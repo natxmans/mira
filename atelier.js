@@ -62,7 +62,13 @@
     reveilEnCours: null,
     enCours: false,
     contexte: 4096,
-    vueCode: false,
+    vue: 'apercu',
+    creations: stock.lire('creations', []), // Mes créations
+    creationActuelle: null,
+    autoCorrection: stock.lire('autoCorrection', true),
+    lectureAuto: stock.lire('lectureAuto', false),
+    attenteErreur: null, // moment où sa dernière page a été lancée (pour la correction automatique)
+    derniereDemande: '',
     erreurMontree: false,
   };
   if (!MODELES[etat.modele]) etat.modele = 'rapide';
@@ -204,6 +210,15 @@ Règles :
     return n;
   }
 
+  // Tes créations marquées « Garder comme exemple » deviennent des exemples pour elle.
+  const MOTS_VIDES = new Set(['avec', 'pour', 'dans', 'fais', 'faire', 'fait', 'une', 'des', 'les', 'qui', 'que', 'plus', 'tres', 'cette', 'mais', 'aussi', 'veux', 'voudrais', 'aimerais', 'peux', 'peut', 'code', 'modifie', 'main', 'ajoute', 'moi', 'toi', 'sont', 'etre', 'avoir']);
+  function exemplesPerso() {
+    return (etat.creations || []).filter((c) => c.exemple && c.page).map((c) => ({
+      id: c.id, type: 'exemple', perso: true, titre: `${c.titre} (une de tes réussites)`, code: c.contenu,
+      mots: Array.from(new Set(sansAccents(c.titre + ' ' + c.demande).split(/[^a-z0-9]+/).filter((m) => m.length >= 4 && !MOTS_VIDES.has(m)))),
+    }));
+  }
+
   function choisirSavoirs(demande) {
     const texte = sansAccents(demande);
     const choix = { exemple: null, fiches: [], festival: [] };
@@ -212,8 +227,9 @@ Règles :
       const codeRecent = etat.messages.slice(-3, -1).some((m) => m.role === 'assistant' && m.content.includes('```'));
       // Pour corriger une erreur, elle repart de son propre code : pas d'exemple.
       if (!MOTS_ERREUR.test(demande) && (!codeRecent || VERBES_CREATION.test(texte))) {
-        const exemples = SAVOIRS.filter((s) => s.type === 'exemple')
-          .map((s) => [s, pertinence(s.mots, texte)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
+        const exemples = SAVOIRS.filter((s) => s.type === 'exemple').concat(exemplesPerso())
+          .map((s) => { const n = pertinence(s.mots, texte); return [s, n > 0 && s.perso ? n + 1 : n]; })
+          .filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
         if (exemples.length) choix.exemple = exemples[0][0];
       }
       const seuil = choix.exemple ? 2 : 1;
@@ -619,19 +635,30 @@ Règles :
     div.className = 'msg mira';
     const qui = document.createElement('div');
     qui.className = 'qui';
-    qui.append(document.createElement('i'), document.createTextNode(nomIA()));
+    const nom = document.createElement('span');
+    nom.className = 'nom-ia';
+    nom.textContent = nomIA();
+    const lireBouton = document.createElement('button');
+    lireBouton.type = 'button';
+    lireBouton.className = 'lire';
+    lireBouton.textContent = '🔊';
+    lireBouton.title = 'Lire à voix haute (clique encore pour arrêter)';
+    lireBouton.setAttribute('aria-label', 'Lire cette réponse à voix haute');
+    qui.append(document.createElement('i'), nom, lireBouton);
     const corps = document.createElement('div');
     corps.className = 'corps';
+    lireBouton.addEventListener('click', () => lire(corps.dataset.texte || corps.textContent));
+    corps.dataset.texte = texte;
     div.append(qui, corps);
     rendre(corps, texte, fini);
     $('#fil').append(div);
     return { div, corps };
   }
 
-  function bulleToi(texte) {
+  function bulleToi(texte, auto) {
     const div = document.createElement('div');
     div.className = 'msg toi';
-    div.textContent = texte;
+    div.textContent = (auto ? '🔧 Correction automatique : ' : '') + texte;
     $('#fil').append(div);
     return div;
   }
@@ -643,7 +670,15 @@ Règles :
       bulleMira(`Salut ! Je suis ${nomIA()}. Dis-moi ce que tu veux créer : un jeu, une page, un outil pour le festival… J'écris le code et tu le vois tourner à droite.${nb ? ` J'ai une bibliothèque de ${nb} exemples de code qui marchent : je m'en inspire pour faire moins d'erreurs.` : ''} Je peux quand même me tromper : si quelque chose ne marche pas, dis-le-moi et je corrige.`, true);
     }
     for (const m of etat.messages) {
-      if (m.role === 'user') bulleToi(m.content);
+      if (m.discret) {
+        if (m.role === 'user') {
+          const n = document.createElement('p');
+          n.className = 'note';
+          n.style.alignSelf = 'center';
+          n.textContent = '✏️ Tu as modifié le code : elle repartira de ta version.';
+          $('#fil').append(n);
+        }
+      } else if (m.role === 'user') bulleToi(m.content, m.auto);
       else {
         const { div } = bulleMira(m.content, true);
         if (m.aides && m.aides.length) {
@@ -661,10 +696,11 @@ Règles :
 
   function afficherSavoirs() {
     if (typeof SAVOIRS === 'undefined') { $('#savoirs').hidden = true; return; }
-    const exemples = SAVOIRS.filter((s) => s.type === 'exemple');
+    const exemples = SAVOIRS.filter((s) => s.type === 'exemple').concat(exemplesPerso());
     const fiches = SAVOIRS.filter((s) => s.type === 'fiche');
     const sujets = typeof FESTIVAL_SECTIONS !== 'undefined' ? FESTIVAL_SECTIONS.length : 0;
-    $('#savoirs-titre').textContent = `Ce qu'elle sait : ${exemples.length} exemples de code, ${fiches.length} fiches` + (sujets ? `, le festival 2K27 (${sujets} sujets)` : '');
+    const perso = exemplesPerso().length;
+    $('#savoirs-titre').textContent = `Ce qu'elle sait : ${exemples.length} exemples de code${perso ? ` (dont ${perso} de tes réussites)` : ''}, ${fiches.length} fiches` + (sujets ? `, le festival 2K27 (${sujets} sujets)` : '');
     const box = $('#savoirs-exemples');
     box.textContent = '';
     for (const e of exemples) {
@@ -690,17 +726,22 @@ Règles :
     }
   }
 
-  async function envoyer(brut) {
+  async function envoyer(brut, options) {
     const texte = String(brut || '').trim();
+    const auto = !!(options && options.auto);
     if (!texte || etat.enCours) return;
     const zone = $('#texte-demande');
-    zone.value = '';
+    if (!auto) zone.value = '';
     ajusterZone();
     etat.enCours = true;
+    etat.attenteErreur = null;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
     majBoutons();
     if (!etat.messages.length) $('#fil').textContent = '';
     $('#idees').hidden = true;
-    const maBulle = bulleToi(texte);
+    // La demande « d'origine » donne son nom à la création (pas les messages de correction).
+    if (!auto && !MOTS_ERREUR.test(texte)) etat.derniereDemande = texte;
+    const maBulle = bulleToi(texte, auto);
     const { div, corps } = bulleMira('', false);
     defiler();
     if (!etat.moteur) {
@@ -724,13 +765,13 @@ Règles :
         return;
       }
     }
-    etat.messages.push({ role: 'user', content: texte });
+    etat.messages.push(auto ? { role: 'user', content: texte, auto: true } : { role: 'user', content: texte });
     // L'ancien aperçu s'arrête pendant qu'elle écrit : ça lui laisse toute la puissance.
     enleverErreur();
     etat.erreurMontree = true;
     $('#cadre').srcdoc = '';
 
-    let reponse = '', fin = null, vitesse = null, prevu = false;
+    let reponse = '', fin = null, vitesse = null, prevu = false, termine = false;
     let cachee = document.hidden;
     const surCache = () => { if (document.hidden) cachee = true; };
     document.addEventListener('visibilitychange', surCache);
@@ -738,6 +779,8 @@ Règles :
     majEtat(`${nomIA()} réfléchit…`);
     const dessiner = () => {
       prevu = false;
+      // Un dernier dessin prévu pendant l'écriture ne doit pas effacer l'affichage final.
+      if (termine) return;
       const suivre = presDuBas();
       rendre(corps, reponse, false);
       if (suivre) defiler();
@@ -786,9 +829,11 @@ Règles :
     } catch (e) {
       if (!reponse) reponse = "Oups, j'ai eu un problème : " + ((e && e.message) || e);
     }
+    termine = true;
     const propre = reponse.trim() || '(elle n\'a rien répondu)';
     etat.messages.push({ role: 'assistant', content: propre, aides, sources });
     stock.ecrire('conversation', etat.messages.slice(-40));
+    corps.dataset.texte = propre;
     rendre(corps, propre, true);
     document.removeEventListener('visibilitychange', surCache);
     const note = (texte) => {
@@ -807,7 +852,19 @@ Règles :
     if (vitesse) $('#etat-grand-cerveau').textContent += ` · ${duree} s, ${Math.round(vitesse)} mots/s`;
     etat.enCours = false;
     majBoutons();
-    montrerDepuis(propre);
+    const nouveau = montrerDepuis(propre);
+    if (nouveau) {
+      // Une correction remplace la version cassée ; une nouvelle demande crée une nouvelle création.
+      const actuelle = etat.creations.find((c) => c.id === etat.creationActuelle);
+      if ((auto || MOTS_ERREUR.test(texte)) && actuelle) {
+        Object.assign(actuelle, { contenu: nouveau.contenu, langage: nouveau.langage, page: !!nouveau.page, date: Date.now() });
+        sauverCreations();
+        afficherCreations();
+      } else enregistrerCreation(nouveau, etat.derniereDemande || texte);
+      // Correction automatique : si sa page plante dès le lancement, elle réessaie une fois.
+      if (nouveau.page && !auto) etat.attenteErreur = Date.now();
+    }
+    if (etat.lectureAuto) lire(propre);
     defiler();
     $('#texte-demande').focus();
   }
@@ -833,9 +890,10 @@ Règles :
   // ---------------------------------------------------------------------------
   // L'aperçu : on exécute sa page dans un cadre isolé
   // ---------------------------------------------------------------------------
-  // Petit script ajouté au début de sa page : il remplace localStorage (interdit dans
-  // le cadre isolé) et nous signale les erreurs pour qu'elle puisse les corriger.
-  const AIDE_CADRE = '<script>(function(){try{window.localStorage.getItem("x")}catch(e){var m={},f={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}};try{Object.defineProperty(window,"localStorage",{value:f,configurable:true});Object.defineProperty(window,"sessionStorage",{value:f,configurable:true})}catch(e2){}}function s(t){try{parent.postMessage({mira:"erreur",message:String(t)},"*")}catch(e3){}}window.addEventListener("error",function(e){s(e.message)});window.addEventListener("unhandledrejection",function(e){s(e.reason&&e.reason.message||e.reason)})})();<\/script>';
+  // Petit script ajouté au début de sa page (sur la même ligne, pour ne pas décaler les
+  // numéros de ligne des erreurs) : il remplace localStorage (interdit dans le cadre
+  // isolé), recopie la console et nous signale les erreurs pour qu'elle les corrige.
+  const AIDE_CADRE = '<script>(function(){try{window.localStorage.getItem("x")}catch(e){var m={},f={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}};try{Object.defineProperty(window,"localStorage",{value:f,configurable:true});Object.defineProperty(window,"sessionStorage",{value:f,configurable:true})}catch(e2){}}function p(d){try{parent.postMessage(d,"*")}catch(e3){}}function txt(a){if(a instanceof Error)return a.name+": "+a.message;if(typeof a==="object"&&a!==null){try{return JSON.stringify(a)}catch(e4){}}return String(a)}["log","info","warn","error"].forEach(function(n){var o=console[n];console[n]=function(){p({mira:"console",niveau:n,texte:Array.prototype.map.call(arguments,txt).join(" ")});return o.apply(console,arguments)}});window.addEventListener("error",function(e){p({mira:"erreur",message:String(e.message)});p({mira:"console",niveau:"error",texte:e.message+(e.lineno?" (ligne "+e.lineno+")":"")})});window.addEventListener("unhandledrejection",function(e){var r=e.reason&&e.reason.message||e.reason;p({mira:"erreur",message:String(r)});p({mira:"console",niveau:"error",texte:String(r)})})})();<\/script>';
 
   function avecAide(page) {
     const m = page.match(/<head[^>]*>/i) || page.match(/<html[^>]*>/i);
@@ -878,20 +936,22 @@ Règles :
     const el = $('#code-brut code');
     el.textContent = codes[codes.length - 1].contenu;
     el.className = '';
-    $('#apercu-vide').hidden = true;
-    $('#cadre').hidden = true;
+    for (const id of ['#apercu-vide', '#cadre', '#console', '#aide-code']) $(id).hidden = true;
     const pre = $('#code-brut');
     pre.hidden = false;
     pre.scrollTop = pre.scrollHeight;
     $('#voir-apercu').setAttribute('aria-pressed', 'false');
+    $('#voir-console').setAttribute('aria-pressed', 'false');
     $('#voir-code').setAttribute('aria-pressed', 'true');
   }
 
+  // Montre le code de sa réponse ; renvoie ce code (ou null s'il n'y en a pas).
   function montrerDepuis(texte) {
     const code = assembler(decouper(texte));
     if (code) montrer(code, code.page);
-    else if (etat.code) montrer(etat.code, !etat.vueCode);
-    else choisirVue(false);
+    else if (etat.code) montrer(etat.code, etat.vue !== 'code');
+    else choisirVue('apercu');
+    return code;
   }
 
   function montrer(code, apercu) {
@@ -899,26 +959,31 @@ Règles :
     stock.ecrire('code', code);
     etat.erreurMontree = false;
     enleverErreur();
+    viderConsole();
     const el = $('#code-brut code');
     el.textContent = code.contenu;
     el.className = code.langage ? 'language-' + code.langage : '';
     colorer(el);
-    for (const id of ['#copier', '#telecharger-code']) $(id).disabled = false;
-    $('#recharger').disabled = !code.page;
+    for (const id of ['#copier', '#telecharger-code', '#recharger']) $(id).disabled = false;
     $('#plein-ecran').disabled = !code.page;
     $('#voir-apercu').disabled = !code.page;
     if (code.page) $('#cadre').srcdoc = avecAide(code.contenu);
-    choisirVue(code.page ? !apercu : true);
+    choisirVue(code.page && apercu ? 'apercu' : 'code');
   }
 
-  function choisirVue(voirCode) {
-    etat.vueCode = voirCode;
-    $('#voir-apercu').setAttribute('aria-pressed', String(!voirCode));
-    $('#voir-code').setAttribute('aria-pressed', String(voirCode));
-    const rien = !etat.code;
-    $('#apercu-vide').hidden = !rien;
-    $('#cadre').hidden = rien || voirCode || !etat.code.page;
-    $('#code-brut').hidden = rien || !voirCode;
+  function choisirVue(vue) {
+    etat.vue = vue;
+    let v = vue;
+    if (!etat.code && v !== 'console') v = 'vide';
+    else if (v === 'apercu' && !etat.code.page) v = 'code';
+    $('#voir-apercu').setAttribute('aria-pressed', String(v === 'apercu'));
+    $('#voir-code').setAttribute('aria-pressed', String(v === 'code'));
+    $('#voir-console').setAttribute('aria-pressed', String(v === 'console'));
+    $('#apercu-vide').hidden = v !== 'vide';
+    $('#cadre').hidden = v !== 'apercu';
+    $('#code-brut').hidden = v !== 'code';
+    $('#console').hidden = v !== 'console';
+    $('#aide-code').hidden = v !== 'code';
   }
 
   function enleverErreur() {
@@ -926,20 +991,91 @@ Règles :
     if (e) e.remove();
   }
 
+  // --- La console du programme ---
+  let erreursConsole = 0;
+  function viderConsole() {
+    $('#console').textContent = '';
+    erreursConsole = 0;
+    $('#compte-console').textContent = '';
+  }
+
+  function ajouterConsole(niveau, texte) {
+    const box = $('#console');
+    if (box.childElementCount >= 500) box.firstElementChild.remove();
+    const ligne = document.createElement('span');
+    ligne.className = 'ligne ' + (['warn', 'error', 'info'].includes(niveau) ? niveau : 'log');
+    ligne.textContent = (niveau === 'error' ? '✖ ' : niveau === 'warn' ? '⚠ ' : '› ') + String(texte).slice(0, 2000);
+    box.append(ligne);
+    box.scrollTop = box.scrollHeight;
+    if (niveau === 'error') {
+      erreursConsole++;
+      $('#compte-console').textContent = String(erreursConsole);
+    }
+  }
+
   window.addEventListener('message', (ev) => {
-    if (ev.source !== $('#cadre').contentWindow || !ev.data || ev.data.mira !== 'erreur' || etat.erreurMontree) return;
+    if (ev.source !== $('#cadre').contentWindow || !ev.data) return;
+    if (ev.data.mira === 'console') return ajouterConsole(ev.data.niveau, ev.data.texte);
+    if (ev.data.mira !== 'erreur' || etat.erreurMontree) return;
     etat.erreurMontree = true;
     const message = String(ev.data.message).slice(0, 300);
+    const demandeCorrection = `Ton code affiche cette erreur : « ${message} ». Trouve le problème, corrige-le et renvoie le fichier complet.`;
+    // Correction automatique : une seule fois, et seulement pour une erreur au lancement.
+    const attente = etat.attenteErreur;
+    etat.attenteErreur = null;
+    if (etat.autoCorrection && attente && Date.now() - attente < 6000 && !etat.enCours && etat.moteur) {
+      toast('Son code a une erreur : elle la corrige toute seule…');
+      envoyer(demandeCorrection, { auto: true });
+      return;
+    }
     const box = document.createElement('div');
     box.className = 'erreur-code';
     const t = document.createElement('span');
     t.textContent = 'Son code a une erreur : ' + message;
     box.append(t, bouton('Lui demander de corriger', () => {
       enleverErreur();
-      envoyer(`Ton code affiche cette erreur : « ${message} ». Trouve le problème, corrige-le et renvoie le fichier complet.`);
-    }), bouton('Fermer', enleverErreur));
+      envoyer(demandeCorrection);
+    }), bouton('Voir la console', () => choisirVue('console')), bouton('Fermer', enleverErreur));
     $('.apercu-corps').append(box);
   });
+
+  // Relancer : si tu as modifié le code, c'est ta version qui est lancée et gardée.
+  function relancer() {
+    if (!etat.code) return;
+    const edite = $('#code-brut code').textContent;
+    if (edite === etat.code.contenu) {
+      montrer(etat.code, true);
+      return;
+    }
+    const code = Object.assign({}, etat.code, { contenu: edite });
+    montrer(code, true);
+    const c = etat.creations.find((x) => x.id === etat.creationActuelle);
+    if (c) {
+      c.contenu = edite;
+      c.date = Date.now();
+      sauverCreations();
+      afficherCreations();
+    } else {
+      enregistrerCreation(code, 'Modifié à la main');
+    }
+    // Elle doit savoir que tu as changé son code, pour repartir de ta version.
+    etat.messages.push(
+      { role: 'user', content: `J'ai modifié le code moi-même. Voici la nouvelle version, repars d'elle pour la suite :\n\`\`\`${code.langage || ''}\n${edite}\n\`\`\``, discret: true },
+      { role: 'assistant', content: "D'accord, je repars de ta version.", discret: true },
+    );
+    stock.ecrire('conversation', etat.messages.slice(-40));
+    ajouterNoteFil('✏️ Tu as modifié le code : elle repartira de ta version.');
+    toast('Tes modifications sont lancées et gardées dans « Mes créations ».');
+  }
+
+  function ajouterNoteFil(texte) {
+    const n = document.createElement('p');
+    n.className = 'note';
+    n.style.alignSelf = 'center';
+    n.textContent = texte;
+    $('#fil').append(n);
+    defiler();
+  }
 
   async function copier(texte) {
     try {
@@ -955,12 +1091,11 @@ Règles :
     toast('Code copié !');
   }
 
-  function telecharger() {
-    const c = etat.code;
+  function telecharger(c) {
     if (!c) return;
     const ext = { html: 'html', svg: 'svg', css: 'css', js: 'js', javascript: 'js', python: 'py', py: 'py', json: 'json', java: 'java', c: 'c', cpp: 'cpp', bash: 'sh', sh: 'sh' }[c.langage] || 'txt';
-    let nom = 'creation-de-' + nomIA().toLowerCase();
-    const titre = c.page && c.contenu.match(/<title>([^<]{1,60})<\/title>/i);
+    let nom = c.titre || 'creation-de-' + nomIA().toLowerCase();
+    const titre = !c.titre && c.page && c.contenu.match(/<title>([^<]{1,60})<\/title>/i);
     if (titre) nom = titre[1];
     nom = nom.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'creation';
     const lien = document.createElement('a');
@@ -977,7 +1112,207 @@ Règles :
     t.textContent = texte;
     t.classList.add('visible');
     clearTimeout(toast.minuteur);
-    toast.minuteur = setTimeout(() => t.classList.remove('visible'), 2500);
+    toast.minuteur = setTimeout(() => t.classList.remove('visible'), 3000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mes créations : tout ce qu'elle a créé est gardé sur l'ordinateur
+  // ---------------------------------------------------------------------------
+  function sauverCreations() {
+    // Si la mémoire du navigateur est pleine, on retire les plus anciennes (sauf les exemples).
+    while (!stock.ecrire('creations', etat.creations)) {
+      let i = -1;
+      etat.creations.forEach((c, j) => { if (!c.exemple) i = j; });
+      if (i < 0) break;
+      etat.creations.splice(i, 1);
+    }
+  }
+
+  function titreDe(code, demande) {
+    const t = code.page && code.contenu.match(/<title>([^<]{1,60})<\/title>/i);
+    const propre = (t ? t[1] : '').replace(/\s+/g, ' ').trim();
+    return propre || String(demande || 'Création').replace(/\s+/g, ' ').slice(0, 50);
+  }
+
+  function enregistrerCreation(code, demande) {
+    const existe = etat.creations.find((c) => c.contenu === code.contenu);
+    if (existe) {
+      etat.creationActuelle = existe.id;
+      afficherCreations();
+      return existe;
+    }
+    const c = {
+      id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      titre: titreDe(code, demande), demande: String(demande || ''), langage: code.langage, page: !!code.page,
+      contenu: code.contenu, date: Date.now(), exemple: false,
+    };
+    etat.creations.unshift(c);
+    while (etat.creations.length > 60) {
+      const i = etat.creations.map((x) => x.exemple).lastIndexOf(false);
+      if (i < 0) break;
+      etat.creations.splice(i, 1);
+    }
+    etat.creationActuelle = c.id;
+    sauverCreations();
+    afficherCreations();
+    return c;
+  }
+
+  function afficherCreations() {
+    const box = $('#liste-creations');
+    box.textContent = '';
+    for (const c of etat.creations) {
+      const carte = document.createElement('article');
+      carte.className = 'creation' + (c.id === etat.creationActuelle ? ' active' : '');
+      const h = document.createElement('h3');
+      h.textContent = c.titre;
+      const date = document.createElement('span');
+      date.className = 'date';
+      date.textContent = new Date(c.date).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) + (c.page ? '' : ' · ' + (c.langage || 'code'));
+      carte.append(h, date);
+      if (c.exemple) {
+        const e = document.createElement('span');
+        e.className = 'etiquette';
+        e.textContent = '⭐ Exemple pour ' + nomIA();
+        carte.append(e);
+      }
+      if (c.demande) {
+        const d = document.createElement('p');
+        d.className = 'demande-origine';
+        d.textContent = '« ' + c.demande + ' »';
+        carte.append(d);
+      }
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      actions.append(
+        bouton('Ouvrir', () => {
+          etat.creationActuelle = c.id;
+          montrer({ langage: c.langage, contenu: c.contenu, page: c.page }, true);
+          afficherCreations();
+          document.querySelector('.apercu').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }),
+        bouton('Renommer', () => {
+          const nom = prompt('Nouveau nom pour cette création :', c.titre);
+          if (nom && nom.trim()) { c.titre = nom.trim().slice(0, 60); sauverCreations(); afficherCreations(); afficherSavoirs(); }
+        }),
+        bouton('Télécharger', () => telecharger(c)),
+      );
+      if (c.page) {
+        actions.append(bouton(c.exemple ? 'Retirer des exemples' : '⭐ Garder comme exemple', () => {
+          c.exemple = !c.exemple;
+          sauverCreations();
+          afficherCreations();
+          afficherSavoirs();
+          toast(c.exemple ? `${nomIA()} s'inspirera de « ${c.titre} » pour les demandes qui y ressemblent.` : 'Retiré de ses exemples.');
+        }));
+      }
+      actions.append(bouton('Supprimer', () => {
+        if (!confirm(`Supprimer « ${c.titre} » ?`)) return;
+        etat.creations = etat.creations.filter((x) => x.id !== c.id);
+        sauverCreations();
+        afficherCreations();
+        afficherSavoirs();
+      }));
+      carte.append(actions);
+      box.append(carte);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // La voix : elle lit ses réponses, et tu peux lui dicter
+  // ---------------------------------------------------------------------------
+  function texteAParler(texte) {
+    return String(texte)
+      .replace(/```[\s\S]*?(```|$)/g, ' Voici le code. ')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/[*#>_]/g, '')
+      .replace(/https?:\/\/\S+/g, 'un lien')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function lire(texte) {
+    if (!('speechSynthesis' in window)) { toast('Ton navigateur ne sait pas lire à voix haute.'); return; }
+    if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+    const u = new SpeechSynthesisUtterance(texteAParler(texte));
+    u.lang = 'fr-FR';
+    const voix = speechSynthesis.getVoices().find((v) => /^fr(-|_|$)/i.test(v.lang));
+    if (voix) u.voice = voix;
+    speechSynthesis.speak(u);
+  }
+
+  function preparerDictee() {
+    const Reconnaissance = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const b = $('#dicter');
+    if (!Reconnaissance) return;
+    b.hidden = false;
+    let ecoute = null;
+    b.addEventListener('click', () => {
+      if (ecoute) { ecoute.stop(); return; }
+      if (!stock.lire('dictee-expliquee', false)) {
+        toast('La dictée passe par le service de reconnaissance vocale de ton navigateur.');
+        stock.ecrire('dictee-expliquee', true);
+      }
+      const zone = $('#texte-demande');
+      const debut = zone.value ? zone.value.replace(/\s*$/, ' ') : '';
+      ecoute = new Reconnaissance();
+      ecoute.lang = 'fr-FR';
+      ecoute.interimResults = true;
+      ecoute.onresult = (e) => {
+        let texte = '';
+        for (const r of e.results) texte += r[0].transcript;
+        zone.value = debut + texte;
+        ajusterZone();
+      };
+      ecoute.onerror = (e) => {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') toast('Autorise le micro dans ton navigateur pour dicter.');
+        else if (e.error === 'no-speech') toast("Je n'ai rien entendu.");
+      };
+      ecoute.onend = () => {
+        ecoute = null;
+        b.classList.remove('ecoute');
+        zone.focus();
+      };
+      b.classList.add('ecoute');
+      ecoute.start();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Espace disque : combien de place prend son grand cerveau, et le supprimer
+  // ---------------------------------------------------------------------------
+  async function afficherEspace() {
+    const infos = $('#espace-infos');
+    const box = $('#espace-modeles');
+    box.textContent = '';
+    try {
+      const e = await navigator.storage.estimate();
+      const protege = navigator.storage.persisted ? await navigator.storage.persisted() : false;
+      infos.textContent = `${nomIA()} utilise ${(e.usage / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Go sur cet ordinateur. `
+        + (protege ? 'Ton navigateur a promis de ne pas l\'effacer tout seul.' : 'Ton navigateur peut l\'effacer s\'il manque de place.');
+    } catch (err) {
+      infos.textContent = "Impossible de savoir la place utilisée.";
+    }
+    if (!etat.webllm) {
+      try { etat.webllm = await import(WEBLLM); } catch (err) { return; }
+    }
+    for (const [cle, m] of Object.entries(MODELES)) {
+      for (const id of [idPour(cle, true), idPour(cle, false)]) {
+        let present = false;
+        try { present = await etat.webllm.hasModelInCache(id, configuration()); } catch (err) { /* rien */ }
+        if (!present) continue;
+        box.append(bouton(`Supprimer « ${m.nom} » (${m.taille})`, async () => {
+          if (!confirm(`Supprimer le grand cerveau « ${m.nom} » de cet ordinateur ? Il faudra le retélécharger (${m.taille}) pour s'en resservir.`)) return;
+          if (etat.idModele === id) await endormir();
+          try { await etat.webllm.deleteModelAllInfoInCache(id, configuration()); } catch (err) { /* rien */ }
+          stock.ecrire('telecharge.' + id, false);
+          afficherModeles();
+          afficherEspace();
+          toast('Supprimé. La place est libérée.');
+        }));
+      }
+    }
+    if (!box.childElementCount) box.append(document.createTextNode('Aucun grand cerveau téléchargé pour l\'instant.'));
   }
 
   // ---------------------------------------------------------------------------
@@ -999,12 +1334,19 @@ Règles :
   function majNom() {
     $('#nom-reveil').textContent = nomIA();
     majBoutonReveil();
-    for (const q of document.querySelectorAll('.msg.mira .qui')) q.lastChild.textContent = nomIA();
+    for (const q of document.querySelectorAll('.msg.mira .qui .nom-ia')) q.textContent = nomIA();
+    afficherCreations();
   }
 
   // Pour vérifier la recherche dans sa bibliothèque sans carte graphique : index.html?test
   if (/[?&]test\b/.test(location.search)) {
-    window.miraTest = { etat, choisirSavoirs, construireMessages, nomsDesSavoirs, planDeRecherche, lancerRecherche };
+    window.miraTest = { etat, choisirSavoirs, construireMessages, nomsDesSavoirs, planDeRecherche, lancerRecherche, montrer, enregistrerCreation, relancer, choisirVue, texteAParler };
+  }
+
+  function caseACocher(id, cle) {
+    const c = $(id);
+    c.checked = !!etat[cle];
+    c.addEventListener('change', () => { etat[cle] = c.checked; stock.ecrire(cle, etat[cle]); });
   }
 
   function demarrer() {
@@ -1028,16 +1370,17 @@ Règles :
     $('#reveiller').addEventListener('click', () => { reveiller().catch(() => {}); });
     $('#changer-cerveau').addEventListener('click', endormir);
 
-    const festival = $('#avec-festival');
-    festival.checked = !!etat.festival;
-    festival.addEventListener('change', () => { etat.festival = festival.checked; stock.ecrire('festival', etat.festival); });
-    const recherche = $('#avec-recherche');
-    recherche.checked = !!etat.recherche;
-    recherche.addEventListener('change', () => { etat.recherche = recherche.checked; stock.ecrire('recherche', etat.recherche); });
+    caseACocher('#avec-festival', 'festival');
+    caseACocher('#avec-recherche', 'recherche');
+    caseACocher('#auto-correction', 'autoCorrection');
+    caseACocher('#lecture-auto', 'lectureAuto');
+    $('#espace').addEventListener('toggle', () => { if ($('#espace').open) afficherEspace(); });
 
     afficherSavoirs();
     afficherIdees();
     afficherFil();
+    afficherCreations();
+    preparerDictee();
     const zone = $('#texte-demande');
     zone.addEventListener('input', ajusterZone);
     zone.addEventListener('keydown', (e) => {
@@ -1046,32 +1389,44 @@ Règles :
     $('#demande').addEventListener('submit', (e) => { e.preventDefault(); envoyer(zone.value); });
     $('#arreter').addEventListener('click', arreter);
     $('#nouvelle-conversation').addEventListener('click', () => {
-      if (etat.messages.length && !confirm('Commencer une nouvelle conversation ? Celle-ci sera effacée.')) return;
+      if (etat.messages.length && !confirm('Commencer une nouvelle conversation ? Ses créations restent gardées dans « Mes créations ».')) return;
       etat.messages = [];
       stock.ecrire('conversation', []);
       etat.code = null;
+      etat.creationActuelle = null;
       stock.ecrire('code', null);
       enleverErreur();
+      viderConsole();
       $('#cadre').srcdoc = '';
       $('#code-brut code').textContent = '';
       for (const id of ['#recharger', '#copier', '#telecharger-code', '#plein-ecran']) $(id).disabled = true;
-      choisirVue(false);
+      choisirVue('apercu');
       afficherFil();
+      afficherCreations();
       zone.focus();
     });
 
-    $('#voir-apercu').addEventListener('click', () => { if (etat.code && etat.code.page) choisirVue(false); });
-    $('#voir-code').addEventListener('click', () => choisirVue(true));
-    $('#recharger').addEventListener('click', () => { if (etat.code && etat.code.page) montrer(etat.code, true); });
-    $('#copier').addEventListener('click', () => { if (etat.code) copier(etat.code.contenu); });
-    $('#telecharger-code').addEventListener('click', telecharger);
+    $('#voir-apercu').addEventListener('click', () => choisirVue('apercu'));
+    $('#voir-code').addEventListener('click', () => choisirVue('code'));
+    $('#voir-console').addEventListener('click', () => choisirVue('console'));
+    $('#recharger').addEventListener('click', relancer);
+    $('#copier').addEventListener('click', () => { if (etat.code) copier($('#code-brut code').textContent || etat.code.contenu); });
+    $('#telecharger-code').addEventListener('click', () => {
+      if (!etat.code) return;
+      const c = etat.creations.find((x) => x.id === etat.creationActuelle);
+      telecharger(Object.assign({}, etat.code, { contenu: $('#code-brut code').textContent || etat.code.contenu, titre: c ? c.titre : '' }));
+    });
     $('#plein-ecran').addEventListener('click', () => {
       const c = $('#cadre');
       if (c.requestFullscreen) c.requestFullscreen().catch(() => {});
     });
 
-    if (etat.code) montrer(etat.code, true);
-    else choisirVue(false);
+    if (etat.code) {
+      const c = etat.creations.find((x) => x.contenu === etat.code.contenu);
+      if (c) etat.creationActuelle = c.id;
+      montrer(etat.code, true);
+      afficherCreations();
+    } else choisirVue('apercu');
   }
 
   demarrer();

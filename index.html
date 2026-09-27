@@ -6,6 +6,9 @@
 <title>Mira</title>
 <meta name="description" content="Mira, une IA qui code pour toi et qui tourne entièrement sur ton ordinateur, avec un petit cerveau écrit de zéro que tu entraînes toi-même.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236a4cff'/%3E%3Ccircle cx='11' cy='13' r='3' fill='white'/%3E%3Ccircle cx='21' cy='13' r='3' fill='white'/%3E%3Cpath d='M10 21q6 5 12 0' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#6a4cff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -351,6 +354,45 @@
   .erreur-code span { flex: 1; min-width: 200px; overflow-wrap: anywhere; }
   .modes button:disabled { opacity: .45; cursor: default; }
 
+  /* ---------- En-tête : outils ---------- */
+  .outils-entete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+  /* ---------- Guide ---------- */
+  dialog.guide { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; border: 1px solid var(--bord); border-radius: var(--rayon); background: var(--surface); color: var(--texte); padding: 20px 24px; box-shadow: var(--ombre); }
+  dialog.guide::backdrop { background: rgba(10, 8, 20, .55); }
+  .guide-entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .guide-entete h2 { margin: 0; font-size: 22px; }
+  dialog.guide h3 { margin: 18px 0 6px; font-size: 16px; }
+  dialog.guide ul { margin: 0; padding-left: 20px; }
+  dialog.guide li { margin-bottom: 6px; font-size: 15px; }
+  kbd { font-family: var(--mono); font-size: 13px; border: 1px solid var(--bord); border-bottom-width: 2px; border-radius: 6px; padding: 0 5px; background: var(--surface-2); }
+
+  /* ---------- Console et code modifiable ---------- */
+  .console { position: absolute; inset: 0; margin: 0; overflow: auto; padding: 12px 14px; background: #0f0e17; color: #e6e4f0; font-family: var(--mono); font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .console .ligne { display: block; padding: 2px 0; border-bottom: 1px solid #22202e; }
+  .console .warn { color: #fbbf24; }
+  .console .error { color: #ff7b88; }
+  .console .info { color: #8ec5ff; }
+  .console:empty::before { content: "Rien dans la console. Les messages console.log() et les erreurs du programme apparaîtront ici."; color: #8a8799; font-family: var(--police); }
+  #compte-console:not(:empty) { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--rouge); color: #fff; font-size: 11px; line-height: 18px; }
+  #code-brut code[contenteditable] { outline: none; display: block; min-height: 100%; }
+  .aide-code { margin: 0; padding: 6px 12px; font-size: 12.5px; color: var(--doux); border-top: 1px solid var(--bord); }
+
+  /* ---------- Mes créations ---------- */
+  .creations { margin-top: 16px; }
+  .grille-creations { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .grille-creations:empty::before { content: "Pas encore de création. Demande-lui un jeu ou une page : ce qu'elle écrit apparaîtra ici."; color: var(--doux); font-size: 14px; }
+  .creation { border: 1px solid var(--bord); border-radius: 14px; padding: 12px; background: var(--surface-2); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .creation.active { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .creation h3 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+  .creation .date { font-size: 12px; color: var(--doux); }
+  .creation .demande-origine { font-size: 13px; color: var(--doux); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .creation .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+  .creation .etiquette { align-self: flex-start; font-size: 11.5px; font-weight: 800; color: var(--vert); }
+  .qui .lire { margin-left: auto; border: 0; background: none; cursor: pointer; font-size: 15px; padding: 0 4px; opacity: .7; }
+  .qui .lire:hover { opacity: 1; }
+  #dicter.ecoute { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+
   /* Couleurs du code (highlight.js) */
   .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-name { color: #8250df; }
   .hljs-string, .hljs-attr-value, .hljs-template-variable, .hljs-addition { color: #0a7f4f; }
@@ -365,6 +407,11 @@
     :root:not([data-theme="light"]) .hljs-attr, :root:not([data-theme="light"]) .hljs-attribute, :root:not([data-theme="light"]) .hljs-property, :root:not([data-theme="light"]) .hljs-selector-class, :root:not([data-theme="light"]) .hljs-selector-id { color: #8ec5ff; }
     :root:not([data-theme="light"]) .hljs-title, :root:not([data-theme="light"]) .hljs-section { color: #ff8fc2; }
   }
+  :root[data-theme="dark"] .hljs-keyword, :root[data-theme="dark"] .hljs-selector-tag, :root[data-theme="dark"] .hljs-built_in, :root[data-theme="dark"] .hljs-name { color: #c4a7ff; }
+  :root[data-theme="dark"] .hljs-string, :root[data-theme="dark"] .hljs-template-variable, :root[data-theme="dark"] .hljs-addition { color: #7ee0a8; }
+  :root[data-theme="dark"] .hljs-number, :root[data-theme="dark"] .hljs-literal, :root[data-theme="dark"] .hljs-symbol { color: #ffb86b; }
+  :root[data-theme="dark"] .hljs-attr, :root[data-theme="dark"] .hljs-attribute, :root[data-theme="dark"] .hljs-property, :root[data-theme="dark"] .hljs-selector-class, :root[data-theme="dark"] .hljs-selector-id { color: #8ec5ff; }
+  :root[data-theme="dark"] .hljs-title, :root[data-theme="dark"] .hljs-section { color: #ff8fc2; }
 
   @media (max-width: 980px) {
     .chiffres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -400,8 +447,48 @@
       <input id="nom" maxlength="24" spellcheck="false" autocomplete="off" title="Clique pour renommer ton IA" aria-label="Nom de ton IA">
       <p>Une IA qui code pour toi, avec un petit cerveau écrit de zéro. Tout se passe sur ton ordinateur.</p>
     </div>
-    <span class="pastille" id="pastille" title="État de l'entraînement du petit cerveau"><i></i><span>En pause</span></span>
+    <div class="outils-entete">
+      <button class="bouton petit" type="button" id="installer" hidden title="Installer Mira comme une application sur cet ordinateur">Installer</button>
+      <button class="bouton petit" type="button" id="bouton-guide">Guide</button>
+      <button class="bouton petit" type="button" id="bouton-theme" title="Changer le thème">Thème : auto</button>
+      <span class="pastille" id="pastille" title="État de l'entraînement du petit cerveau"><i></i><span>En pause</span></span>
+    </div>
   </header>
+
+  <dialog class="guide" id="guide" aria-labelledby="guide-titre">
+    <div class="guide-entete">
+      <h2 id="guide-titre">Guide rapide</h2>
+      <button class="bouton petit" type="button" id="fermer-guide">Fermer</button>
+    </div>
+    <h3>Bien lui demander</h3>
+    <ul>
+      <li><strong>Une chose à la fois.</strong> « Un jeu du serpent avec un score », puis « ajoute des murs », puis « rends-le plus rapide ».</li>
+      <li><strong>Sois précis·e</strong> sur ce que tu veux voir : couleurs, règles, boutons, textes.</li>
+      <li>Pour <strong>changer son code</strong>, dis ce qui ne va pas : « le serpent traverse les murs, il doit perdre ».</li>
+      <li>Si son code plante, clique sur <strong>« Lui demander de corriger »</strong>, ou laisse la correction automatique le faire.</li>
+    </ul>
+    <h3>Pour qu'elle aille vite</h3>
+    <ul>
+      <li>Laisse l'onglet <strong>au premier plan</strong> pendant qu'elle écrit : caché, le navigateur la ralentit beaucoup.</li>
+      <li>La taille « Rapide » suffit pour les petits jeux ; « Plus douée » fait moins d'erreurs mais prend plus de temps.</li>
+    </ul>
+    <h3>Les outils de l'aperçu</h3>
+    <ul>
+      <li><strong>Code</strong> : tu peux le modifier toi-même, puis cliquer sur « Relancer ».</li>
+      <li><strong>Console</strong> : les messages et les erreurs du programme, pour comprendre ce qui se passe.</li>
+      <li><strong>Mes créations</strong> (sous l'Atelier) : tout ce qu'elle a créé est gardé. « Garder comme exemple » lui apprend à s'en inspirer.</li>
+    </ul>
+    <h3>Ce qu'elle ne sait pas faire</h3>
+    <ul>
+      <li>Elle est bien plus petite que les grandes IA en ligne : pour les gros projets, avance par petites étapes.</li>
+      <li>Elle ne peut pas créer de vraies images, ni publier un site à ta place.</li>
+      <li>Elle peut se tromper, même quand elle cite une source : vérifie les informations importantes.</li>
+    </ul>
+    <h3>Raccourcis</h3>
+    <ul>
+      <li><kbd>Entrée</kbd> envoie, <kbd>Maj</kbd> + <kbd>Entrée</kbd> va à la ligne, <kbd>Échap</kbd> ferme ce guide.</li>
+    </ul>
+  </dialog>
 
   <nav class="vues" role="tablist" aria-label="Espaces">
     <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="true">Atelier <small>· elle code</small></button>
@@ -432,6 +519,7 @@
         <div class="idees" id="idees"></div>
         <form class="demande" id="demande" autocomplete="off">
           <textarea id="texte-demande" rows="2" placeholder="Ex : fais-moi un jeu du serpent avec un score" aria-label="Ta demande"></textarea>
+          <button class="bouton" type="button" id="dicter" hidden title="Dicter ta demande (la voix est transformée en texte par le service de reconnaissance vocale du navigateur)" aria-label="Dicter">🎤</button>
           <button class="bouton principal" type="submit" id="envoyer">Envoyer</button>
           <button class="bouton" type="button" id="arreter" hidden>Stop</button>
         </form>
@@ -439,8 +527,15 @@
           <span id="etat-grand-cerveau">Grand cerveau endormi</span>
           <label title="Ajoute le programme du festival 2K27 à ce qu'elle sait"><input type="checkbox" id="avec-festival"> Elle connaît le festival 2K27 (quand tu en parles)</label>
           <label title="Vikidia, Wikipédia, Wiktionnaire, MDN Web Docs et Stack Overflow. Seuls les mots de ta question leur sont envoyés."><input type="checkbox" id="avec-recherche"> Elle cherche sur des sites fiables quand c'est utile</label>
+          <label title="Si son code plante dès le lancement, elle essaie une fois de le corriger toute seule"><input type="checkbox" id="auto-correction"> Elle corrige toute seule ses erreurs (1 essai)</label>
+          <label title="Elle lit ses réponses à voix haute (voix de ton ordinateur)"><input type="checkbox" id="lecture-auto"> Elle lit ses réponses à voix haute</label>
           <button class="lien" type="button" id="changer-cerveau" hidden>Changer de taille</button>
         </div>
+        <details class="savoirs" id="espace">
+          <summary>Espace disque</summary>
+          <p class="sous" id="espace-infos">…</p>
+          <div class="savoirs-liste" id="espace-modeles"></div>
+        </details>
         <details class="savoirs" id="savoirs">
           <summary id="savoirs-titre">Ce qu'elle sait</summary>
           <p class="sous">Avant de répondre, elle cherche ici ce qui ressemble à ta demande et le relit. Clique sur un exemple pour le voir tourner.</p>
@@ -455,6 +550,7 @@
           <div class="modes" role="group" aria-label="Affichage">
             <button type="button" id="voir-apercu" aria-pressed="true">Aperçu</button>
             <button type="button" id="voir-code" aria-pressed="false">Code</button>
+            <button type="button" id="voir-console" aria-pressed="false">Console <span id="compte-console"></span></button>
           </div>
           <span class="espace"></span>
           <button class="bouton petit" type="button" id="recharger" disabled>Relancer</button>
@@ -464,11 +560,23 @@
         </div>
         <div class="apercu-corps">
           <iframe id="cadre" title="Aperçu du code de Mira" sandbox="allow-scripts allow-modals allow-forms allow-pointer-lock" hidden></iframe>
-          <pre id="code-brut" hidden><code></code></pre>
+          <pre id="code-brut" hidden><code contenteditable="plaintext-only" spellcheck="false" aria-label="Code, modifiable"></code></pre>
+          <pre id="console" class="console" hidden aria-live="polite"></pre>
           <div class="apercu-vide" id="apercu-vide"><div><strong>Rien pour l'instant</strong>Quand elle écrit une page ou un jeu, il s'affiche ici et tu peux y jouer tout de suite.</div></div>
         </div>
+        <p class="aide-code" id="aide-code" hidden>Tu peux modifier ce code directement, puis cliquer sur « Relancer » pour voir le résultat.</p>
       </article>
     </div>
+
+    <section class="carte creations" aria-labelledby="titre-creations">
+      <div class="entete-carte">
+        <div>
+          <h2 id="titre-creations">Mes créations</h2>
+          <p class="sous">Tout ce qu'elle a créé pour toi est gardé ici, sur cet ordinateur. « Garder comme exemple » lui apprend à s'inspirer de tes réussites.</p>
+        </div>
+      </div>
+      <div class="grille-creations" id="liste-creations"></div>
+    </section>
   </div>
 
   <div class="vue" id="vue-labo" role="tabpanel" aria-labelledby="onglet-labo" hidden>
@@ -636,5 +744,6 @@
 <script src="recherche.js"></script>
 <script src="app.js"></script>
 <script src="atelier.js"></script>
+<script src="outils.js"></script>
 </body>
 </html>

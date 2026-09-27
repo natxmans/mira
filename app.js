@@ -870,6 +870,7 @@
 
     if ('ResizeObserver' in window) new ResizeObserver(dessinerCourbe).observe($('#courbe'));
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', dessinerCourbe);
+    window.addEventListener('mira-theme', dessinerCourbe);
 
     // le cerveau
     envoyerTextes();

@@ -14,7 +14,11 @@ Tu lui demandes un jeu, un site ou un outil ; elle écrit le code et tu vois le 
 - Il se télécharge une seule fois (0,9 Go, 1,7 Go ou 4,3 Go selon la taille choisie), puis il reste dans le cache du navigateur.
 - **Sa bibliothèque** (`savoirs.js`) : 27 exemples de code testés (serpent, morpion, quiz, calculatrice, casse-briques, Flappy, Pong, plateforme, pendu, memory, roue de tirage au sort, tableau de tournoi, formulaire, page du festival…) et 15 fiches (boucle de jeu, manipuler la page, tableaux, fetch, erreurs fréquentes, mise en page, canvas, dates, sons, Python…). À chaque demande, elle cherche ce qui ressemble et le relit avant d'écrire : un petit modèle fait beaucoup moins d'erreurs quand il s'inspire d'un code qui marche. Elle te dit de quoi elle s'est aidée.
 - **La recherche sur des sites fiables** (`recherche.js`) : quand tu poses une question ou que son code plante, elle cherche sur Vikidia, Wikipédia, le Wiktionnaire, MDN Web Docs ou Stack Overflow, lit ce qu'elle trouve et te donne ses sources. Aucun autre site n'est consulté, et seuls les mots de ta question sont envoyés. La case « Elle cherche sur des sites fiables » permet de l'arrêter.
-- Le code s'exécute dans un cadre isolé (`iframe` sandbox) : il ne peut pas lire les données de la page. S'il plante, un bouton propose de lui demander de corriger l'erreur.
+- Le code s'exécute dans un cadre isolé (`iframe` sandbox) : il ne peut pas lire les données de la page. S'il plante dès le lancement, elle essaie une fois de le corriger toute seule ; sinon, un bouton propose de lui demander de corriger l'erreur.
+- **L'aperçu** a trois vues : le résultat, le code (que tu peux modifier toi-même avant de cliquer sur « Relancer ») et la console (les `console.log` et les erreurs du programme).
+- **Mes créations** : tout ce qu'elle crée est gardé sur l'ordinateur. Tu peux rouvrir, renommer, télécharger ou supprimer chaque création, et « Garder comme exemple » lui apprend à s'inspirer de tes réussites.
+- **La voix** : elle peut lire ses réponses à voix haute, et tu peux lui dicter tes demandes (avec la reconnaissance vocale du navigateur).
+- **Pratique** : thème clair ou sombre, guide rapide, gestion de l'espace disque (voir et supprimer son grand cerveau), et installation comme une application (`manifest.webmanifest`, `sw.js`) qui marche aussi sans internet une fois le grand cerveau téléchargé.
 - Elle connaît le festival gaming **2K27** quand tu lui en parles : programme, structures, jeux et PEGI, tournois, cinéma, matériel, contact et style visuel (`festival-resume.js`, informations publiques seulement).
 
 ### Le Laboratoire : son petit cerveau fait maison
@@ -34,6 +38,8 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 | `atelier.js` | L'Atelier : grand cerveau, recherche dans la bibliothèque, conversation, aperçu du code |
 | `savoirs.js` | Sa bibliothèque : exemples de code testés et fiches |
 | `recherche.js` | La recherche sur des sites fiables (et les livres de Wikisource pour le Laboratoire) |
+| `outils.js` | Thème, guide rapide et installation comme application |
+| `sw.js`, `manifest.webmanifest`, `icone-*.png` | L'application installable qui marche sans internet |
 | `cerveau.js` | Le petit cerveau : Transformer, rétropropagation et optimiseur Adam écrits à la main |
 | `app.js` | Le Laboratoire : entraînement, courbe, journal, sauvegardes |
 | `textes.js` | Ce que lit le petit cerveau (discussions, festival 2K27, histoires) |
