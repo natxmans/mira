@@ -19,10 +19,11 @@
   const CONTEXTE_VOULU = 8192; // taille de sa mémoire de travail, en morceaux de mots (tokens)
   const LETTRES_PAR_TOKEN = 3; // estimation prudente pour du code et du français
 
+  // Temps mesurés sur un ordinateur portable avec carte graphique intégrée (AMD Radeon).
   const MODELES = {
-    rapide: { nom: 'Rapide', id: 'Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC', taille: '0,9 Go', detail: 'Répond vite. Pour les petits programmes.' },
-    conseille: { nom: 'Conseillée', id: 'Qwen2.5-Coder-3B-Instruct-q4f16_1-MLC', taille: '1,7 Go', detail: 'Le bon équilibre pour la plupart des ordinateurs.' },
-    puissant: { nom: 'Puissante', id: 'Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC', taille: '4,3 Go', detail: 'Code mieux, mais demande une bonne carte graphique.' },
+    rapide: { nom: 'Rapide', id: 'Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC', taille: '0,9 Go', detail: 'Un petit jeu en 2 à 3 minutes sur un portable. Conseillée pour commencer.' },
+    conseille: { nom: 'Plus douée', id: 'Qwen2.5-Coder-3B-Instruct-q4f16_1-MLC', taille: '1,7 Go', detail: 'Fait moins d\'erreurs, mais environ deux fois plus lente.' },
+    puissant: { nom: 'La plus douée', id: 'Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC', taille: '4,3 Go', detail: 'Pour les ordinateurs avec une vraie carte graphique de jeu.' },
   };
 
   // Modèle minuscule pour vérifier que tout marche sans gros téléchargement : index.html?mini
@@ -50,7 +51,7 @@
   };
 
   const etat = {
-    modele: stock.lire('modele', 'conseille'),
+    modele: stock.lire('modele', 'rapide'),
     festival: stock.lire('festival', true),
     messages: stock.lire('conversation', []), // [{ role: 'user' | 'assistant', content }]
     code: stock.lire('code', null), // { langage, contenu, page }
@@ -63,7 +64,7 @@
     vueCode: false,
     erreurMontree: false,
   };
-  if (!MODELES[etat.modele]) etat.modele = 'conseille';
+  if (!MODELES[etat.modele]) etat.modele = 'rapide';
 
   const nomIA = () => ($('#nom').value || 'Mira').trim() || 'Mira';
 
@@ -78,6 +79,7 @@ Règles :
 - Réponds toujours en français, simplement et gentiment. Tutoie.
 - Quand on te demande un site, une page, un jeu, une animation ou un outil : écris UN SEUL fichier HTML complet dans un bloc \`\`\`html, avec le CSS dans <style> et le JavaScript dans <script>. Aucune image externe : utilise du CSS, des emojis, du SVG ou un <canvas>. Les polices Google Fonts sont permises.
 - Le code doit être complet et marcher tout de suite : jamais de « ... » ni de partie à compléter.
+- Avant d'écrire le code, prévois ses étapes. Déclare chaque variable et chaque fonction avant de t'en servir, et vérifie que tous les noms que tu utilises existent vraiment.
 - Soigne le design : couleurs harmonieuses, coins arrondis, texte lisible, adapté au téléphone.
 - Pour un jeu : contrôles au clavier ET boutons à l'écran, un score et un bouton Rejouer.
 - Si on te demande de modifier ton code, renvoie le fichier complet modifié.
@@ -518,13 +520,14 @@ Règles :
       const suivre = presDuBas();
       rendre(corps, reponse, false);
       if (suivre) defiler();
+      codeEnDirect(reponse);
     };
     try {
       const flux = await etat.moteur.chat.completions.create({
         messages: construireMessages(),
         stream: true,
         stream_options: { include_usage: true },
-        temperature: 0.4,
+        temperature: 0.2,
         top_p: 0.9,
         max_tokens: maxReponse(),
       });
@@ -622,9 +625,27 @@ Règles :
     return { langage: dernier.langage || 'texte', contenu: dernier.contenu, page: false };
   }
 
+  // Pendant qu'elle écrit, le panneau de droite montre son code qui avance.
+  function codeEnDirect(texte) {
+    const codes = decouper(texte).filter((p) => p.type === 'code');
+    if (!codes.length) return;
+    const el = $('#code-brut code');
+    el.textContent = codes[codes.length - 1].contenu;
+    el.className = '';
+    $('#apercu-vide').hidden = true;
+    $('#cadre').hidden = true;
+    const pre = $('#code-brut');
+    pre.hidden = false;
+    pre.scrollTop = pre.scrollHeight;
+    $('#voir-apercu').setAttribute('aria-pressed', 'false');
+    $('#voir-code').setAttribute('aria-pressed', 'true');
+  }
+
   function montrerDepuis(texte) {
     const code = assembler(decouper(texte));
     if (code) montrer(code, code.page);
+    else if (etat.code) montrer(etat.code, !etat.vueCode);
+    else choisirVue(false);
   }
 
   function montrer(code, apercu) {
