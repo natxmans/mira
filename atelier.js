@@ -71,7 +71,7 @@
   // ---------------------------------------------------------------------------
   // Ce qu'on lui explique avant chaque conversation
   // ---------------------------------------------------------------------------
-  function consignes() {
+  function consignes(savoirs) {
     const nom = nomIA();
     let texte = `Tu t'appelles ${nom}. Tu es une IA qui aide à programmer, et tu parles avec la jeune personne qui t'a créée.
 Tu tournes entièrement sur son ordinateur, dans son navigateur : ton petit cerveau a été écrit de zéro, et pour coder tu utilises un grand modèle open source, Qwen2.5-Coder.
@@ -86,8 +86,14 @@ Règles :
 - Pour Python ou un autre langage, mets le code dans un bloc avec le bon langage et explique comment le lancer.
 - Après le code, explique en 2 ou 3 phrases courtes ce que tu as fait.
 - Si tu ne sais pas, dis-le honnêtement.`;
-    if (etat.festival && typeof FESTIVAL_RESUME === 'string' && parleDuFestival()) {
-      texte += `\n\nTu connais le festival gaming 2K27 (utilise ces informations seulement quand on te parle du festival) :\n${FESTIVAL_RESUME}`;
+    if (savoirs && savoirs.exemple) {
+      texte += `\n\nVoici un exemple de code qui fonctionne (« ${savoirs.exemple.titre} »), écrit pour une demande proche. Inspire-t'en fortement : garde ce qui marche, adapte-le exactement à la demande (textes, couleurs, règles), et renvoie un fichier complet.\n\`\`\`html\n${savoirs.exemple.code}\n\`\`\``;
+    }
+    for (const f of (savoirs && savoirs.fiches) || []) {
+      texte += `\n\nFiche utile (« ${f.titre} ») :\n\`\`\`\n${f.code}\n\`\`\``;
+    }
+    if (savoirs && savoirs.festival.length) {
+      texte += '\n\nCe que tu sais du festival gaming 2K27 (programme encore provisoire) :\n' + savoirs.festival.map((s) => `${s.titre} : ${s.texte}`).join('\n');
     }
     return texte;
   }
@@ -99,12 +105,72 @@ Règles :
     return etat.messages.slice(-6).some((m) => m.role === 'user' && MOTS_FESTIVAL.test(m.content));
   }
 
+  // ---------------------------------------------------------------------------
+  // Sa bibliothèque (savoirs.js et festival-resume.js) : on cherche ce qui correspond
+  // à la demande, comme un moteur de recherche, pour le lui faire lire avant de répondre.
+  // ---------------------------------------------------------------------------
+  const sansAccents = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const VERBES_CREATION = /\b(fais|fait|faire|cree|creer|ecris|ecrire|code|coder|programme|programmer|invente|genere|construis|je veux|j'aimerais|je voudrais)\b|\bun jeu\b|\bune page\b|\bun site\b|\bune appli|\bun outil\b/;
+
+  function pertinence(mots, texte) {
+    let n = 0;
+    for (const m of mots) {
+      const mot = sansAccents(m);
+      if (mot && texte.includes(mot)) n += mot.length >= 6 ? 2 : 1;
+    }
+    return n;
+  }
+
+  function choisirSavoirs(demande) {
+    const texte = sansAccents(demande);
+    const choix = { exemple: null, fiches: [], festival: [] };
+    if (typeof SAVOIRS !== 'undefined') {
+      // Pour une simple modification (« rends-le plus rapide »), son dernier code suffit.
+      const codeRecent = etat.messages.slice(-3, -1).some((m) => m.role === 'assistant' && m.content.includes('```'));
+      if (!codeRecent || VERBES_CREATION.test(texte)) {
+        const exemples = SAVOIRS.filter((s) => s.type === 'exemple')
+          .map((s) => [s, pertinence(s.mots, texte)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
+        if (exemples.length) choix.exemple = exemples[0][0];
+      }
+      const seuil = choix.exemple ? 2 : 1;
+      choix.fiches = SAVOIRS.filter((s) => s.type === 'fiche')
+        .map((s) => [s, pertinence(s.mots, texte)]).filter((x) => x[1] >= seuil)
+        .sort((a, b) => b[1] - a[1]).slice(0, choix.exemple ? 1 : 2).map((x) => x[0]);
+    }
+    if (etat.festival && typeof FESTIVAL_SECTIONS !== 'undefined' && parleDuFestival()) {
+      choix.festival = FESTIVAL_SECTIONS
+        .map((s) => [s, s.id === 'general' ? 1000 : pertinence(s.mots, texte)])
+        .sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+    }
+    return choix;
+  }
+
+  function nomsDesSavoirs(s) {
+    const noms = [];
+    if (s.exemple) noms.push(`l'exemple « ${s.exemple.titre} »`);
+    for (const f of s.fiches) noms.push(`la fiche « ${f.titre} »`);
+    if (s.festival.length) noms.push(s.festival.length === FESTIVAL_SECTIONS.length ? 'tout ce qu\'elle sait du festival 2K27' : 'le festival 2K27 (' + s.festival.map((x) => x.titre.toLowerCase()).join(', ') + ')');
+    return noms;
+  }
+
   const maxReponse = () => (etat.contexte >= 8192 ? 3072 : 1536);
 
-  // Garde les derniers messages qui tiennent dans sa mémoire de travail.
-  function construireMessages() {
-    const systeme = consignes();
-    const budget = (etat.contexte - maxReponse() - 64) * LETTRES_PAR_TOKEN - systeme.length;
+  // Garde les savoirs et les derniers messages qui tiennent dans sa mémoire de travail.
+  function construireMessages(savoirs) {
+    const limite = (etat.contexte - maxReponse() - 64) * LETTRES_PAR_TOKEN;
+    const derniere = etat.messages.length ? etat.messages[etat.messages.length - 1].content.length : 0;
+    const s = { exemple: savoirs.exemple, fiches: savoirs.fiches.slice(), festival: savoirs.festival.slice() };
+    let systeme = consignes(s);
+    // Si c'est trop long, on retire d'abord les fiches, puis les sujets du festival les moins utiles, puis l'exemple.
+    while (systeme.length + derniere + 1500 > limite) {
+      if (s.fiches.length) s.fiches.pop();
+      else if (s.festival.length > 1) s.festival.pop();
+      else if (s.exemple) s.exemple = null;
+      else if (s.festival.length) s.festival.pop();
+      else break;
+      systeme = consignes(s);
+    }
+    const budget = limite - systeme.length;
     const garde = [];
     let total = 0;
     for (let i = etat.messages.length - 1; i >= 0; i--) {
@@ -117,7 +183,7 @@ Règles :
       total += contenu.length;
     }
     while (garde.length && garde[0].role !== 'user') garde.shift();
-    return [{ role: 'system', content: systeme }, ...garde];
+    return { messages: [{ role: 'system', content: systeme }, ...garde], utilises: s };
   }
 
   // ---------------------------------------------------------------------------
@@ -468,14 +534,42 @@ Règles :
   function afficherFil() {
     $('#fil').textContent = '';
     if (!etat.messages.length) {
-      bulleMira(`Salut ! Je suis ${nomIA()}. Dis-moi ce que tu veux créer : un jeu, une page, un outil pour le festival… J'écris le code et tu le vois tourner à droite. Je peux me tromper : si quelque chose ne marche pas, dis-le-moi et je corrige.`, true);
+      const nb = typeof SAVOIRS !== 'undefined' ? SAVOIRS.filter((s) => s.type === 'exemple').length : 0;
+      bulleMira(`Salut ! Je suis ${nomIA()}. Dis-moi ce que tu veux créer : un jeu, une page, un outil pour le festival… J'écris le code et tu le vois tourner à droite.${nb ? ` J'ai une bibliothèque de ${nb} exemples de code qui marchent : je m'en inspire pour faire moins d'erreurs.` : ''} Je peux quand même me tromper : si quelque chose ne marche pas, dis-le-moi et je corrige.`, true);
     }
     for (const m of etat.messages) {
       if (m.role === 'user') bulleToi(m.content);
-      else bulleMira(m.content, true);
+      else {
+        const { div } = bulleMira(m.content, true);
+        if (m.aides && m.aides.length) {
+          const n = document.createElement('p');
+          n.className = 'note';
+          n.textContent = '📚 Elle s\'est aidée de ' + m.aides.join(', ') + '.';
+          div.append(n);
+        }
+      }
     }
     $('#idees').hidden = etat.messages.length > 0;
     defiler();
+  }
+
+  function afficherSavoirs() {
+    if (typeof SAVOIRS === 'undefined') { $('#savoirs').hidden = true; return; }
+    const exemples = SAVOIRS.filter((s) => s.type === 'exemple');
+    const fiches = SAVOIRS.filter((s) => s.type === 'fiche');
+    const sujets = typeof FESTIVAL_SECTIONS !== 'undefined' ? FESTIVAL_SECTIONS.length : 0;
+    $('#savoirs-titre').textContent = `Ce qu'elle sait : ${exemples.length} exemples de code, ${fiches.length} fiches` + (sujets ? `, le festival 2K27 (${sujets} sujets)` : '');
+    const box = $('#savoirs-exemples');
+    box.textContent = '';
+    for (const e of exemples) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = e.titre;
+      b.title = 'Voir cet exemple tourner';
+      b.addEventListener('click', () => montrer({ langage: 'html', contenu: e.code, page: true }, true));
+      box.append(b);
+    }
+    $('#savoirs-fiches').textContent = 'Fiches : ' + fiches.map((f) => f.titre).join(' · ') + '.';
   }
 
   function afficherIdees() {
@@ -543,9 +637,12 @@ Règles :
       if (suivre) defiler();
       codeEnDirect(reponse);
     };
+    const preparation = construireMessages(choisirSavoirs(texte));
+    const aides = nomsDesSavoirs(preparation.utilises);
+    if (aides.length) majEtat(`${nomIA()} lit ${aides.join(', ')}…`);
     try {
       const flux = await etat.moteur.chat.completions.create({
-        messages: construireMessages(),
+        messages: preparation.messages,
         stream: true,
         stream_options: { include_usage: true },
         temperature: 0.2,
@@ -568,7 +665,7 @@ Règles :
       if (!reponse) reponse = "Oups, j'ai eu un problème : " + ((e && e.message) || e);
     }
     const propre = reponse.trim() || '(elle n\'a rien répondu)';
-    etat.messages.push({ role: 'assistant', content: propre });
+    etat.messages.push({ role: 'assistant', content: propre, aides });
     stock.ecrire('conversation', etat.messages.slice(-40));
     rendre(corps, propre, true);
     document.removeEventListener('visibilitychange', surCache);
@@ -578,6 +675,7 @@ Règles :
       n.textContent = texte;
       div.append(n);
     };
+    if (aides.length) note('📚 Elle s\'est aidée de ' + aides.join(', ') + '.');
     if (fin === 'length') note('Sa réponse était trop longue et a été coupée. Demande-lui une version plus courte, ou de continuer.');
     if (cachee) note('Astuce : laisse cet onglet au premier plan pendant qu\'elle écrit. Quand il est caché, le navigateur la ralentit beaucoup.');
     const duree = Math.round((performance.now() - debut) / 1000);
@@ -780,6 +878,11 @@ Règles :
     for (const q of document.querySelectorAll('.msg.mira .qui')) q.lastChild.textContent = nomIA();
   }
 
+  // Pour vérifier la recherche dans sa bibliothèque sans carte graphique : index.html?test
+  if (/[?&]test\b/.test(location.search)) {
+    window.miraTest = { etat, choisirSavoirs, construireMessages, nomsDesSavoirs };
+  }
+
   function demarrer() {
     let vue = 'atelier';
     try { vue = localStorage.getItem('mira.vue') || 'atelier'; } catch (e) { /* rien */ }
@@ -805,6 +908,7 @@ Règles :
     festival.checked = !!etat.festival;
     festival.addEventListener('change', () => { etat.festival = festival.checked; stock.ecrire('festival', etat.festival); });
 
+    afficherSavoirs();
     afficherIdees();
     afficherFil();
     const zone = $('#texte-demande');

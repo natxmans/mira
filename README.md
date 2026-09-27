@@ -12,8 +12,9 @@ Tu lui demandes un jeu, un site ou un outil ; elle écrit le code et tu vois le 
 
 - Son « grand cerveau » est un vrai modèle de langage open source spécialisé en programmation, **Qwen2.5-Coder** (équipe Qwen d'Alibaba). Il tourne sur ta carte graphique grâce à **WebGPU** et à la bibliothèque **[WebLLM](https://github.com/mlc-ai/web-llm)**.
 - Il se télécharge une seule fois (0,9 Go, 1,7 Go ou 4,3 Go selon la taille choisie), puis il reste dans le cache du navigateur.
+- **Sa bibliothèque** (`savoirs.js`) : 17 exemples de code testés (serpent, morpion, quiz, calculatrice, casse-briques, memory, formulaire, tableau des scores, page du festival…) et 8 fiches (boucle de jeu, tactile, sauvegarde, design, sons, hasard, animations, Python). À chaque demande, elle cherche ce qui ressemble et le relit avant d'écrire : un petit modèle fait beaucoup moins d'erreurs quand il s'inspire d'un code qui marche. Elle te dit de quoi elle s'est aidée.
 - Le code s'exécute dans un cadre isolé (`iframe` sandbox) : il ne peut pas lire les données de la page. S'il plante, un bouton propose de lui demander de corriger l'erreur.
-- Elle connaît le programme du festival gaming **2K27** quand tu lui en parles (`festival-resume.js`).
+- Elle connaît le festival gaming **2K27** quand tu lui en parles : programme, structures, jeux et PEGI, tournois, cinéma, matériel, contact et style visuel (`festival-resume.js`, informations publiques seulement).
 
 ### Le Laboratoire : son petit cerveau fait maison
 
@@ -28,11 +29,12 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 | Fichier | Rôle |
 | --- | --- |
 | `index.html` | La page et son style |
-| `atelier.js` | L'Atelier : grand cerveau, conversation, aperçu du code |
+| `atelier.js` | L'Atelier : grand cerveau, recherche dans la bibliothèque, conversation, aperçu du code |
+| `savoirs.js` | Sa bibliothèque : exemples de code testés et fiches |
 | `cerveau.js` | Le petit cerveau : Transformer, rétropropagation et optimiseur Adam écrits à la main |
 | `app.js` | Le Laboratoire : entraînement, courbe, journal, sauvegardes |
 | `textes.js` | Ce que lit le petit cerveau (discussions, festival 2K27, histoires) |
-| `festival-resume.js` | Ce que le grand cerveau sait du festival 2K27 |
+| `festival-resume.js` | Ce que le grand cerveau sait du festival 2K27, par sujet |
 
 ## Crédits
 

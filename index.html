@@ -319,6 +319,13 @@
   .etat-cerveau { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; font-size: 13px; color: var(--doux); }
   .etat-cerveau label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
   .etat-cerveau input { accent-color: var(--accent); }
+  .savoirs { margin-top: 10px; border-top: 1px solid var(--bord); padding-top: 8px; }
+  .savoirs summary { cursor: pointer; font-size: 14px; font-weight: 800; color: var(--doux); }
+  .savoirs summary:hover { color: var(--accent); }
+  .savoirs .sous { margin: 8px 0; font-size: 13px; }
+  .savoirs-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+  .savoirs-liste button { border: 1px solid var(--bord); background: var(--surface); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; }
+  .savoirs-liste button:hover { border-color: var(--accent); }
   .lien { border: 0; background: none; padding: 0; color: var(--doux); font-weight: 700; font-size: 13px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
   .lien:hover { color: var(--accent); }
 
@@ -428,6 +435,12 @@
           <label title="Ajoute le programme du festival 2K27 à ce qu'elle sait"><input type="checkbox" id="avec-festival"> Elle connaît le festival 2K27 (quand tu en parles)</label>
           <button class="lien" type="button" id="changer-cerveau" hidden>Changer de taille</button>
         </div>
+        <details class="savoirs" id="savoirs">
+          <summary id="savoirs-titre">Ce qu'elle sait</summary>
+          <p class="sous">Avant de répondre, elle cherche ici ce qui ressemble à ta demande et le relit. Clique sur un exemple pour le voir tourner.</p>
+          <div class="savoirs-liste" id="savoirs-exemples"></div>
+          <p class="sous" id="savoirs-fiches"></p>
+        </details>
       </article>
 
       <article class="carte apercu" aria-label="Résultat">
@@ -516,6 +529,7 @@
     <div role="tabpanel" id="p-lit" aria-labelledby="t-lit">
       <p class="sous">Tout ce qu'elle saura dire vient de ces textes. Change-les, ajoute tes propres phrases, puis clique sur « Utiliser ce texte ». Pour qu'elle sache discuter, garde le format <code>Toi : …</code> / <code>IA : …</code>. <code>{nom}</code> sera remplacé par son nom.</p>
       <div class="boutons" style="margin-bottom:10px">
+        <button class="bouton petit" type="button" data-modele="tout">Tout lire (le plus de données)</button>
         <button class="bouton petit" type="button" data-modele="discussions">Modèle : discussions</button>
         <button class="bouton petit" type="button" data-modele="festival">Modèle : festival 2K27</button>
         <button class="bouton petit" type="button" data-modele="histoires">Modèle : histoires</button>
@@ -597,6 +611,7 @@
 <script src="cerveau.js"></script>
 <script src="textes.js"></script>
 <script src="festival-resume.js"></script>
+<script src="savoirs.js"></script>
 <script src="app.js"></script>
 <script src="atelier.js"></script>
 </body>

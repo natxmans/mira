@@ -859,3 +859,6 @@ IA : Je fais de mon mieux, mais je suis une petite IA. Vérifie toujours sur le 
 Toi : Le programme peut changer ?
 IA : Oui, c'est encore une hypothèse. Il sera validé par les jeunes à la séance du mercredi 30 septembre.
 `;
+
+// Tous les textes à la fois : le plus de données possible pour le petit cerveau.
+TEXTES.tout = [TEXTES.discussions, TEXTES.festival, TEXTES.histoires].join('\n');
