@@ -543,6 +543,66 @@
     });
   }
 
+  // Lui donner encore plus à lire : livres libres de droits (Wikisource) et articles.
+  async function chercherLivres(source, requete) {
+    const ligne = $('#etat-livres');
+    ligne.textContent = 'Recherche…';
+    $('#resultats-livres').textContent = '';
+    try {
+      const resultats = await RECHERCHE.listerTextes(source, requete, 8);
+      ligne.textContent = resultats.length
+        ? `${resultats.length} résultat${resultats.length > 1 ? 's' : ''} sur ${RECHERCHE.WIKIS[source].nom} :`
+        : "Rien trouvé. Essaie avec d'autres mots.";
+      afficherLivres(source, resultats.map((r) => ({ titre: r.titre, detail: r.extrait })));
+    } catch (e) {
+      ligne.textContent = "La recherche n'a pas marché. Vérifie ta connexion internet.";
+    }
+  }
+
+  function afficherLivres(source, elements) {
+    const liste = $('#resultats-livres');
+    liste.textContent = '';
+    for (const el of elements) {
+      const li = document.createElement('li');
+      const s = document.createElement('span');
+      s.textContent = el.titre;
+      if (el.detail) {
+        const petit = document.createElement('small');
+        petit.textContent = el.detail.slice(0, 150) + '…';
+        s.append(petit);
+      }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bouton petit';
+      b.textContent = 'Ajouter';
+      b.addEventListener('click', () => ajouterLivre(source, el.titre, b));
+      li.append(s, b);
+      liste.append(li);
+    }
+  }
+
+  async function ajouterLivre(source, titre, bouton) {
+    bouton.disabled = true;
+    bouton.textContent = '…';
+    try {
+      const t = await RECHERCHE.texteComplet(source, titre, 40000);
+      if (t.liens.length) {
+        $('#etat-livres').textContent = `« ${t.titre} » est un sommaire : choisis la version à ajouter.`;
+        afficherLivres(source, t.liens.map((l) => ({ titre: l })));
+        return;
+      }
+      const zone = $('#textes');
+      zone.value = zone.value.replace(/\s*$/, '') + `\n\n${t.titre.split('/').pop()}\n\n${t.texte}\n`;
+      compter();
+      bouton.textContent = 'Ajouté ✓';
+      afficherToast(`« ${t.titre} » ajouté (${nombre.format(t.texte.length)} caractères). Clique sur « Utiliser ce texte » pour qu'elle le lise.`);
+    } catch (e) {
+      bouton.disabled = false;
+      bouton.textContent = 'Réessayer';
+      afficherToast('Impossible de récupérer ce texte.');
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Onglet « Dans sa tête »
   // ---------------------------------------------------------------------------
@@ -766,6 +826,12 @@
     $('#annuler-textes').addEventListener('click', () => { zone.value = etat.textes; compter(); });
     compter();
     afficherLecons();
+    if (typeof RECHERCHE === 'undefined') $('#form-livres').hidden = true;
+    $('#form-livres').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const requete = $('#recherche-livres').value.trim();
+      if (requete) chercherLivres($('#source-livres').value, requete);
+    });
 
     // dans sa tête
     $('#tete-texte').value = "Toi : Comment tu t'appelles ?\nIA : Je m'appelle ";

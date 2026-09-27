@@ -1106,7 +1106,7 @@ nouvellePartie();
 
 SAVOIRS.push({
   id: 'page-festival', type: 'exemple', titre: "Page d'accueil du festival 2K27",
-  mots: ['page du festival', "page d'accueil", 'site du festival', 'site pour le festival', 'page pour le festival', 'affiche', 'presentation du festival', 'landing'],
+  mots: ['page du festival', "page d'accueil", 'site du festival', 'site pour le festival', 'page pour le festival', 'affiche du festival', 'presentation du festival', 'landing'],
   code: `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1572,6 +1572,991 @@ afficherReponses();
 </html>`,
 });
 
+SAVOIRS.push({
+  id: 'flappy', type: 'exemple', titre: "Oiseau volant (façon Flappy Bird)",
+  mots: ['flappy', 'oiseau', 'voler', 'tuyaux', 'battre des ailes', 'sauter entre'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oiseau volant</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0c4a6e; font-family: system-ui, sans-serif; color: #fff; text-align: center; }
+  canvas { width: min(360px, 92vw); border-radius: 14px; display: block; touch-action: none; cursor: pointer; }
+  p { opacity: .8; }
+</style>
+</head>
+<body>
+<div>
+  <canvas id="jeu" width="360" height="540"></canvas>
+  <p>Espace, flèche du haut, clic ou doigt pour battre des ailes</p>
+</div>
+<script>
+const canvas = document.getElementById('jeu');
+const ctx = canvas.getContext('2d');
+const LARGEUR_TUYAU = 60, TROU = 150, VITESSE = 2.5;
+let oiseau, tuyaux, score, record = 0, etat, images, finA;
+
+function nouvellePartie() {
+  oiseau = { x: 90, y: 250, vy: 0, r: 16 };
+  tuyaux = [];
+  score = 0;
+  images = 0;
+  etat = 'pret';
+}
+
+function battre() {
+  if (etat === 'perdu') {
+    if (Date.now() - finA > 500) nouvellePartie();
+    return;
+  }
+  etat = 'jeu';
+  oiseau.vy = -7.5;
+}
+
+function mettreAJour() {
+  if (etat !== 'jeu') return;
+  images++;
+  oiseau.vy += 0.45;
+  oiseau.y += oiseau.vy;
+  if (images % 90 === 0) {
+    tuyaux.push({ x: canvas.width, haut: 60 + Math.random() * (canvas.height - TROU - 160), compte: false });
+  }
+  for (const t of tuyaux) {
+    t.x -= VITESSE;
+    if (!t.compte && t.x + LARGEUR_TUYAU < oiseau.x) { t.compte = true; score++; }
+    const dansColonne = oiseau.x + oiseau.r > t.x && oiseau.x - oiseau.r < t.x + LARGEUR_TUYAU;
+    const horsDuTrou = oiseau.y - oiseau.r < t.haut || oiseau.y + oiseau.r > t.haut + TROU;
+    if (dansColonne && horsDuTrou) perdre();
+  }
+  tuyaux = tuyaux.filter(t => t.x > -LARGEUR_TUYAU);
+  if (oiseau.y + oiseau.r > canvas.height - 40 || oiseau.y < 0) perdre();
+}
+
+function perdre() {
+  if (etat === 'perdu') return;
+  etat = 'perdu';
+  finA = Date.now();
+  record = Math.max(record, score);
+}
+
+function dessiner() {
+  ctx.fillStyle = '#7dd3fc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#22c55e';
+  for (const t of tuyaux) {
+    ctx.fillRect(t.x, 0, LARGEUR_TUYAU, t.haut);
+    ctx.fillRect(t.x, t.haut + TROU, LARGEUR_TUYAU, canvas.height);
+  }
+  ctx.fillStyle = '#a16207';
+  ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+  ctx.font = '34px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🐤', oiseau.x, oiseau.y);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 40px system-ui';
+  ctx.fillText(score, canvas.width / 2, 60);
+  ctx.font = 'bold 22px system-ui';
+  if (etat === 'pret') ctx.fillText('Touche pour commencer', canvas.width / 2, canvas.height / 2 + 60);
+  if (etat === 'perdu') {
+    ctx.fillText('Perdu ! Record : ' + record, canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Touche pour rejouer', canvas.width / 2, canvas.height / 2 + 34);
+  }
+}
+
+function boucle() {
+  mettreAJour();
+  dessiner();
+  requestAnimationFrame(boucle);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.key === 'ArrowUp') { e.preventDefault(); battre(); }
+});
+canvas.addEventListener('pointerdown', battre);
+nouvellePartie();
+boucle();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'pong', type: 'exemple', titre: 'Pong (contre l\'ordinateur ou à deux)',
+  mots: ['pong', 'ping-pong', 'ping pong', 'tennis', 'deux joueurs', '2 joueurs', 'raquettes'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pong</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #111; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
+  canvas { background: #000; width: min(640px, 96vw); border-radius: 10px; display: block; margin: 0 auto; touch-action: none; }
+  .barre { margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  button { font: inherit; font-weight: 700; padding: 8px 16px; border: 0; border-radius: 10px; background: #fff; color: #111; cursor: pointer; }
+  p { opacity: .7; }
+</style>
+</head>
+<body>
+<div>
+  <canvas id="jeu" width="640" height="380"></canvas>
+  <div class="barre">
+    <button id="mode">Mode : contre l'ordinateur</button>
+    <button id="rejouer">Rejouer</button>
+  </div>
+  <p>Joueur de gauche : Z / S ou le doigt · Joueur de droite : flèches ⬆️ ⬇️ · Premier à 7 points</p>
+</div>
+<script>
+const canvas = document.getElementById('jeu');
+const ctx = canvas.getContext('2d');
+const HAUTEUR = 80, LARGEUR = 12, GAGNANT = 7;
+const touches = {};
+let deuxJoueurs = false, gauche, droite, balle, scores, fini;
+
+function servir(vers) {
+  balle = { x: canvas.width / 2, y: canvas.height / 2, r: 8, dx: 5 * vers, dy: (Math.random() * 4) - 2 };
+}
+
+function nouvellePartie() {
+  gauche = { y: canvas.height / 2 - HAUTEUR / 2 };
+  droite = { y: canvas.height / 2 - HAUTEUR / 2 };
+  scores = [0, 0];
+  fini = false;
+  servir(Math.random() < 0.5 ? -1 : 1);
+}
+
+function limiter(r) {
+  r.y = Math.max(0, Math.min(canvas.height - HAUTEUR, r.y));
+}
+
+function mettreAJour() {
+  if (fini) return;
+  if (touches.z) gauche.y -= 7;
+  if (touches.s) gauche.y += 7;
+  if (deuxJoueurs) {
+    if (touches.ArrowUp) droite.y -= 7;
+    if (touches.ArrowDown) droite.y += 7;
+  } else {
+    const cible = balle.y - HAUTEUR / 2;
+    droite.y += Math.max(-4.5, Math.min(4.5, cible - droite.y));
+  }
+  limiter(gauche);
+  limiter(droite);
+  balle.x += balle.dx;
+  balle.y += balle.dy;
+  if (balle.y < balle.r || balle.y > canvas.height - balle.r) balle.dy = -balle.dy;
+  const toucheRaquette = (r, x) => balle.y > r.y && balle.y < r.y + HAUTEUR && Math.abs(balle.x - x) < balle.r + LARGEUR / 2;
+  if (balle.dx < 0 && toucheRaquette(gauche, 20)) {
+    balle.dx = -balle.dx * 1.05;
+    balle.dy = (balle.y - (gauche.y + HAUTEUR / 2)) / 8;
+  }
+  if (balle.dx > 0 && toucheRaquette(droite, canvas.width - 20)) {
+    balle.dx = -balle.dx * 1.05;
+    balle.dy = (balle.y - (droite.y + HAUTEUR / 2)) / 8;
+  }
+  if (balle.x < 0 || balle.x > canvas.width) {
+    const point = balle.x < 0 ? 1 : 0;
+    scores[point]++;
+    if (scores[point] >= GAGNANT) fini = true;
+    else servir(point === 0 ? 1 : -1);
+  }
+}
+
+function dessiner() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#333';
+  for (let y = 0; y < canvas.height; y += 24) ctx.fillRect(canvas.width / 2 - 2, y, 4, 12);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(20 - LARGEUR / 2, gauche.y, LARGEUR, HAUTEUR);
+  ctx.fillRect(canvas.width - 20 - LARGEUR / 2, droite.y, LARGEUR, HAUTEUR);
+  ctx.beginPath();
+  ctx.arc(balle.x, balle.y, balle.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = 'bold 40px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText(scores[0], canvas.width / 4, 50);
+  ctx.fillText(scores[1], canvas.width * 3 / 4, 50);
+  if (fini) {
+    ctx.font = 'bold 30px system-ui';
+    ctx.fillText((scores[0] > scores[1] ? 'Gauche' : 'Droite') + ' gagne ! 🏆', canvas.width / 2, canvas.height / 2);
+  }
+}
+
+function boucle() {
+  mettreAJour();
+  dessiner();
+  requestAnimationFrame(boucle);
+}
+
+document.addEventListener('keydown', e => {
+  touches[e.key] = true;
+  if (e.key.startsWith('Arrow')) e.preventDefault();
+});
+document.addEventListener('keyup', e => { touches[e.key] = false; });
+canvas.addEventListener('pointermove', e => {
+  const r = canvas.getBoundingClientRect();
+  gauche.y = (e.clientY - r.top) * (canvas.height / r.height) - HAUTEUR / 2;
+});
+document.getElementById('mode').addEventListener('click', e => {
+  deuxJoueurs = !deuxJoueurs;
+  e.target.textContent = deuxJoueurs ? 'Mode : 2 joueurs' : "Mode : contre l'ordinateur";
+  nouvellePartie();
+});
+document.getElementById('rejouer').addEventListener('click', nouvellePartie);
+nouvellePartie();
+boucle();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'plateforme', type: 'exemple', titre: 'Jeu de plateforme (sauter et ramasser des pièces)',
+  mots: ['plateforme', 'plateformes', 'sauter', 'saut', 'mario', 'pieces', 'ramasser', 'personnage qui saute', 'niveau'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saute !</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #1e1b4b; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
+  canvas { width: min(640px, 96vw); border-radius: 12px; display: block; margin: 0 auto; }
+  .commandes { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+  button { font: inherit; font-size: 20px; font-weight: 700; padding: 10px 18px; border: 0; border-radius: 12px; background: #4338ca; color: #fff; cursor: pointer; user-select: none; touch-action: none; }
+</style>
+</head>
+<body>
+<div>
+  <canvas id="jeu" width="640" height="360"></canvas>
+  <div class="commandes">
+    <button data-touche="gauche">⬅️</button>
+    <button data-touche="saut">⤴️ Saut</button>
+    <button data-touche="droite">➡️</button>
+  </div>
+</div>
+<script>
+const canvas = document.getElementById('jeu');
+const ctx = canvas.getContext('2d');
+const PLATEFORMES = [
+  { x: 0, y: 330, l: 640, h: 30 },
+  { x: 90, y: 260, l: 120, h: 14 },
+  { x: 270, y: 200, l: 110, h: 14 },
+  { x: 440, y: 150, l: 130, h: 14 },
+  { x: 230, y: 100, l: 90, h: 14 },
+  { x: 40, y: 150, l: 90, h: 14 }
+];
+const commandes = { gauche: false, droite: false, saut: false };
+let joueur, pieces, gagne;
+
+function nouvellePartie() {
+  joueur = { x: 30, y: 290, l: 26, h: 34, vx: 0, vy: 0, auSol: false };
+  pieces = [{ x: 150, y: 230 }, { x: 325, y: 170 }, { x: 505, y: 120 }, { x: 275, y: 70 }, { x: 85, y: 120 }, { x: 600, y: 300 }];
+  gagne = false;
+}
+
+function mettreAJour() {
+  joueur.vx = (commandes.droite ? 4 : 0) - (commandes.gauche ? 4 : 0);
+  if (commandes.saut && joueur.auSol) joueur.vy = -11;
+  joueur.vy = Math.min(joueur.vy + 0.55, 12);
+  joueur.x = Math.max(0, Math.min(canvas.width - joueur.l, joueur.x + joueur.vx));
+  const ancienBas = joueur.y + joueur.h;
+  joueur.y += joueur.vy;
+  joueur.auSol = false;
+  for (const p of PLATEFORMES) {
+    const auDessus = joueur.x + joueur.l > p.x && joueur.x < p.x + p.l;
+    if (auDessus && joueur.vy >= 0 && ancienBas <= p.y && joueur.y + joueur.h >= p.y) {
+      joueur.y = p.y - joueur.h;
+      joueur.vy = 0;
+      joueur.auSol = true;
+    }
+  }
+  pieces = pieces.filter(c => Math.hypot(c.x - (joueur.x + joueur.l / 2), c.y - (joueur.y + joueur.h / 2)) > 24);
+  if (!pieces.length) gagne = true;
+}
+
+function dessiner() {
+  ctx.fillStyle = '#93c5fd';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#65a30d';
+  for (const p of PLATEFORMES) ctx.fillRect(p.x, p.y, p.l, p.h);
+  ctx.font = '22px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const c of pieces) ctx.fillText('🪙', c.x, c.y);
+  ctx.fillStyle = '#dc2626';
+  ctx.fillRect(joueur.x, joueur.y, joueur.l, joueur.h);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(joueur.x + 6, joueur.y + 8, 5, 5);
+  ctx.fillRect(joueur.x + 16, joueur.y + 8, 5, 5);
+  ctx.fillStyle = '#1e1b4b';
+  ctx.font = 'bold 18px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('Pièces restantes : ' + pieces.length, 12, 22);
+  if (gagne) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 34px system-ui';
+    ctx.fillText('Bravo, tout ramassé ! 🎉', canvas.width / 2, canvas.height / 2);
+  }
+}
+
+function boucle() {
+  if (!gagne) mettreAJour();
+  dessiner();
+  requestAnimationFrame(boucle);
+}
+
+const CLAVIER = { ArrowLeft: 'gauche', q: 'gauche', ArrowRight: 'droite', d: 'droite', ArrowUp: 'saut', z: 'saut', ' ': 'saut' };
+document.addEventListener('keydown', e => {
+  if (CLAVIER[e.key]) { e.preventDefault(); commandes[CLAVIER[e.key]] = true; }
+  if (gagne && e.key === 'Enter') nouvellePartie();
+});
+document.addEventListener('keyup', e => { if (CLAVIER[e.key]) commandes[CLAVIER[e.key]] = false; });
+document.querySelectorAll('[data-touche]').forEach(b => {
+  b.addEventListener('pointerdown', () => { commandes[b.dataset.touche] = true; if (gagne) nouvellePartie(); });
+  b.addEventListener('pointerup', () => { commandes[b.dataset.touche] = false; });
+  b.addEventListener('pointerleave', () => { commandes[b.dataset.touche] = false; });
+});
+nouvellePartie();
+boucle();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'roue', type: 'exemple', titre: 'Roue de tirage au sort',
+  mots: ['roue', 'tirage au sort', 'tirer au sort', 'tirage', 'hasard un nom', 'choisir au hasard', 'loterie', 'qui commence'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roue du tirage au sort</title>
+<style>
+  body { margin: 0; min-height: 100vh; background: #faf5ff; color: #3b0764; font-family: system-ui, sans-serif; display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+  .roue { position: relative; width: min(360px, 88vw); }
+  canvas { width: 100%; display: block; }
+  .fleche { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); font-size: 34px; }
+  .panneau { width: min(300px, 88vw); }
+  textarea { width: 100%; box-sizing: border-box; height: 170px; font: inherit; padding: 10px; border: 2px solid #d8b4fe; border-radius: 12px; }
+  button { font: inherit; font-weight: 800; font-size: 18px; width: 100%; margin-top: 10px; padding: 12px; border: 0; border-radius: 12px; background: #9333ea; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; }
+  #gagnant { font-size: 24px; font-weight: 800; min-height: 34px; margin-top: 12px; text-align: center; }
+  label { display: flex; gap: 8px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="roue"><div class="fleche">🔻</div><canvas id="roue" width="400" height="400"></canvas></div>
+<div class="panneau">
+  <textarea id="noms">Léa
+Tom
+Inès
+Hugo
+Emma
+Sacha</textarea>
+  <label><input type="checkbox" id="retirer"> Retirer le gagnant ensuite</label>
+  <button id="tourner">Tourner la roue</button>
+  <div id="gagnant"></div>
+</div>
+<script>
+const canvas = document.getElementById('roue');
+const ctx = canvas.getContext('2d');
+const COULEURS = ['#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#eab308'];
+let angle = 0, enRotation = false;
+
+function lireNoms() {
+  return document.getElementById('noms').value.split('\\n').map(n => n.trim()).filter(Boolean);
+}
+
+function dessiner() {
+  const noms = lireNoms();
+  const c = canvas.width / 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!noms.length) return;
+  const part = (Math.PI * 2) / noms.length;
+  noms.forEach((nom, i) => {
+    const debut = angle + i * part;
+    ctx.beginPath();
+    ctx.moveTo(c, c);
+    ctx.arc(c, c, c - 4, debut, debut + part);
+    ctx.fillStyle = COULEURS[i % COULEURS.length];
+    ctx.fill();
+    ctx.save();
+    ctx.translate(c, c);
+    ctx.rotate(debut + part / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(nom.slice(0, 14), c - 18, 7);
+    ctx.restore();
+  });
+}
+
+function gagnantActuel() {
+  const noms = lireNoms();
+  const part = (Math.PI * 2) / noms.length;
+  // La flèche est en haut, c'est-à-dire à l'angle -90°.
+  const sousLaFleche = ((-Math.PI / 2 - angle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  return noms[Math.floor(sousLaFleche / part)];
+}
+
+function tourner() {
+  const noms = lireNoms();
+  if (enRotation || noms.length < 2) return;
+  enRotation = true;
+  document.getElementById('tourner').disabled = true;
+  document.getElementById('gagnant').textContent = '';
+  const depart = angle;
+  const tours = Math.PI * 2 * (5 + Math.random() * 3);
+  const duree = 4000;
+  const t0 = performance.now();
+  function etape(maintenant) {
+    const t = Math.min(1, (maintenant - t0) / duree);
+    angle = depart + tours * (1 - Math.pow(1 - t, 3));
+    dessiner();
+    if (t < 1) return requestAnimationFrame(etape);
+    enRotation = false;
+    document.getElementById('tourner').disabled = false;
+    const gagnant = gagnantActuel();
+    document.getElementById('gagnant').textContent = '🎉 ' + gagnant + ' !';
+    if (document.getElementById('retirer').checked) {
+      const zone = document.getElementById('noms');
+      const restants = lireNoms();
+      restants.splice(restants.indexOf(gagnant), 1);
+      zone.value = restants.join('\\n');
+      dessiner();
+    }
+  }
+  requestAnimationFrame(etape);
+}
+
+document.getElementById('noms').addEventListener('input', dessiner);
+document.getElementById('tourner').addEventListener('click', tourner);
+dessiner();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'tableau-tournoi', type: 'exemple', titre: 'Tableau de tournoi à élimination',
+  mots: ['arbre du tournoi', 'tableau du tournoi', 'bracket', 'elimination', 'eliminatoire', 'demi-finale', 'quart de finale', 'matchs', 'phases finales'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau du tournoi</title>
+<style>
+  body { margin: 0; min-height: 100vh; background: #0a0a14; color: #e8e8f5; font-family: system-ui, sans-serif; padding: 20px; box-sizing: border-box; }
+  h1 { margin: 0 0 12px; color: #22e8ff; }
+  .saisie { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 18px; }
+  textarea { width: 260px; height: 150px; font: inherit; padding: 10px; border-radius: 12px; border: 1px solid #34344f; background: #15152a; color: inherit; }
+  button { font: inherit; font-weight: 700; padding: 10px 16px; border: 0; border-radius: 10px; background: #b026ff; color: #fff; cursor: pointer; }
+  .tableau { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 10px; }
+  .tour { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; min-width: 170px; }
+  .tour h2 { font-size: 14px; color: #9494b0; margin: 0 0 4px; text-transform: uppercase; }
+  .match { background: #15152a; border: 1px solid #2a2a45; border-radius: 12px; overflow: hidden; }
+  .joueur { display: block; width: 100%; text-align: left; background: none; border-radius: 0; padding: 9px 12px; color: inherit; font-weight: 600; }
+  .joueur + .joueur { border-top: 1px solid #2a2a45; }
+  .joueur:hover:not(:disabled) { background: #22223a; }
+  .joueur.gagne { background: #ff2e88; color: #fff; }
+  .joueur:disabled { cursor: default; opacity: .6; }
+  #champion { font-size: 26px; font-weight: 800; margin-top: 16px; color: #ff2e88; }
+</style>
+</head>
+<body>
+<h1>🏆 Tableau du tournoi</h1>
+<div class="saisie">
+  <textarea id="noms">Mario
+Luigi
+Peach
+Yoshi
+Bowser
+Toad
+Daisy
+Wario</textarea>
+  <div>
+    <button id="creer">Créer le tableau</button>
+    <p style="max-width:260px;color:#9494b0">Un pseudo par ligne (4, 8 ou 16). Clique sur le gagnant de chaque match pour le faire avancer.</p>
+  </div>
+</div>
+<div class="tableau" id="tableau"></div>
+<div id="champion"></div>
+<script>
+let tours = [];
+const NOMS_TOURS = { 1: 'Finale', 2: 'Demi-finales', 4: 'Quarts de finale', 8: 'Huitièmes de finale' };
+
+function melanger(t) {
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]];
+  }
+  return t;
+}
+
+function creer() {
+  let noms = document.getElementById('noms').value.split('\\n').map(n => n.trim()).filter(Boolean);
+  let taille = 2;
+  while (taille < noms.length && taille < 16) taille *= 2;
+  noms = melanger(noms.slice(0, taille));
+  while (noms.length < taille) noms.push('(qualifié d\\'office)');
+  tours = [];
+  let matchs = [];
+  for (let i = 0; i < noms.length; i += 2) matchs.push({ a: noms[i], b: noms[i + 1], gagnant: null });
+  tours.push(matchs);
+  while (matchs.length > 1) {
+    matchs = Array.from({ length: matchs.length / 2 }, () => ({ a: null, b: null, gagnant: null }));
+    tours.push(matchs);
+  }
+  afficher();
+}
+
+function choisir(t, m, qui) {
+  const match = tours[t][m];
+  if (!match.a || !match.b) return;
+  match.gagnant = qui;
+  // On efface la suite si un résultat change.
+  for (let s = t + 1; s < tours.length; s++) tours[s].forEach(x => { x.gagnant = null; });
+  for (let s = t; s < tours.length - 1; s++) {
+    tours[s].forEach((x, i) => {
+      const suivant = tours[s + 1][Math.floor(i / 2)];
+      suivant[i % 2 === 0 ? 'a' : 'b'] = x.gagnant ? x[x.gagnant] : null;
+    });
+  }
+  afficher();
+}
+
+function afficher() {
+  const zone = document.getElementById('tableau');
+  zone.innerHTML = '';
+  tours.forEach((matchs, t) => {
+    const colonne = document.createElement('div');
+    colonne.className = 'tour';
+    const titre = document.createElement('h2');
+    titre.textContent = NOMS_TOURS[matchs.length] || 'Tour ' + (t + 1);
+    colonne.appendChild(titre);
+    matchs.forEach((match, m) => {
+      const boite = document.createElement('div');
+      boite.className = 'match';
+      ['a', 'b'].forEach(qui => {
+        const b = document.createElement('button');
+        b.className = 'joueur' + (match.gagnant === qui ? ' gagne' : '');
+        b.textContent = match[qui] || '…';
+        b.disabled = !match.a || !match.b;
+        b.addEventListener('click', () => choisir(t, m, qui));
+        boite.appendChild(b);
+      });
+      colonne.appendChild(boite);
+    });
+    zone.appendChild(colonne);
+  });
+  const finale = tours[tours.length - 1][0];
+  document.getElementById('champion').textContent = finale.gagnant ? '👑 Champion : ' + finale[finale.gagnant] : '';
+}
+
+document.getElementById('creer').addEventListener('click', creer);
+creer();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'piano', type: 'exemple', titre: 'Piano qui joue des notes',
+  mots: ['piano', 'clavier musical', 'notes de musique', 'jouer de la musique', 'instrument', 'synthetiseur', 'boite a sons'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon piano</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #1c1917; color: #fafaf9; font-family: system-ui, sans-serif; text-align: center; }
+  .piano { display: flex; justify-content: center; margin-top: 16px; }
+  .touche { width: 58px; height: 200px; margin: 0 2px; border: 0; border-radius: 0 0 10px 10px; background: #fff; color: #444; font-weight: 700; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 10px; cursor: pointer; user-select: none; touch-action: none; }
+  .touche small { color: #999; }
+  .touche.active { background: #fcd34d; transform: translateY(3px); }
+  select { font: inherit; padding: 6px 10px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div>
+  <h1>🎹 Mon piano</h1>
+  <label>Son : <select id="son"><option value="triangle">Doux</option><option value="square">Jeu vidéo</option><option value="sawtooth">Robot</option><option value="sine">Flûte</option></select></label>
+  <div class="piano" id="piano"></div>
+  <p>Clique sur les touches ou tape Q S D F G H J K</p>
+</div>
+<script>
+const NOTES = [
+  { nom: 'Do', frequence: 261.63, clavier: 'q' },
+  { nom: 'Ré', frequence: 293.66, clavier: 's' },
+  { nom: 'Mi', frequence: 329.63, clavier: 'd' },
+  { nom: 'Fa', frequence: 349.23, clavier: 'f' },
+  { nom: 'Sol', frequence: 392.0, clavier: 'g' },
+  { nom: 'La', frequence: 440.0, clavier: 'h' },
+  { nom: 'Si', frequence: 493.88, clavier: 'j' },
+  { nom: 'Do', frequence: 523.25, clavier: 'k' }
+];
+let audio = null;
+
+function jouer(note, bouton) {
+  if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = audio.createOscillator();
+  const volume = audio.createGain();
+  osc.type = document.getElementById('son').value;
+  osc.frequency.value = note.frequence;
+  volume.gain.setValueAtTime(0.3, audio.currentTime);
+  volume.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.8);
+  osc.connect(volume).connect(audio.destination);
+  osc.start();
+  osc.stop(audio.currentTime + 0.8);
+  bouton.classList.add('active');
+  setTimeout(() => bouton.classList.remove('active'), 150);
+}
+
+const piano = document.getElementById('piano');
+NOTES.forEach(note => {
+  const b = document.createElement('button');
+  b.className = 'touche';
+  b.innerHTML = note.nom + '<small>' + note.clavier.toUpperCase() + '</small>';
+  b.addEventListener('pointerdown', () => jouer(note, b));
+  note.bouton = b;
+  piano.appendChild(b);
+});
+document.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  const note = NOTES.find(n => n.clavier === e.key.toLowerCase());
+  if (note) jouer(note, note.bouton);
+});
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'pendu', type: 'exemple', titre: 'Jeu du pendu',
+  mots: ['pendu', 'deviner un mot', 'mot mystere', 'mot cache', 'lettres a deviner', 'hangman'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le pendu</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #fefce8; color: #422006; font-family: system-ui, sans-serif; text-align: center; }
+  .jeu { width: min(560px, 94vw); padding: 16px; }
+  svg { width: 180px; height: 180px; }
+  svg .partie { stroke: #422006; stroke-width: 4; fill: none; stroke-linecap: round; visibility: hidden; }
+  #mot { font-size: 34px; font-weight: 800; letter-spacing: 8px; margin: 12px 0; }
+  .lettres { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .lettres button { width: 38px; height: 42px; font: inherit; font-weight: 700; border: 0; border-radius: 8px; background: #facc15; cursor: pointer; }
+  .lettres button:disabled { background: #e7e5e4; color: #a8a29e; cursor: default; }
+  #message { font-size: 22px; font-weight: 800; min-height: 32px; margin: 12px 0; }
+  #rejouer { font: inherit; font-weight: 700; padding: 10px 20px; border: 0; border-radius: 10px; background: #422006; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="jeu">
+  <h1>Le pendu</h1>
+  <svg viewBox="0 0 180 180" aria-hidden="true">
+    <line class="partie" x1="20" y1="170" x2="120" y2="170"/>
+    <line class="partie" x1="50" y1="170" x2="50" y2="20"/>
+    <line class="partie" x1="50" y1="20" x2="130" y2="20"/>
+    <line class="partie" x1="130" y1="20" x2="130" y2="45"/>
+    <circle class="partie" cx="130" cy="60" r="15"/>
+    <line class="partie" x1="130" y1="75" x2="130" y2="120"/>
+    <line class="partie" x1="130" y1="90" x2="110" y2="105"/>
+    <line class="partie" x1="130" y1="90" x2="150" y2="105"/>
+    <line class="partie" x1="130" y1="120" x2="115" y2="150"/>
+    <line class="partie" x1="130" y1="120" x2="145" y2="150"/>
+  </svg>
+  <div id="mot"></div>
+  <div id="message"></div>
+  <div class="lettres" id="lettres"></div>
+  <p><button id="rejouer">Nouveau mot</button></p>
+</div>
+<script>
+const MOTS = ['ORDINATEUR', 'MANETTE', 'FESTIVAL', 'PLANETE', 'CHOCOLAT', 'DRAGON', 'TOURNOI', 'PIXEL', 'CLAVIER', 'CINEMA', 'GIRAFE', 'VACANCES'];
+const ERREURS_MAX = 10;
+let mot, trouvees, erreurs, fini;
+
+function nouvellePartie() {
+  mot = MOTS[Math.floor(Math.random() * MOTS.length)];
+  trouvees = new Set();
+  erreurs = 0;
+  fini = false;
+  document.getElementById('message').textContent = '';
+  document.querySelectorAll('.partie').forEach(p => { p.style.visibility = 'hidden'; });
+  const zone = document.getElementById('lettres');
+  zone.innerHTML = '';
+  for (const lettre of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+    const b = document.createElement('button');
+    b.textContent = lettre;
+    b.addEventListener('click', () => proposer(lettre, b));
+    zone.appendChild(b);
+  }
+  afficherMot();
+}
+
+function afficherMot() {
+  document.getElementById('mot').textContent = mot.split('').map(l => trouvees.has(l) ? l : '_').join('');
+}
+
+function proposer(lettre, bouton) {
+  if (fini) return;
+  bouton.disabled = true;
+  if (mot.includes(lettre)) {
+    trouvees.add(lettre);
+    afficherMot();
+    if (mot.split('').every(l => trouvees.has(l))) terminer('Bravo, tu as trouvé ! 🎉');
+  } else {
+    document.querySelectorAll('.partie')[erreurs].style.visibility = 'visible';
+    erreurs++;
+    if (erreurs >= ERREURS_MAX) terminer('Perdu ! Le mot était ' + mot);
+  }
+}
+
+function terminer(texte) {
+  fini = true;
+  document.getElementById('message').textContent = texte;
+  document.querySelectorAll('#lettres button').forEach(b => { b.disabled = true; });
+}
+
+document.addEventListener('keydown', e => {
+  const lettre = e.key.toUpperCase();
+  const bouton = [...document.querySelectorAll('#lettres button')].find(b => b.textContent === lettre);
+  if (bouton && !bouton.disabled) proposer(lettre, bouton);
+});
+document.getElementById('rejouer').addEventListener('click', nouvellePartie);
+nouvellePartie();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'taupe', type: 'exemple', titre: 'Tape-taupe (jeu de réflexes)',
+  mots: ['taupe', 'tape-taupe', 'reflexes', 'reflexe', 'cliquer vite', 'cibles', 'whack', 'rapidite'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tape-taupe</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #3f6212; color: #fff; font-family: system-ui, sans-serif; text-align: center; }
+  .infos { display: flex; gap: 24px; justify-content: center; font-size: 20px; font-weight: 800; margin-bottom: 14px; }
+  .terrain { display: grid; grid-template-columns: repeat(3, 100px); gap: 14px; justify-content: center; }
+  .trou { width: 100px; height: 100px; border: 0; border-radius: 50%; background: #422006; font-size: 52px; cursor: pointer; box-shadow: inset 0 8px 0 rgba(0,0,0,.3); }
+  #lancer { margin-top: 18px; font: inherit; font-weight: 800; font-size: 18px; padding: 12px 24px; border: 0; border-radius: 12px; background: #facc15; color: #3f6212; cursor: pointer; }
+</style>
+</head>
+<body>
+<div>
+  <h1>🔨 Tape-taupe</h1>
+  <div class="infos"><span>Score : <span id="score">0</span></span><span>Temps : <span id="temps">30</span> s</span></div>
+  <div class="terrain" id="terrain"></div>
+  <button id="lancer">Jouer</button>
+</div>
+<script>
+const terrain = document.getElementById('terrain');
+const trous = [];
+let score = 0, temps = 30, active = -1, horloge = null, apparition = null;
+
+for (let i = 0; i < 9; i++) {
+  const b = document.createElement('button');
+  b.className = 'trou';
+  b.setAttribute('aria-label', 'Trou ' + (i + 1));
+  b.addEventListener('pointerdown', () => taper(i));
+  terrain.appendChild(b);
+  trous.push(b);
+}
+
+function montrerTaupe() {
+  if (active >= 0) trous[active].textContent = '';
+  let i;
+  do { i = Math.floor(Math.random() * 9); } while (i === active);
+  active = i;
+  trous[i].textContent = '🐹';
+}
+
+function taper(i) {
+  if (i !== active || !horloge) return;
+  score++;
+  document.getElementById('score').textContent = score;
+  trous[i].textContent = '💥';
+  active = -1;
+  clearInterval(apparition);
+  apparition = setInterval(montrerTaupe, Math.max(400, 900 - score * 15));
+}
+
+function fin() {
+  clearInterval(horloge);
+  clearInterval(apparition);
+  horloge = null;
+  trous.forEach(t => { t.textContent = ''; });
+  document.getElementById('lancer').textContent = 'Rejouer (score : ' + score + ')';
+}
+
+document.getElementById('lancer').addEventListener('click', () => {
+  score = 0;
+  temps = 30;
+  document.getElementById('score').textContent = score;
+  document.getElementById('temps').textContent = temps;
+  clearInterval(horloge);
+  clearInterval(apparition);
+  horloge = setInterval(() => {
+    temps--;
+    document.getElementById('temps').textContent = temps;
+    if (temps <= 0) fin();
+  }, 1000);
+  apparition = setInterval(montrerTaupe, 900);
+  montrerTaupe();
+});
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'mot-de-passe', type: 'exemple', titre: 'Générateur de mots de passe',
+  mots: ['mot de passe', 'mots de passe', 'password', 'generateur', 'securite'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Générateur de mots de passe</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
+  .carte { width: min(460px, 92vw); padding: 24px; border-radius: 20px; background: #1e293b; }
+  h1 { margin: 0 0 16px; font-size: 24px; }
+  #resultat { font-family: ui-monospace, Consolas, monospace; font-size: 22px; padding: 14px; border-radius: 12px; background: #0b1220; overflow-wrap: anywhere; min-height: 30px; }
+  .force { height: 8px; border-radius: 4px; background: #334155; margin: 10px 0 16px; overflow: hidden; }
+  .force i { display: block; height: 100%; width: 0; transition: width .3s, background .3s; }
+  label { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  input[type=range] { flex: 1; }
+  .boutons { display: flex; gap: 8px; margin-top: 14px; }
+  button { flex: 1; font: inherit; font-weight: 700; padding: 12px; border: 0; border-radius: 12px; cursor: pointer; background: #22c55e; color: #052e16; }
+  #copier { background: #334155; color: #fff; }
+</style>
+</head>
+<body>
+<div class="carte">
+  <h1>🔐 Générateur de mots de passe</h1>
+  <div id="resultat"></div>
+  <div class="force"><i id="jauge"></i></div>
+  <label>Longueur : <input type="range" id="longueur" min="6" max="32" value="14"> <b id="valeur">14</b></label>
+  <label><input type="checkbox" id="majuscules" checked> Majuscules</label>
+  <label><input type="checkbox" id="chiffres" checked> Chiffres</label>
+  <label><input type="checkbox" id="symboles"> Symboles</label>
+  <div class="boutons"><button id="generer">Générer</button><button id="copier">Copier</button></div>
+</div>
+<script>
+function hasard(max) {
+  const tableau = new Uint32Array(1);
+  crypto.getRandomValues(tableau);
+  return tableau[0] % max;
+}
+
+function generer() {
+  const longueur = Number(document.getElementById('longueur').value);
+  let lettres = 'abcdefghijkmnopqrstuvwxyz';
+  if (document.getElementById('majuscules').checked) lettres += 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  if (document.getElementById('chiffres').checked) lettres += '23456789';
+  if (document.getElementById('symboles').checked) lettres += '!@#$%&*?-_+=';
+  let mdp = '';
+  for (let i = 0; i < longueur; i++) mdp += lettres[hasard(lettres.length)];
+  document.getElementById('resultat').textContent = mdp;
+  const bits = longueur * Math.log2(lettres.length);
+  const jauge = document.getElementById('jauge');
+  jauge.style.width = Math.min(100, bits) + '%';
+  jauge.style.background = bits < 50 ? '#ef4444' : bits < 75 ? '#f59e0b' : '#22c55e';
+}
+
+document.getElementById('longueur').addEventListener('input', e => {
+  document.getElementById('valeur').textContent = e.target.value;
+  generer();
+});
+document.querySelectorAll('input[type=checkbox]').forEach(c => c.addEventListener('change', generer));
+document.getElementById('generer').addEventListener('click', generer);
+document.getElementById('copier').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('resultat').textContent).then(() => {
+    document.getElementById('copier').textContent = 'Copié !';
+    setTimeout(() => { document.getElementById('copier').textContent = 'Copier'; }, 1200);
+  }).catch(() => {});
+});
+generer();
+</script>
+</body>
+</html>`,
+});
+
+SAVOIRS.push({
+  id: 'des', type: 'exemple', titre: 'Lancer de dés',
+  mots: ['lancer de des', 'lancer les des', 'lancer un de', 'des a jouer', 'de a six faces', 'jeu de des', 'yams'],
+  code: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lancer de dés</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #064e3b; color: #ecfdf5; font-family: system-ui, sans-serif; text-align: center; }
+  .des { display: flex; gap: 16px; justify-content: center; margin: 20px 0; min-height: 100px; }
+  .de { width: 90px; height: 90px; border-radius: 18px; background: #fff; color: #064e3b; font-size: 64px; line-height: 90px; box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+  .de.roule { animation: rouler .5s ease-out; }
+  @keyframes rouler { from { transform: rotate(-360deg) scale(.5); } to { transform: none; } }
+  select, button { font: inherit; font-weight: 700; padding: 10px 16px; border: 0; border-radius: 12px; }
+  button { background: #facc15; color: #064e3b; cursor: pointer; font-size: 18px; }
+  #total { font-size: 26px; font-weight: 800; }
+  #historique { opacity: .8; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div>
+  <h1>🎲 Lancer de dés</h1>
+  <label>Nombre de dés : <select id="nombre"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+  <div class="des" id="des"></div>
+  <div id="total"></div>
+  <p><button id="lancer">Lancer !</button></p>
+  <div id="historique"></div>
+</div>
+<script>
+const FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+const historique = [];
+
+function lancer() {
+  const nombre = Number(document.getElementById('nombre').value);
+  const zone = document.getElementById('des');
+  zone.innerHTML = '';
+  let total = 0;
+  for (let i = 0; i < nombre; i++) {
+    const valeur = Math.floor(Math.random() * 6) + 1;
+    total += valeur;
+    const de = document.createElement('div');
+    de.className = 'de roule';
+    de.textContent = FACES[valeur - 1];
+    de.title = String(valeur);
+    zone.appendChild(de);
+  }
+  document.getElementById('total').textContent = 'Total : ' + total;
+  historique.unshift(total);
+  document.getElementById('historique').textContent = 'Derniers lancers : ' + historique.slice(0, 8).join(', ');
+}
+
+document.getElementById('lancer').addEventListener('click', lancer);
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); lancer(); } });
+</script>
+</body>
+</html>`,
+});
+
 // ---------------------------------------------------------------------------
 // Les fiches : des astuces courtes qu'elle peut réutiliser.
 // ---------------------------------------------------------------------------
@@ -1710,6 +2695,132 @@ SAVOIRS.push({
 .bouton:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,.2); }
 /* Respecter les personnes qui n'aiment pas les animations */
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }`,
+});
+
+SAVOIRS.push({
+  id: 'dom', type: 'fiche', titre: 'Manipuler la page en JavaScript',
+  mots: ['bouton', 'clic', 'cliquer', 'afficher', 'changer le texte', 'element', 'queryselector', 'getelementbyid', 'addeventlistener', 'page web'],
+  code: `const titre = document.querySelector('h1');          // le premier <h1>
+const bouton = document.getElementById('mon-bouton');   // l'élément id="mon-bouton"
+titre.textContent = 'Nouveau titre';                    // changer le texte (sûr)
+titre.style.color = 'tomato';                           // changer le style
+titre.classList.add('actif');                           // ajouter une classe CSS
+titre.classList.toggle('cache');                        // l'enlever ou la remettre
+bouton.addEventListener('click', () => { alert('Clic !'); });
+// Créer un élément et l'ajouter à la page
+const li = document.createElement('li');
+li.textContent = 'Nouvelle ligne';
+document.querySelector('ul').appendChild(li);
+// Lire un champ de formulaire
+const valeur = document.querySelector('input').value;
+// Attention : un script placé dans <head> doit attendre la page :
+document.addEventListener('DOMContentLoaded', () => { /* ton code ici */ });`,
+});
+
+SAVOIRS.push({
+  id: 'tableaux', type: 'fiche', titre: 'Les tableaux (listes) en JavaScript',
+  mots: ['tableau', 'liste', 'array', 'trier', 'filtrer', 'chercher dans', 'parcourir', 'foreach', 'map', 'filter', 'push'],
+  code: `const fruits = ['pomme', 'banane'];
+fruits.push('kiwi');                         // ajouter à la fin
+fruits.length;                               // 3 éléments
+fruits[0];                                   // 'pomme' (on compte à partir de 0)
+fruits.includes('kiwi');                     // true
+fruits.indexOf('banane');                    // 1
+fruits.splice(1, 1);                         // retirer 1 élément à la position 1
+fruits.forEach((f, i) => console.log(i, f)); // parcourir
+const majuscules = fruits.map(f => f.toUpperCase());       // transformer
+const longs = fruits.filter(f => f.length > 4);            // garder certains
+const joueur = joueurs.find(j => j.nom === 'Léa');         // trouver le premier
+joueurs.sort((a, b) => b.points - a.points);               // trier du plus grand au plus petit
+const total = [3, 5, 2].reduce((somme, x) => somme + x, 0); // additionner : 10`,
+});
+
+SAVOIRS.push({
+  id: 'fetch-api', type: 'fiche', titre: 'Aller chercher des données sur internet (fetch)',
+  mots: ['api', 'fetch', 'donnees depuis internet', 'donnees en ligne', 'meteo', 'charger des donnees', 'requete http'],
+  code: `// fetch demande une page ou des données à un site. C'est « asynchrone » : on attend avec await.
+async function chercherWikipedia(mot) {
+  const url = 'https://fr.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(mot);
+  try {
+    const reponse = await fetch(url);
+    if (!reponse.ok) throw new Error('Page introuvable');
+    const donnees = await reponse.json();
+    return donnees.extract;                    // le résumé de l'article
+  } catch (erreur) {
+    return 'Oups : ' + erreur.message;
+  }
+}
+chercherWikipedia('Jupiter (planète)').then(texte => {
+  document.querySelector('#resultat').textContent = texte;
+});
+// Un site n'accepte d'être appelé depuis une autre page que s'il l'autorise (CORS).
+// Wikipédia l'autorise. Beaucoup d'API demandent aussi une clé : ne la mets jamais dans une page publique.`,
+});
+
+SAVOIRS.push({
+  id: 'erreurs', type: 'fiche', titre: 'Corriger les erreurs fréquentes',
+  mots: ['erreur', 'bug', 'marche pas', 'fonctionne pas', 'undefined', 'null', 'is not defined', 'is not a function', 'cannot read', 'typeerror', 'referenceerror', 'syntaxerror', 'corrige'],
+  code: `// « X is not defined » : la variable ou fonction X n'existe pas. Faute de frappe ? Déclarée plus bas ou dans une autre fonction ?
+// « Cannot read properties of null (reading 'addEventListener') » : querySelector/getElementById n'a rien trouvé.
+//    Vérifie que l'id existe dans le HTML et que le <script> est placé APRÈS l'élément (à la fin de <body>).
+// « Cannot read properties of undefined (reading 'x') » : l'objet n'existe pas encore.
+//    Ex. tableau[i].x avec i trop grand, ou un objet utilisé avant d'être créé.
+// « X is not a function » : X n'est pas une fonction (mauvais nom, ou tu as écrasé la variable).
+// « Unexpected token » / SyntaxError : parenthèse, accolade ou guillemet oublié.
+// Le jeu ne réagit pas au clavier : écoute sur document (document.addEventListener('keydown', ...)).
+// Le jeu va trop vite : utilise requestAnimationFrame ou setInterval, pas une boucle while.
+// Déboguer : console.log('ici', variable) pour voir ce qui se passe.`,
+});
+
+SAVOIRS.push({
+  id: 'mise-en-page', type: 'fiche', titre: 'Mise en page avec flexbox et grid',
+  mots: ['centrer', 'aligner', 'colonnes', 'mise en page', 'flexbox', 'flex', 'grid', 'grille', 'responsive', 'telephone', 'a cote'],
+  code: `/* Centrer au milieu de l'écran */
+body { min-height: 100vh; display: grid; place-items: center; margin: 0; }
+/* Des éléments côte à côte, avec un espace, qui passent à la ligne si besoin */
+.rangee { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: center; }
+/* Une grille de cartes qui s'adapte à la largeur */
+.grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+/* Une grille fixe de 3 colonnes (ex. morpion) */
+.plateau { display: grid; grid-template-columns: repeat(3, 90px); gap: 8px; }
+/* Sur téléphone (écran étroit) */
+@media (max-width: 600px) { .rangee { flex-direction: column; } }
+/* Ne jamais dépasser l'écran */
+img, canvas { max-width: 100%; height: auto; }`,
+});
+
+SAVOIRS.push({
+  id: 'canvas-dessin', type: 'fiche', titre: 'Dessiner sur un canvas',
+  mots: ['canvas', 'dessiner', 'rectangle', 'cercle', 'ligne', 'texte sur', 'image', 'couleur de fond'],
+  code: `const ctx = document.getElementById('jeu').getContext('2d');
+ctx.clearRect(0, 0, 400, 300);                  // tout effacer
+ctx.fillStyle = '#3b82f6';                      // couleur de remplissage
+ctx.fillRect(20, 20, 100, 60);                  // rectangle plein (x, y, largeur, hauteur)
+ctx.strokeStyle = '#111'; ctx.lineWidth = 3;
+ctx.strokeRect(150, 20, 100, 60);               // contour de rectangle
+ctx.beginPath(); ctx.arc(80, 180, 40, 0, Math.PI * 2); ctx.fill();   // cercle (x, y, rayon)
+ctx.beginPath(); ctx.moveTo(150, 150); ctx.lineTo(300, 250); ctx.stroke();   // ligne
+ctx.font = 'bold 24px system-ui'; ctx.textAlign = 'center';
+ctx.fillText('Score : 10', 200, 40);            // texte
+ctx.font = '40px system-ui'; ctx.fillText('🚀', 300, 150);   // un emoji comme personnage
+// Pour une image : const img = new Image(); img.onload = () => ctx.drawImage(img, x, y, l, h); img.src = '...';`,
+});
+
+SAVOIRS.push({
+  id: 'dates', type: 'fiche', titre: 'Dates et heures',
+  mots: ['date', 'heure', 'horloge', 'aujourd', 'calendrier', 'jours avant', 'anniversaire', 'temps restant'],
+  code: `const maintenant = new Date();
+maintenant.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+// → « dimanche 27 septembre 2026 »
+maintenant.toLocaleTimeString('fr-FR');          // → « 14:05:32 »
+const cible = new Date('2026-10-20T10:00:00');  // une date précise (année-mois-jour T heure)
+const ms = cible - maintenant;                   // différence en millisecondes
+const jours = Math.floor(ms / 86400000);
+const heures = Math.floor(ms / 3600000) % 24;
+const minutes = Math.floor(ms / 60000) % 60;
+const secondes = Math.floor(ms / 1000) % 60;
+const deux = n => String(n).padStart(2, '0');   // 5 → « 05 »
+setInterval(() => { /* mettre à jour l'affichage */ }, 1000);   // chaque seconde`,
 });
 
 SAVOIRS.push({

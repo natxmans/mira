@@ -53,6 +53,7 @@
   const etat = {
     modele: stock.lire('modele', 'rapide'),
     festival: stock.lire('festival', true),
+    recherche: stock.lire('recherche', true),
     messages: stock.lire('conversation', []), // [{ role: 'user' | 'assistant', content }]
     code: stock.lire('code', null), // { langage, contenu, page }
     webllm: null,
@@ -95,7 +96,77 @@ Règles :
     if (savoirs && savoirs.festival.length) {
       texte += '\n\nCe que tu sais du festival gaming 2K27 (programme encore provisoire) :\n' + savoirs.festival.map((s) => `${s.titre} : ${s.texte}`).join('\n');
     }
+    if (savoirs && savoirs.recherche && savoirs.recherche.length) {
+      texte += "\n\nVoici ce que tu viens de trouver en cherchant sur des sites fiables. Appuie-toi dessus pour répondre, dis de quel site vient l'information, et si ça ne répond pas à la question, dis-le honnêtement au lieu d'inventer :\n"
+        + savoirs.recherche.map((r) => `[${r.source} — ${r.titre}]\n${r.texte}`).join('\n\n');
+    }
     return texte;
+  }
+
+  // ---------------------------------------------------------------------------
+  // La recherche sur des sites fiables (recherche.js) : seulement quand c'est utile.
+  // ---------------------------------------------------------------------------
+  const MOTS_ERREUR = /(uncaught|typeerror|referenceerror|syntaxerror|rangeerror|is not defined|is not a function|cannot read|unexpected token)/i;
+  const PAPOTAGE = /^(salut|bonjour|coucou|bonsoir|merci|ok|d'accord|ca va|tu vas bien|comment tu vas|comment ca va|qui es-tu|tu es qui|comment tu t'appelles|tu fais quoi|au revoir)/;
+
+  function planDeRecherche(texte, savoirs) {
+    if (!etat.recherche || typeof RECHERCHE === 'undefined') return null;
+    const t = sansAccents(texte).trim();
+    const explicite = /\b(cherche|recherche|sur internet|sur le web|wikipedia|vikidia|wiktionnaire|mdn|stack overflow)\b/.test(t);
+    if (MOTS_ERREUR.test(texte)) return { erreur: true, mdn: RECHERCHE.pagesMDN(texte).length > 0 };
+    const mdn = RECHERCHE.pagesMDN(texte).length > 0;
+    const question = /\?\s*$/.test(t) || /^(qui|que|qu'|quoi|quel|quelle|quels|quelles|quand|ou |comment|pourquoi|combien|c'est quoi|c est quoi|explique|definition|definis|donne-moi la definition|que veut dire|que signifie|raconte|parle-moi|dis-moi)/.test(t);
+    const surElle = /\b(tu|toi|ton|ta|tes|mira)\b/.test(t) && !explicite;
+    const creation = !!savoirs.exemple || (VERBES_CREATION.test(t) && !question);
+    const plan = { wiki: false, definition: false, mdn: false, erreur: false };
+    if (mdn && (question || explicite)) plan.mdn = true;
+    if (!mdn && !MOTS_FESTIVAL.test(texte) && !PAPOTAGE.test(t) && !surElle && (explicite || (question && !creation))) plan.wiki = true;
+    if (plan.wiki && /(definition|definis|que veut dire|que signifie|sens du mot)/.test(t)) plan.definition = true;
+    return plan.wiki || plan.mdn ? plan : null;
+  }
+
+  async function lancerRecherche(plan, texte) {
+    const requete = RECHERCHE.motsCles(texte);
+    const taches = [];
+    if (plan.wiki) {
+      taches.push(RECHERCHE.chercherWiki('vikidia', requete, { intro: false, caracteres: 1400 }));
+      taches.push(RECHERCHE.chercherWiki('wikipedia', requete, { caracteres: 1200 }));
+      if (plan.definition) taches.push(RECHERCHE.chercherWiki('wiktionnaire', requete, { intro: false, caracteres: 900 }));
+    }
+    if (plan.mdn) taches.push(RECHERCHE.chercherMDN(texte, 2500));
+    if (plan.erreur) taches.push(RECHERCHE.chercherStackOverflow(texte, 1800));
+    const resultats = await Promise.allSettled(taches);
+    return {
+      trouves: resultats.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
+      echecs: resultats.filter((r) => r.status === 'rejected').length,
+    };
+  }
+
+  function sitesDuPlan(plan) {
+    const sites = [];
+    if (plan.wiki) sites.push('Vikidia', 'Wikipédia');
+    if (plan.definition) sites.push('Wiktionnaire');
+    if (plan.mdn) sites.push('MDN');
+    if (plan.erreur) sites.push('Stack Overflow');
+    return sites.join(', ');
+  }
+
+  function afficherSources(div, sources) {
+    const valides = (sources || []).filter((s) => /^https:\/\//.test(s.lien));
+    if (!valides.length) return;
+    const p = document.createElement('p');
+    p.className = 'note sources';
+    p.append('🔎 Sources : ');
+    valides.forEach((s, i) => {
+      if (i) p.append(' · ');
+      const a = document.createElement('a');
+      a.href = s.lien;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = `${s.source} — ${s.titre}`;
+      p.append(a);
+    });
+    div.append(p);
   }
 
   // On ne lui donne le programme du festival que si la conversation en parle :
@@ -112,11 +183,23 @@ Règles :
   const sansAccents = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const VERBES_CREATION = /\b(fais|fait|faire|cree|creer|ecris|ecrire|code|coder|programme|programmer|invente|genere|construis|je veux|j'aimerais|je voudrais)\b|\bun jeu\b|\bune page\b|\bun site\b|\bune appli|\bun outil\b/;
 
+  // Un mot compte seulement s'il est entier : « liste » ne doit pas trouver « listener ».
+  const motEntier = (texte, mot) => {
+    if (!/^[a-z0-9' -]+$/.test(mot)) return texte.includes(mot);
+    let i = texte.indexOf(mot);
+    while (i >= 0) {
+      const avant = texte[i - 1], apres = texte[i + mot.length];
+      if (!(avant && /[a-z0-9]/.test(avant)) && !(apres && /[a-z0-9]/.test(apres))) return true;
+      i = texte.indexOf(mot, i + 1);
+    }
+    return false;
+  };
+
   function pertinence(mots, texte) {
     let n = 0;
     for (const m of mots) {
-      const mot = sansAccents(m);
-      if (mot && texte.includes(mot)) n += mot.length >= 6 ? 2 : 1;
+      const mot = sansAccents(m).trim();
+      if (mot && motEntier(texte, mot)) n += mot.length >= 6 ? 2 : 1;
     }
     return n;
   }
@@ -127,7 +210,8 @@ Règles :
     if (typeof SAVOIRS !== 'undefined') {
       // Pour une simple modification (« rends-le plus rapide »), son dernier code suffit.
       const codeRecent = etat.messages.slice(-3, -1).some((m) => m.role === 'assistant' && m.content.includes('```'));
-      if (!codeRecent || VERBES_CREATION.test(texte)) {
+      // Pour corriger une erreur, elle repart de son propre code : pas d'exemple.
+      if (!MOTS_ERREUR.test(demande) && (!codeRecent || VERBES_CREATION.test(texte))) {
         const exemples = SAVOIRS.filter((s) => s.type === 'exemple')
           .map((s) => [s, pertinence(s.mots, texte)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
         if (exemples.length) choix.exemple = exemples[0][0];
@@ -150,6 +234,7 @@ Règles :
     if (s.exemple) noms.push(`l'exemple « ${s.exemple.titre} »`);
     for (const f of s.fiches) noms.push(`la fiche « ${f.titre} »`);
     if (s.festival.length) noms.push(s.festival.length === FESTIVAL_SECTIONS.length ? 'tout ce qu\'elle sait du festival 2K27' : 'le festival 2K27 (' + s.festival.map((x) => x.titre.toLowerCase()).join(', ') + ')');
+    if (s.recherche && s.recherche.length) noms.push('sa recherche sur ' + Array.from(new Set(s.recherche.map((r) => r.source))).join(', '));
     return noms;
   }
 
@@ -159,13 +244,16 @@ Règles :
   function construireMessages(savoirs) {
     const limite = (etat.contexte - maxReponse() - 64) * LETTRES_PAR_TOKEN;
     const derniere = etat.messages.length ? etat.messages[etat.messages.length - 1].content.length : 0;
-    const s = { exemple: savoirs.exemple, fiches: savoirs.fiches.slice(), festival: savoirs.festival.slice() };
+    const s = { exemple: savoirs.exemple, fiches: savoirs.fiches.slice(), festival: savoirs.festival.slice(), recherche: (savoirs.recherche || []).slice() };
     let systeme = consignes(s);
-    // Si c'est trop long, on retire d'abord les fiches, puis les sujets du festival les moins utiles, puis l'exemple.
+    // Si c'est trop long, on retire d'abord les fiches, puis les sujets du festival les moins utiles,
+    // puis les résultats de recherche en trop, puis l'exemple.
     while (systeme.length + derniere + 1500 > limite) {
       if (s.fiches.length) s.fiches.pop();
       else if (s.festival.length > 1) s.festival.pop();
+      else if (s.recherche.length > 1) s.recherche.pop();
       else if (s.exemple) s.exemple = null;
+      else if (s.recherche.length) s.recherche.pop();
       else if (s.festival.length) s.festival.pop();
       else break;
       systeme = consignes(s);
@@ -245,17 +333,22 @@ Règles :
       try {
         return await creerMoteur(id, suivi, options);
       } catch (e) {
-        if (essai >= 3 || !/network|fetch|Cache\.add/i.test(String((e && e.message) || e))) throw e;
-        progression(0, `Petite coupure de connexion, je reprends le téléchargement (essai ${essai + 1} sur 3)…`);
-        await new Promise((r) => setTimeout(r, 2000 * essai));
+        if (essai >= 4 || !/network|fetch|Cache\.add/i.test(String((e && e.message) || e))) throw e;
+        progression(0, `Petite coupure de connexion, je reprends le téléchargement (essai ${essai + 1} sur 4)…`);
+        await new Promise((r) => setTimeout(r, 2000 * 2 ** (essai - 1)));
       }
     }
   }
 
   // Le modèle tourne dans un « Worker » pour ne pas figer la page. Si le navigateur
   // refuse de créer ce Worker, il tourne directement dans la page.
+  // Le grand cerveau est rangé dans IndexedDB : le cache classique du navigateur
+  // refuse parfois les téléchargements de Hugging Face (« Cache.add() network error »).
+  const configuration = () => Object.assign({}, etat.webllm.prebuiltAppConfig, { cacheBackend: 'indexeddb' });
+
   async function creerMoteur(id, suivi, options) {
     const webllm = etat.webllm;
+    const reglages = { initProgressCallback: suivi, appConfig: configuration() };
     let travail = null;
     try {
       const source = `import { WebWorkerMLCEngineHandler } from '${WEBLLM}';\nconst gestion = new WebWorkerMLCEngineHandler();\nself.onmessage = (m) => gestion.onmessage(m);`;
@@ -269,13 +362,13 @@ Règles :
       });
       panne.catch(() => {});
       try {
-        return await Promise.race([webllm.CreateWebWorkerMLCEngine(travail, id, { initProgressCallback: suivi }, options), panne]);
+        return await Promise.race([webllm.CreateWebWorkerMLCEngine(travail, id, reglages, options), panne]);
       } catch (e) {
         travail.terminate();
         if (!e.ouvrier) throw e;
       }
     }
-    return webllm.CreateMLCEngine(id, { initProgressCallback: suivi }, options);
+    return webllm.CreateMLCEngine(id, reglages, options);
   }
 
   function reveiller() {
@@ -295,7 +388,19 @@ Règles :
           etat.webllm = await import(WEBLLM);
         }
         const id = idPour(etat.modele, gpu.f16);
-        const suivi = (p) => progression(p.progress, traduire(p.text, p.progress));
+        // On demande au navigateur de ne pas effacer son grand cerveau quand il manque de place.
+        try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) { /* rien */ }
+        let efface = false;
+        const suivi = (p) => {
+          let texte = traduire(p.text, p.progress);
+          // Elle croyait l'avoir déjà, mais il faut le retélécharger : le navigateur l'avait effacé.
+          if (/Fetching param cache/.test(p.text) && stock.lire('telecharge.' + id, false)) {
+            efface = true;
+            stock.ecrire('telecharge.' + id, false);
+          }
+          if (efface) texte = 'Ton navigateur avait effacé mon grand cerveau pour faire de la place, je le retélécharge. ' + texte;
+          progression(p.progress, texte);
+        };
         let moteur;
         try {
           moteur = await creerAvecEssais(id, suivi, { context_window_size: CONTEXTE_VOULU });
@@ -547,6 +652,7 @@ Règles :
           n.textContent = '📚 Elle s\'est aidée de ' + m.aides.join(', ') + '.';
           div.append(n);
         }
+        afficherSources(div, m.sources);
       }
     }
     $('#idees').hidden = etat.messages.length > 0;
@@ -637,7 +743,23 @@ Règles :
       if (suivre) defiler();
       codeEnDirect(reponse);
     };
-    const preparation = construireMessages(choisirSavoirs(texte));
+    const savoirs = choisirSavoirs(texte);
+    const plan = planDeRecherche(texte, savoirs);
+    let rechercheRatee = false;
+    if (plan) {
+      const sites = sitesDuPlan(plan);
+      majEtat(`${nomIA()} cherche sur ${sites}…`);
+      corps.textContent = '';
+      const p = document.createElement('p');
+      p.className = 'curseur';
+      p.textContent = `🔎 Je cherche sur ${sites}…`;
+      corps.append(p);
+      const trouve = await lancerRecherche(plan, texte);
+      savoirs.recherche = trouve.trouves;
+      rechercheRatee = !trouve.trouves.length;
+    }
+    const preparation = construireMessages(savoirs);
+    const sources = preparation.utilises.recherche.map((r) => ({ source: r.source, titre: r.titre, lien: r.lien }));
     const aides = nomsDesSavoirs(preparation.utilises);
     if (aides.length) majEtat(`${nomIA()} lit ${aides.join(', ')}…`);
     try {
@@ -665,7 +787,7 @@ Règles :
       if (!reponse) reponse = "Oups, j'ai eu un problème : " + ((e && e.message) || e);
     }
     const propre = reponse.trim() || '(elle n\'a rien répondu)';
-    etat.messages.push({ role: 'assistant', content: propre, aides });
+    etat.messages.push({ role: 'assistant', content: propre, aides, sources });
     stock.ecrire('conversation', etat.messages.slice(-40));
     rendre(corps, propre, true);
     document.removeEventListener('visibilitychange', surCache);
@@ -676,6 +798,8 @@ Règles :
       div.append(n);
     };
     if (aides.length) note('📚 Elle s\'est aidée de ' + aides.join(', ') + '.');
+    afficherSources(div, sources);
+    if (plan && rechercheRatee) note('🔎 Sa recherche n\'a rien donné (pas de résultat ou pas de connexion) : elle a répondu avec ce qu\'elle sait déjà.');
     if (fin === 'length') note('Sa réponse était trop longue et a été coupée. Demande-lui une version plus courte, ou de continuer.');
     if (cachee) note('Astuce : laisse cet onglet au premier plan pendant qu\'elle écrit. Quand il est caché, le navigateur la ralentit beaucoup.');
     const duree = Math.round((performance.now() - debut) / 1000);
@@ -880,7 +1004,7 @@ Règles :
 
   // Pour vérifier la recherche dans sa bibliothèque sans carte graphique : index.html?test
   if (/[?&]test\b/.test(location.search)) {
-    window.miraTest = { etat, choisirSavoirs, construireMessages, nomsDesSavoirs };
+    window.miraTest = { etat, choisirSavoirs, construireMessages, nomsDesSavoirs, planDeRecherche, lancerRecherche };
   }
 
   function demarrer() {
@@ -907,6 +1031,9 @@ Règles :
     const festival = $('#avec-festival');
     festival.checked = !!etat.festival;
     festival.addEventListener('change', () => { etat.festival = festival.checked; stock.ecrire('festival', etat.festival); });
+    const recherche = $('#avec-recherche');
+    recherche.checked = !!etat.recherche;
+    recherche.addEventListener('change', () => { etat.recherche = recherche.checked; stock.ecrire('recherche', etat.recherche); });
 
     afficherSavoirs();
     afficherIdees();

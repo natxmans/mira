@@ -39,6 +39,7 @@ function installerCerveau() {
       .replace(/[“”„]/g, '"')
       .replace(/[–—−]/g, '-')
       .replace(/…/g, '...')
+      .replace(/ſ/g, 's') // le « s long » des vieux livres
       .replace(/[\t   ]/g, ' ');
     let sortie = '';
     for (const c of t) {

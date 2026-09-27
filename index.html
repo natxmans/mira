@@ -220,6 +220,10 @@
   .lecons li { display: flex; gap: 10px; align-items: center; border: 1px solid var(--bord); border-radius: 10px; padding: 6px 6px 6px 12px; font-size: 14px; }
   .lecons li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .lecons li em { color: var(--doux); font-style: normal; }
+  .champ-livres { flex: 1; min-width: 180px; border: 1px solid var(--bord); background: var(--surface); border-radius: 12px; padding: 9px 12px; }
+  .champ-livres:focus { outline: none; border-color: var(--accent); }
+  .lecons.resultats-livres:empty::before { content: none; }
+  .resultats-livres li small { display: block; color: var(--doux); font-size: 13px; }
   .lecons:empty::before { content: "Aucune leçon pour l'instant. Dans la discussion, clique sur « Lui apprendre une meilleure réponse » sous une réponse ratée."; color: var(--doux); font-size: 14px; }
 
   .tete { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
@@ -303,6 +307,7 @@
   .corps code.enligne { font-family: var(--mono); font-size: 13.5px; background: var(--surface); border: 1px solid var(--bord); border-radius: 6px; padding: 0 5px; }
   .corps .curseur::after { content: "▍"; color: var(--accent); animation: pulse 1s infinite; }
   .note { font-size: 13px; color: var(--doux); margin-top: 6px; }
+  .note.sources a { color: var(--accent); font-weight: 700; overflow-wrap: anywhere; }
   .bloc-code { margin: 8px 0; border: 1px solid var(--bord); border-radius: 12px; overflow: hidden; background: var(--surface); }
   .bloc-entete { display: flex; align-items: center; gap: 6px; padding: 6px 8px 6px 12px; border-bottom: 1px solid var(--bord); font-size: 12px; font-weight: 800; color: var(--doux); text-transform: uppercase; letter-spacing: .04em; }
   .bloc-entete span { flex: 1; }
@@ -433,6 +438,7 @@
         <div class="etat-cerveau">
           <span id="etat-grand-cerveau">Grand cerveau endormi</span>
           <label title="Ajoute le programme du festival 2K27 à ce qu'elle sait"><input type="checkbox" id="avec-festival"> Elle connaît le festival 2K27 (quand tu en parles)</label>
+          <label title="Vikidia, Wikipédia, Wiktionnaire, MDN Web Docs et Stack Overflow. Seuls les mots de ta question leur sont envoyés."><input type="checkbox" id="avec-recherche"> Elle cherche sur des sites fiables quand c'est utile</label>
           <button class="lien" type="button" id="changer-cerveau" hidden>Changer de taille</button>
         </div>
         <details class="savoirs" id="savoirs">
@@ -440,6 +446,7 @@
           <p class="sous">Avant de répondre, elle cherche ici ce qui ressemble à ta demande et le relit. Clique sur un exemple pour le voir tourner.</p>
           <div class="savoirs-liste" id="savoirs-exemples"></div>
           <p class="sous" id="savoirs-fiches"></p>
+          <p class="sous"><strong>Sur internet</strong>, elle ne consulte que des sites fiables : Vikidia et Wikipédia pour les connaissances, le Wiktionnaire pour les définitions, MDN Web Docs pour le HTML, le CSS et le JavaScript, et Stack Overflow pour les messages d'erreur. Elle cherche quand tu poses une question ou quand son code plante, et elle te montre ses sources. Seuls les mots de ta question sont envoyés à ces sites.</p>
         </details>
       </article>
 
@@ -541,6 +548,20 @@
         <button class="bouton principal" type="button" id="utiliser" disabled>Utiliser ce texte</button>
         <button class="bouton" type="button" id="annuler-textes" disabled>Annuler les changements</button>
       </div>
+      <h3>Lui donner encore plus à lire</h3>
+      <p class="sous" style="margin-bottom:8px">Cherche un livre libre de droits (fables, contes, romans anciens sur Wikisource) ou un article (Vikidia, Wikipédia), puis ajoute-le à ses textes. Plus elle lit, plus elle apprend… mais plus son entraînement est long.</p>
+      <form class="boutons" id="form-livres" autocomplete="off">
+        <select class="bouton" id="source-livres" aria-label="Où chercher">
+          <option value="wikisource">Wikisource : livres, fables, contes</option>
+          <option value="vikidia">Vikidia : articles pour les jeunes</option>
+          <option value="wikipedia">Wikipédia : articles</option>
+        </select>
+        <input id="recherche-livres" class="champ-livres" placeholder="Ex : La Fontaine, Perrault, les volcans…" aria-label="Que chercher">
+        <button class="bouton" type="submit">Chercher</button>
+      </form>
+      <p class="compteur" id="etat-livres"></p>
+      <ul class="lecons resultats-livres" id="resultats-livres"></ul>
+
       <h3>Tes leçons</h3>
       <p class="sous" style="margin-bottom:8px">Les bonnes réponses que tu lui as apprises dans la discussion. Elle les révise plus souvent que le reste.</p>
       <ul class="lecons" id="lecons"></ul>
@@ -603,7 +624,7 @@
 
   </div>
 
-  <footer>Tes conversations et ton code ne quittent jamais ton ordinateur. Seul le grand cerveau est téléchargé une fois, depuis Hugging Face.</footer>
+  <footer>Tes conversations et ton code restent sur ton ordinateur. Le grand cerveau est téléchargé une fois depuis Hugging Face, et quand elle fait une recherche, seuls les mots de ta question sont envoyés aux sites fiables consultés.</footer>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -612,6 +633,7 @@
 <script src="textes.js"></script>
 <script src="festival-resume.js"></script>
 <script src="savoirs.js"></script>
+<script src="recherche.js"></script>
 <script src="app.js"></script>
 <script src="atelier.js"></script>
 </body>
