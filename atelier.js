@@ -168,8 +168,22 @@ Règles :
     if (/WebGPU|carte graphique/.test(t) && /[éà]/.test(t)) return t;
     if (/memory|OOM|allocat|device.?lost|DeviceLost/i.test(t)) return "Ta carte graphique n'a pas assez de mémoire pour ce cerveau. Choisis une taille plus petite, ferme les autres onglets et réessaie.";
     if (/quota|storage/i.test(t)) return "Il n'y a pas assez de place pour le télécharger. Libère de l'espace sur ton ordinateur ou choisis une taille plus petite.";
-    if (/fetch|network/i.test(t)) return 'Le téléchargement a échoué. Vérifie ta connexion internet et réessaie : ce qui est déjà téléchargé est gardé.';
+    if (/fetch|network/i.test(t)) return `Le téléchargement a échoué plusieurs fois. Vérifie ta connexion internet et réessaie : ce qui est déjà téléchargé est gardé. (Détail : ${t.slice(0, 160)})`;
     return "Oups, elle n'a pas pu se réveiller : " + t;
+  }
+
+  // Hugging Face coupe parfois un téléchargement : on réessaie tout seul, sans perdre
+  // les morceaux déjà enregistrés.
+  async function creerAvecEssais(id, suivi, options) {
+    for (let essai = 1; ; essai++) {
+      try {
+        return await creerMoteur(id, suivi, options);
+      } catch (e) {
+        if (essai >= 3 || !/network|fetch|Cache\.add/i.test(String((e && e.message) || e))) throw e;
+        progression(0, `Petite coupure de connexion, je reprends le téléchargement (essai ${essai + 1} sur 3)…`);
+        await new Promise((r) => setTimeout(r, 2000 * essai));
+      }
+    }
   }
 
   // Le modèle tourne dans un « Worker » pour ne pas figer la page. Si le navigateur
@@ -218,12 +232,12 @@ Règles :
         const suivi = (p) => progression(p.progress, traduire(p.text, p.progress));
         let moteur;
         try {
-          moteur = await creerMoteur(id, suivi, { context_window_size: CONTEXTE_VOULU });
+          moteur = await creerAvecEssais(id, suivi, { context_window_size: CONTEXTE_VOULU });
           etat.contexte = CONTEXTE_VOULU;
         } catch (e) {
           // Si la grande mémoire de travail ne passe pas, on réessaie avec celle par défaut.
           if (!/context|window|memory|buffer|size|limit/i.test(String(e && e.message))) throw e;
-          moteur = await creerMoteur(id, suivi, {});
+          moteur = await creerAvecEssais(id, suivi, {});
           etat.contexte = 4096;
         }
         stock.ecrire('telecharge.' + id, true);
@@ -511,8 +525,15 @@ Règles :
       }
     }
     etat.messages.push({ role: 'user', content: texte });
+    // L'ancien aperçu s'arrête pendant qu'elle écrit : ça lui laisse toute la puissance.
+    enleverErreur();
+    etat.erreurMontree = true;
+    $('#cadre').srcdoc = '';
 
     let reponse = '', fin = null, vitesse = null, prevu = false;
+    let cachee = document.hidden;
+    const surCache = () => { if (document.hidden) cachee = true; };
+    document.addEventListener('visibilitychange', surCache);
     const debut = performance.now();
     majEtat(`${nomIA()} réfléchit…`);
     const dessiner = () => {
@@ -550,12 +571,15 @@ Règles :
     etat.messages.push({ role: 'assistant', content: propre });
     stock.ecrire('conversation', etat.messages.slice(-40));
     rendre(corps, propre, true);
-    if (fin === 'length') {
+    document.removeEventListener('visibilitychange', surCache);
+    const note = (texte) => {
       const n = document.createElement('p');
       n.className = 'note';
-      n.textContent = 'Sa réponse était trop longue et a été coupée. Demande-lui une version plus courte, ou de continuer.';
+      n.textContent = texte;
       div.append(n);
-    }
+    };
+    if (fin === 'length') note('Sa réponse était trop longue et a été coupée. Demande-lui une version plus courte, ou de continuer.');
+    if (cachee) note('Astuce : laisse cet onglet au premier plan pendant qu\'elle écrit. Quand il est caché, le navigateur la ralentit beaucoup.');
     const duree = Math.round((performance.now() - debut) / 1000);
     majEtat();
     if (vitesse) $('#etat-grand-cerveau').textContent += ` · ${duree} s, ${Math.round(vitesse)} mots/s`;
@@ -794,6 +818,13 @@ Règles :
       if (etat.messages.length && !confirm('Commencer une nouvelle conversation ? Celle-ci sera effacée.')) return;
       etat.messages = [];
       stock.ecrire('conversation', []);
+      etat.code = null;
+      stock.ecrire('code', null);
+      enleverErreur();
+      $('#cadre').srcdoc = '';
+      $('#code-brut code').textContent = '';
+      for (const id of ['#recharger', '#copier', '#telecharger-code', '#plein-ecran']) $(id).disabled = true;
+      choisirVue(false);
       afficherFil();
       zone.focus();
     });
