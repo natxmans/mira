@@ -8,11 +8,14 @@
  *   - Le grand cerveau n'est pas géré ici : WebLLM le range lui-même dans IndexedDB.
  *   - La recherche sur les sites fiables n'est jamais gardée en copie.
  */
-const VERSION = 'mira-v1';
+const VERSION = 'mira-v2';
 const FICHIERS = [
-  './', 'index.html', 'cerveau.js', 'textes.js', 'festival-resume.js', 'savoirs.js', 'recherche.js',
-  'app.js', 'atelier.js', 'outils.js', 'manifest.webmanifest', 'icone-192.png', 'icone-512.png',
+  './', 'index.html', 'admin.html', 'style.css', 'cerveau.js', 'textes.js', 'festival-resume.js', 'savoirs.js',
+  'recherche.js', 'app.js', 'atelier.js', 'outils.js', 'admin.js', 'visiteur.js', 'manifest.webmanifest',
+  'icone-192.png', 'icone-512.png',
 ];
+// mira-public.json (ce que tu publies pour les visiteurs) passe par la règle « en ligne d'abord » :
+// il est gardé en copie dès qu'il a été lu une fois.
 const BIBLIOTHEQUES = ['https://cdn.jsdelivr.net/', 'https://cdnjs.cloudflare.com/', 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/'];
 
 self.addEventListener('install', (e) => {

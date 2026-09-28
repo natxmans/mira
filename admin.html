@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mira · panneau admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Mira, une IA qui code pour toi et qui tourne entièrement sur ton ordinateur, avec un petit cerveau écrit de zéro que tu entraînes toi-même.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236a4cff'/%3E%3Ccircle cx='11' cy='13' r='3' fill='white'/%3E%3Ccircle cx='21' cy='13' r='3' fill='white'/%3E%3Cpath d='M10 21q6 5 12 0' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#6a4cff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-mode="admin" class="verrouille">
+<div class="verrou" id="verrou" role="dialog" aria-modal="true" aria-labelledby="verrou-titre">
+  <form class="verrou-boite" id="verrou-form" autocomplete="off">
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 34 34"><g class="oeil"><circle cx="11" cy="14" r="3.4" fill="#fff"/><circle cx="23" cy="14" r="3.4" fill="#fff"/></g><path d="M10 22.5q7 5.5 14 0" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg></div>
+    <h1 id="verrou-titre">Panneau admin</h1>
+    <p id="verrou-texte">Chargement…</p>
+    <input type="password" id="verrou-code" autocomplete="off" aria-label="Code secret" placeholder="Ton code secret">
+    <input type="password" id="verrou-confirmation" autocomplete="off" aria-label="Retape le code" placeholder="Retape-le" hidden>
+    <p class="verrou-erreur" id="verrou-erreur" role="alert"></p>
+    <button class="bouton principal" type="submit" id="verrou-valider">Entrer</button>
+    <p class="verrou-aide">Raccourci : <kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>Q</kbd> pour verrouiller ou déverrouiller. <a href="./">Aller à la page des visiteurs</a></p>
+  </form>
+</div>
+<div class="page">
+
+  <header class="entete">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 34 34"><g class="oeil"><circle cx="11" cy="14" r="3.4" fill="#fff"/><circle cx="23" cy="14" r="3.4" fill="#fff"/></g><path d="M10 22.5q7 5.5 14 0" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>
+    </div>
+    <div class="titre">
+      <input id="nom" maxlength="24" spellcheck="false" autocomplete="off" title="Clique pour renommer ton IA" aria-label="Nom de ton IA">
+      <p>Une IA qui code pour toi, avec un petit cerveau écrit de zéro. Tout se passe sur ton ordinateur.</p>
+    </div>
+    <div class="outils-entete">
+      <button class="bouton petit" type="button" id="installer" hidden title="Installer Mira comme une application sur cet ordinateur">Installer</button>
+      <a class="bouton petit" href="./" target="_blank" rel="noopener">Page des visiteurs ↗</a>
+      <button class="bouton petit" type="button" id="verrouiller" title="Ctrl + Maj + Q">Verrouiller</button>
+      <button class="bouton petit" type="button" id="bouton-guide">Guide</button>
+      <button class="bouton petit" type="button" id="bouton-theme" title="Changer le thème">Thème : auto</button>
+      <span class="pastille" id="pastille" title="État de l'entraînement du petit cerveau"><i></i><span>En pause</span></span>
+    </div>
+  </header>
+
+  <dialog class="guide" id="guide" aria-labelledby="guide-titre">
+    <div class="guide-entete">
+      <h2 id="guide-titre">Guide rapide</h2>
+      <button class="bouton petit" type="button" id="fermer-guide">Fermer</button>
+    </div>
+    <h3>Bien lui demander</h3>
+    <ul>
+      <li><strong>Une chose à la fois.</strong> « Un jeu du serpent avec un score », puis « ajoute des murs », puis « rends-le plus rapide ».</li>
+      <li><strong>Sois précis·e</strong> sur ce que tu veux voir : couleurs, règles, boutons, textes.</li>
+      <li>Pour <strong>changer son code</strong>, dis ce qui ne va pas : « le serpent traverse les murs, il doit perdre ».</li>
+      <li>Si son code plante, clique sur <strong>« Lui demander de corriger »</strong>, ou laisse la correction automatique le faire.</li>
+    </ul>
+    <h3>Pour qu'elle aille vite</h3>
+    <ul>
+      <li>Laisse l'onglet <strong>au premier plan</strong> pendant qu'elle écrit : caché, le navigateur la ralentit beaucoup.</li>
+      <li>La taille « Rapide » suffit pour les petits jeux ; « Plus douée » fait moins d'erreurs mais prend plus de temps.</li>
+    </ul>
+    <h3>Les outils de l'aperçu</h3>
+    <ul>
+      <li><strong>Code</strong> : tu peux le modifier toi-même, puis cliquer sur « Relancer ».</li>
+      <li><strong>Console</strong> : les messages et les erreurs du programme, pour comprendre ce qui se passe.</li>
+      <li><strong>Mes créations</strong> (sous l'Atelier) : tout ce qu'elle a créé est gardé. « Garder comme exemple » lui apprend à s'en inspirer.</li>
+    </ul>
+    <h3>Ce qu'elle ne sait pas faire</h3>
+    <ul>
+      <li>Elle est bien plus petite que les grandes IA en ligne : pour les gros projets, avance par petites étapes.</li>
+      <li>Elle ne peut pas créer de vraies images, ni publier un site à ta place.</li>
+      <li>Elle peut se tromper, même quand elle cite une source : vérifie les informations importantes.</li>
+    </ul>
+    <h3>Raccourcis</h3>
+    <ul>
+      <li><kbd>Entrée</kbd> envoie, <kbd>Maj</kbd> + <kbd>Entrée</kbd> va à la ligne, <kbd>Échap</kbd> ferme ce guide.</li>
+    </ul>
+  </dialog>
+
+  <nav class="vues" role="tablist" aria-label="Espaces">
+    <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="true">Atelier <small>· elle code</small></button>
+    <button role="tab" id="onglet-labo" aria-controls="vue-labo" aria-selected="false" tabindex="-1">Laboratoire <small>· son petit cerveau</small></button>
+    <button role="tab" id="onglet-publication" aria-controls="vue-publication" aria-selected="false" tabindex="-1">Publication <small>· pour les visiteurs</small></button>
+  </nav>
+
+  <div class="vue" id="vue-atelier" role="tabpanel" aria-labelledby="onglet-atelier">
+    <div class="atelier">
+      <article class="carte conversation">
+        <div class="entete-carte">
+          <div>
+            <h2 id="titre-atelier">Demande-lui ce que tu veux coder</h2>
+            <p class="sous">Un jeu, un site, un outil pour le festival… Elle écrit le code et tu vois le résultat à droite.</p>
+          </div>
+          <button class="bouton petit" type="button" id="nouvelle-conversation">Nouvelle conversation</button>
+        </div>
+
+        <div class="reveil" id="reveil">
+          <p>Pour coder, <strong id="nom-reveil">Mira</strong> utilise un grand cerveau déjà entraîné (le modèle open source <strong>Qwen2.5-Coder</strong>). Il se télécharge une seule fois, puis il tourne sur ta carte graphique, sans internet ni compte. Choisis sa taille :</p>
+          <div class="modeles" id="modeles" role="radiogroup" aria-label="Taille du grand cerveau"></div>
+          <button class="bouton principal" type="button" id="reveiller">Réveiller Mira</button>
+          <div class="progression" id="progression" hidden><i></i></div>
+          <p id="progression-texte" hidden></p>
+          <p class="alerte" id="alerte-gpu" hidden></p>
+        </div>
+
+        <div class="fil" id="fil" aria-live="polite"></div>
+        <div class="idees" id="idees"></div>
+        <form class="demande" id="demande" autocomplete="off">
+          <textarea id="texte-demande" rows="2" placeholder="Ex : fais-moi un jeu du serpent avec un score" aria-label="Ta demande"></textarea>
+          <button class="bouton" type="button" id="dicter" hidden title="Dicter ta demande (la voix est transformée en texte par le service de reconnaissance vocale du navigateur)" aria-label="Dicter">🎤</button>
+          <button class="bouton principal" type="submit" id="envoyer">Envoyer</button>
+          <button class="bouton" type="button" id="arreter" hidden>Stop</button>
+        </form>
+        <div class="etat-cerveau">
+          <span id="etat-grand-cerveau">Grand cerveau endormi</span>
+          <label class="reglage-admin" title="Ajoute le programme du festival 2K27 à ce qu'elle sait"><input type="checkbox" id="avec-festival"> Elle connaît le festival 2K27 (quand tu en parles)</label>
+          <label class="reglage-admin" title="Vikidia, Wikipédia, Wiktionnaire, MDN Web Docs et Stack Overflow. Seuls les mots de ta question leur sont envoyés."><input type="checkbox" id="avec-recherche"> Elle cherche sur des sites fiables quand c'est utile</label>
+          <label class="reglage-admin" title="Si son code plante dès le lancement, elle essaie une fois de le corriger toute seule"><input type="checkbox" id="auto-correction"> Elle corrige toute seule ses erreurs (1 essai)</label>
+          <label class="reglage-admin" title="Elle lit ses réponses à voix haute (voix de ton ordinateur)"><input type="checkbox" id="lecture-auto"> Elle lit ses réponses à voix haute</label>
+          <button class="lien" type="button" id="changer-cerveau" hidden>Changer de taille</button>
+        </div>
+        <details class="savoirs" id="espace">
+          <summary>Espace disque</summary>
+          <p class="sous" id="espace-infos">…</p>
+          <div class="savoirs-liste" id="espace-modeles"></div>
+        </details>
+        <details class="savoirs" id="savoirs">
+          <summary id="savoirs-titre">Ce qu'elle sait</summary>
+          <p class="sous">Avant de répondre, elle cherche ici ce qui ressemble à ta demande et le relit. Clique sur un exemple pour le voir tourner.</p>
+          <div class="savoirs-liste" id="savoirs-exemples"></div>
+          <p class="sous" id="savoirs-fiches"></p>
+          <p class="sous"><strong>Sur internet</strong>, elle ne consulte que des sites fiables : Vikidia et Wikipédia pour les connaissances, le Wiktionnaire pour les définitions, MDN Web Docs pour le HTML, le CSS et le JavaScript, et Stack Overflow pour les messages d'erreur. Elle cherche quand tu poses une question ou quand son code plante, et elle te montre ses sources. Seuls les mots de ta question sont envoyés à ces sites.</p>
+        </details>
+      </article>
+
+      <article class="carte apercu" aria-label="Résultat">
+        <div class="apercu-barre">
+          <div class="modes" role="group" aria-label="Affichage">
+            <button type="button" id="voir-apercu" aria-pressed="true">Aperçu</button>
+            <button type="button" id="voir-code" aria-pressed="false">Code</button>
+            <button type="button" id="voir-console" aria-pressed="false">Console <span id="compte-console"></span></button>
+          </div>
+          <span class="espace"></span>
+          <button class="bouton petit" type="button" id="recharger" disabled>Relancer</button>
+          <button class="bouton petit" type="button" id="copier" disabled>Copier</button>
+          <button class="bouton petit" type="button" id="telecharger-code" disabled>Télécharger</button>
+          <button class="bouton petit" type="button" id="plein-ecran" disabled>Plein écran</button>
+        </div>
+        <div class="apercu-corps">
+          <iframe id="cadre" title="Aperçu du code de Mira" sandbox="allow-scripts allow-modals allow-forms allow-pointer-lock" hidden></iframe>
+          <pre id="code-brut" hidden><code contenteditable="plaintext-only" spellcheck="false" aria-label="Code, modifiable"></code></pre>
+          <pre id="console" class="console" hidden aria-live="polite"></pre>
+          <div class="apercu-vide" id="apercu-vide"><div><strong>Rien pour l'instant</strong>Quand elle écrit une page ou un jeu, il s'affiche ici et tu peux y jouer tout de suite.</div></div>
+        </div>
+        <p class="aide-code" id="aide-code" hidden>Tu peux modifier ce code directement, puis cliquer sur « Relancer » pour voir le résultat.</p>
+      </article>
+    </div>
+
+    <section class="carte creations" aria-labelledby="titre-creations">
+      <div class="entete-carte">
+        <div>
+          <h2 id="titre-creations">Mes créations</h2>
+          <p class="sous">Tout ce qu'elle a créé pour toi est gardé ici, sur cet ordinateur. « Garder comme exemple » lui apprend à s'inspirer de tes réussites.</p>
+        </div>
+      </div>
+      <div class="grille-creations" id="liste-creations"></div>
+    </section>
+  </div>
+
+  <div class="vue" id="vue-labo" role="tabpanel" aria-labelledby="onglet-labo" hidden>
+  <section class="chiffres" aria-label="Où en est ton IA">
+    <div class="chiffre"><span>Étape</span><strong id="c-etape">0</strong><small>d'entraînement</small></div>
+    <div class="chiffre"><span>Lettres lues</span><strong id="c-lettres">0</strong><small id="c-pages">≈ 0 page</small></div>
+    <div class="chiffre"><span>Réussite</span><strong id="c-reussite">–</strong><small>lettres bien devinées</small></div>
+    <div class="chiffre"><span>Erreur</span><strong id="c-perte">–</strong><small>plus c'est bas, mieux c'est</small></div>
+    <div class="chiffre"><span>Vitesse</span><strong id="c-vitesse">–</strong><small>étapes par seconde</small></div>
+    <div class="chiffre"><span>Cerveau</span><strong id="c-params">–</strong><small id="c-cerveau">paramètres</small></div>
+  </section>
+
+  <main class="grille">
+    <article class="carte">
+      <h2>Son entraînement</h2>
+      <p class="sous">Elle lit ses textes et essaie de deviner chaque lettre suivante. À chaque étape, elle règle un peu ses paramètres.</p>
+      <div class="boutons">
+        <button class="bouton principal" id="bouton-entrainer" type="button">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>
+          <span>Entraîner</span>
+        </button>
+        <select class="bouton" id="taille" aria-label="Taille du cerveau"></select>
+        <button class="bouton danger" id="recommencer" type="button">Recommencer de zéro</button>
+      </div>
+      <p class="conseil" id="conseil-debut">Au début, ses paramètres sont tirés au hasard : elle ne sait rien du tout. Appuie sur <b>Entraîner</b> puis regarde le journal : en quelques minutes, elle passe du charabia à de vraies phrases.</p>
+
+      <div class="courbe" id="courbe">
+        <canvas id="canvas-courbe" aria-label="Courbe de l'erreur au fil de l'entraînement" role="img"></canvas>
+        <div class="vide" id="courbe-vide">La courbe de son erreur apparaîtra ici pendant l'entraînement.</div>
+      </div>
+      <div class="legende"><span>Erreur (perte)</span><span id="legende-x">étapes</span></div>
+
+      <h3>Journal : ce qu'elle écrit au fil du temps</h3>
+      <ol class="journal" id="journal" reversed></ol>
+    </article>
+
+    <article class="carte discussion">
+      <h2 id="titre-discussion">Parler avec ton IA</h2>
+      <p class="sous" id="sous-discussion">Elle répond en devinant une lettre après l'autre, avec ce qu'elle a appris.</p>
+      <div class="modes" role="group" aria-label="Mode">
+        <button type="button" data-mode="discuter" aria-pressed="true">Discuter</button>
+        <button type="button" data-mode="ecrire" aria-pressed="false">Écrire la suite</button>
+      </div>
+      <div class="messages" id="messages" aria-live="polite"></div>
+      <form class="saisie" id="formulaire" autocomplete="off">
+        <input id="message" maxlength="120" placeholder="Écris-lui quelque chose…" aria-label="Ton message">
+        <button class="bouton principal" type="submit" style="min-width:0">Envoyer</button>
+      </form>
+      <div class="reglage">
+        <label for="imagination">Imagination</label>
+        <input type="range" id="imagination" min="0.2" max="1.5" step="0.05" value="0.6">
+        <output id="imagination-valeur" for="imagination">0,60</output>
+      </div>
+    </article>
+  </main>
+
+  <section class="carte onglets">
+    <div class="barre-onglets" role="tablist" aria-label="Plus">
+      <button role="tab" id="t-lit" aria-controls="p-lit" aria-selected="true">Ce qu'elle lit</button>
+      <button role="tab" id="t-tete" aria-controls="p-tete" aria-selected="false" tabindex="-1">Dans sa tête</button>
+      <button role="tab" id="t-comment" aria-controls="p-comment" aria-selected="false" tabindex="-1">Comment ça marche</button>
+      <button role="tab" id="t-sauve" aria-controls="p-sauve" aria-selected="false" tabindex="-1">Sauvegarde</button>
+    </div>
+
+    <div role="tabpanel" id="p-lit" aria-labelledby="t-lit">
+      <p class="sous">Tout ce qu'elle saura dire vient de ces textes. Change-les, ajoute tes propres phrases, puis clique sur « Utiliser ce texte ». Pour qu'elle sache discuter, garde le format <code>Toi : …</code> / <code>IA : …</code>. <code>{nom}</code> sera remplacé par son nom.</p>
+      <div class="boutons" style="margin-bottom:10px">
+        <button class="bouton petit" type="button" data-modele="tout">Tout lire (le plus de données)</button>
+        <button class="bouton petit" type="button" data-modele="discussions">Modèle : discussions</button>
+        <button class="bouton petit" type="button" data-modele="festival">Modèle : festival 2K27</button>
+        <button class="bouton petit" type="button" data-modele="histoires">Modèle : histoires</button>
+        <button class="bouton petit" type="button" data-modele="vide">Page blanche</button>
+      </div>
+      <textarea class="texte" id="textes" spellcheck="false" aria-label="Les textes qu'elle lit"></textarea>
+      <p class="compteur" id="compteur"></p>
+      <div class="boutons" style="margin-top:10px">
+        <button class="bouton principal" type="button" id="utiliser" disabled>Utiliser ce texte</button>
+        <button class="bouton" type="button" id="annuler-textes" disabled>Annuler les changements</button>
+      </div>
+      <h3>Lui donner encore plus à lire</h3>
+      <p class="sous" style="margin-bottom:8px">Cherche un livre libre de droits (fables, contes, romans anciens sur Wikisource) ou un article (Vikidia, Wikipédia), puis ajoute-le à ses textes. Plus elle lit, plus elle apprend… mais plus son entraînement est long.</p>
+      <form class="boutons" id="form-livres" autocomplete="off">
+        <select class="bouton" id="source-livres" aria-label="Où chercher">
+          <option value="wikisource">Wikisource : livres, fables, contes</option>
+          <option value="vikidia">Vikidia : articles pour les jeunes</option>
+          <option value="wikipedia">Wikipédia : articles</option>
+        </select>
+        <input id="recherche-livres" class="champ-livres" placeholder="Ex : La Fontaine, Perrault, les volcans…" aria-label="Que chercher">
+        <button class="bouton" type="submit">Chercher</button>
+      </form>
+      <p class="compteur" id="etat-livres"></p>
+      <ul class="lecons resultats-livres" id="resultats-livres"></ul>
+
+      <h3>Tes leçons</h3>
+      <p class="sous" style="margin-bottom:8px">Les bonnes réponses que tu lui as apprises dans la discussion. Elle les révise plus souvent que le reste.</p>
+      <ul class="lecons" id="lecons"></ul>
+    </div>
+
+    <div role="tabpanel" id="p-tete" aria-labelledby="t-tete" hidden>
+      <p class="sous">Écris le début d'un texte : tu vois les lettres qu'elle pense voir venir ensuite, avec leur probabilité. Clique sur une lettre pour l'ajouter et continuer. Pendant l'entraînement, regarde ses certitudes grandir !</p>
+      <div class="tete">
+        <div>
+          <textarea id="tete-texte" spellcheck="false" aria-label="Début du texte"></textarea>
+          <div class="boutons" style="margin-top:8px">
+            <button class="bouton petit" type="button" id="tete-hasard">Laisser l'IA choisir</button>
+            <button class="bouton petit" type="button" id="tete-effacer">Effacer la dernière lettre</button>
+          </div>
+        </div>
+        <div class="barres" id="barres" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div role="tabpanel" id="p-comment" aria-labelledby="t-comment" hidden>
+      <div class="explication">
+        <div class="schema" aria-label="Schéma du cerveau">
+          <div><b>Texte</b><code>Je m'appel</code></div><span class="fleche">→</span>
+          <div><b>Numéros</b><code>36 71 1 …</code></div><span class="fleche">→</span>
+          <div><b>Plongements</b>listes de nombres</div><span class="fleche">→</span>
+          <div><b>Attention + réflexion</b><span id="schema-couches">× 2 couches</span></div><span class="fleche">→</span>
+          <div><b>Probabilités</b><code>« l » : 94 %</code></div><span class="fleche">→</span>
+          <div><b>Lettre choisie</b><code>l</code></div>
+        </div>
+        <ol>
+          <li><strong>Elle lit lettre par lettre.</strong>Ton IA connaît 125 caractères : les lettres, les accents, les chiffres et la ponctuation. Chaque caractère a un numéro, et elle ne voit que ces numéros.</li>
+          <li><strong>Chaque lettre devient une liste de nombres.</strong>C'est son « plongement ». Au début, ces nombres sont tirés au hasard. Avec l'entraînement, les lettres qui jouent le même rôle (comme les voyelles) finissent avec des listes qui se ressemblent.</li>
+          <li><strong>L'attention : regarder en arrière.</strong>Pour deviner la suite, chaque lettre regarde les lettres d'avant et choisit celles qui comptent. Après « Enchantée, », par exemple, elle doit retrouver le prénom écrit plus haut pour le recopier.</li>
+          <li><strong>Une probabilité pour chaque lettre possible.</strong>À la fin, elle donne une chance à chacun des 125 caractères. Tu peux le voir en direct dans l'onglet « Dans sa tête ».</li>
+          <li><strong>Elle se corrige : c'est l'entraînement.</strong>On compare sa prédiction avec la vraie lettre du texte. L'erreur (la « perte ») mesure à quel point elle s'est trompée. Ensuite, la <em>rétropropagation</em> calcule, pour chacun de ses paramètres, dans quel sens le tourner pour se tromper un peu moins, et l'optimiseur <em>Adam</em> fait ce petit réglage. Une étape = 8 morceaux de texte lus, corrigés et réglés.</li>
+          <li><strong>Pour parler, elle continue le texte.</strong>Quand tu lui écris, elle lit « Toi : ton message / IA : » et tire une lettre au hasard selon ses probabilités, puis une autre, jusqu'au retour à la ligne. Le curseur « Imagination » (la <em>température</em>) la rend plus sage ou plus farfelue.</li>
+        </ol>
+        <div class="encadre">
+          <strong>Et les grandes IA comme Claude ?</strong>
+          <p>Elles sont construites sur le même principe : ce sont aussi des Transformers qui devinent la suite d'un texte, morceau par morceau. La différence, c'est l'échelle. Elles ont des milliards de paramètres au lieu de quelques dizaines de milliers, elles ont lu une immense quantité de textes, et elles ont reçu un entraînement supplémentaire pour apprendre à être utiles et honnêtes.</p>
+          <p>Ton IA, elle, n'a lu que ses quelques pages. Elle apprend surtout par cœur : si tu lui poses une question qu'elle n'a jamais lue, elle mélange des morceaux de réponses qu'elle connaît. Elle ne calcule pas vraiment non plus. Elle se souvient de « 7 x 8 = 56 » parce qu'elle l'a lu.</p>
+        </div>
+        <p class="sous" style="margin-top:16px">Le code de son cerveau est dans le fichier <code>cerveau.js</code>, entièrement commenté en français, sans aucune bibliothèque.</p>
+      </div>
+    </div>
+
+    <div role="tabpanel" id="p-sauve" aria-labelledby="t-sauve" hidden>
+      <p class="sous">Ton IA se sauvegarde toute seule dans ce navigateur pendant l'entraînement. Tu peux aussi télécharger son cerveau dans un fichier pour le garder ou le partager, avec ses textes et ses leçons.</p>
+      <p class="etat-sauvegarde" id="etat-sauvegarde">Pas encore sauvegardée.</p>
+      <div class="ligne-sauvegarde">
+        <button class="bouton" type="button" id="telecharger">Télécharger son cerveau</button>
+        <button class="bouton" type="button" id="charger">Charger un cerveau</button>
+        <input type="file" id="fichier" accept=".json,application/json" hidden>
+      </div>
+      <h3>Tout effacer</h3>
+      <p class="sous" style="margin-bottom:10px">Efface son cerveau, ses textes, ses leçons et son nom sur ce navigateur, et remet tout comme au premier jour.</p>
+      <button class="bouton danger" type="button" id="tout-effacer">Tout effacer</button>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="vue" id="vue-publication" role="tabpanel" aria-labelledby="onglet-publication" hidden>
+    <article class="carte publication">
+      <h2>Publier pour les visiteurs</h2>
+      <p class="sous">Les visiteurs arrivent sur une page plus simple (<a href="./" target="_blank" rel="noopener" id="lien-visiteurs">la page des visiteurs</a>) : une vitrine de tes créations, {nom} qui code pour eux, et ton petit cerveau entraîné. Ce que tu choisis ici ne leur parvient qu'une fois le fichier de publication déposé sur GitHub.</p>
+      <p class="etat-publication" id="pub-etat">…</p>
+
+      <h3>Message d'accueil</h3>
+      <textarea class="texte court" id="pub-accueil" maxlength="600" aria-label="Message d'accueil des visiteurs"></textarea>
+
+      <h3>La vitrine</h3>
+      <p class="sous">Coche les créations à montrer. Les visiteurs pourront y jouer, voir leur code et demander à {nom} de les modifier.</p>
+      <ul class="lecons pub-liste" id="pub-vitrine"></ul>
+
+      <h3>Ses exemples</h3>
+      <label class="case-pub"><input type="checkbox" id="pub-exemples" checked> <span>Partager mes réussites « ⭐ exemple » : la Mira des visiteurs s'en inspirera aussi (<b id="pub-nb-exemples">0</b>).</span></label>
+
+      <h3>Son petit cerveau</h3>
+      <label class="case-pub"><input type="checkbox" id="pub-cerveau" checked> <span>Publier mon petit cerveau entraîné, pour que les visiteurs puissent lui parler. <span id="pub-cerveau-infos"></span></span></label>
+
+      <h3>Pour les visiteurs, {nom}…</h3>
+      <label class="case-pub"><input type="checkbox" id="pub-festival" checked> <span>connaît le festival 2K27 quand on lui en parle</span></label>
+      <label class="case-pub"><input type="checkbox" id="pub-recherche" checked> <span>cherche sur des sites fiables quand c'est utile</span></label>
+      <label class="case-pub"><input type="checkbox" id="pub-correction" checked> <span>corrige toute seule ses erreurs (1 essai)</span></label>
+
+      <h3>Ton code secret</h3>
+      <p class="sous">Il protège ce panneau sur les ordinateurs partagés. Il est publié seulement sous une forme brouillée (on ne peut pas le retrouver à partir du fichier). Ce n'est pas une vraie serrure : la vraie protection, c'est que toi seul·e peux publier sur ton compte GitHub.</p>
+      <button class="bouton petit" type="button" id="changer-code">Changer mon code secret</button>
+
+      <div class="avertissement">⚠️ Tout ce qui est publié est visible par tout le monde, y compris le texte de tes demandes sous chaque création. Relis avant de publier, et n'y mets jamais d'informations personnelles.</div>
+
+      <div class="boutons" style="margin-top:16px">
+        <button class="bouton" type="button" id="pub-apercu">Voir l'aperçu visiteurs</button>
+        <button class="bouton principal" type="button" id="pub-telecharger">Télécharger le fichier de publication</button>
+      </div>
+      <ol class="etapes-pub">
+        <li>Clique sur « Télécharger le fichier de publication » : tu obtiens <code>mira-public.json</code>.</li>
+        <li>Ouvre <a href="https://github.com/natxmans/mira/upload/main" target="_blank" rel="noopener">la page d'envoi de ton dépôt GitHub</a> et dépose ce fichier (il remplace l'ancien).</li>
+        <li>Clique sur « Commit changes ». Une minute plus tard, les visiteurs voient la nouvelle version.</li>
+      </ol>
+    </article>
+  </div>
+
+  <footer>Tes conversations et ton code restent sur ton ordinateur. Le grand cerveau est téléchargé une fois depuis Hugging Face, et quand elle fait une recherche, seuls les mots de ta question sont envoyés aux sites fiables consultés.</footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="cerveau.js"></script>
+<script src="textes.js"></script>
+<script src="festival-resume.js"></script>
+<script src="savoirs.js"></script>
+<script src="recherche.js"></script>
+<script src="app.js"></script>
+<script src="atelier.js"></script>
+<script src="outils.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

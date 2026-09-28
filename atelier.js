@@ -41,19 +41,27 @@
   ];
 
   const $ = (s) => document.querySelector(s);
-  const stock = {
+  // Deux pages utilisent ce fichier : le panneau admin (admin.html) et la page des visiteurs
+  // (index.html). Côté visiteur, tout est rangé à part, pour ne jamais mélanger les deux.
+  const MODE_VISITEUR = document.body.dataset.mode === 'visiteur';
+  const PUBLIC = window.MIRA_PUBLIC || {}; // ce que tu as publié pour les visiteurs (mira-public.json)
+  const creerStock = (prefixe) => ({
     lire(cle, defaut) {
-      try { const v = localStorage.getItem('mira.atelier.' + cle); return v === null ? defaut : JSON.parse(v); } catch (e) { return defaut; }
+      try { const v = localStorage.getItem(prefixe + cle); return v === null ? defaut : JSON.parse(v); } catch (e) { return defaut; }
     },
     ecrire(cle, valeur) {
-      try { localStorage.setItem('mira.atelier.' + cle, JSON.stringify(valeur)); return true; } catch (e) { return false; }
+      try { localStorage.setItem(prefixe + cle, JSON.stringify(valeur)); return true; } catch (e) { return false; }
     },
-  };
+  });
+  const stock = creerStock(MODE_VISITEUR ? 'mira.visiteur.' : 'mira.atelier.');
+  // Le grand cerveau téléchargé sert aux deux pages : on retient qu'il est là au même endroit.
+  const stockModeles = creerStock('mira.atelier.');
+  const reglagesPublics = PUBLIC.reglages || {};
 
   const etat = {
     modele: stock.lire('modele', 'rapide'),
-    festival: stock.lire('festival', true),
-    recherche: stock.lire('recherche', true),
+    festival: MODE_VISITEUR ? reglagesPublics.festival !== false : stock.lire('festival', true),
+    recherche: MODE_VISITEUR ? reglagesPublics.recherche !== false : stock.lire('recherche', true),
     messages: stock.lire('conversation', []), // [{ role: 'user' | 'assistant', content }]
     code: stock.lire('code', null), // { langage, contenu, page }
     webllm: null,
@@ -65,7 +73,7 @@
     vue: 'apercu',
     creations: stock.lire('creations', []), // Mes créations
     creationActuelle: null,
-    autoCorrection: stock.lire('autoCorrection', true),
+    autoCorrection: MODE_VISITEUR ? reglagesPublics.autoCorrection !== false : stock.lire('autoCorrection', true),
     lectureAuto: stock.lire('lectureAuto', false),
     attenteErreur: null, // moment où sa dernière page a été lancée (pour la correction automatique)
     derniereDemande: '',
@@ -212,11 +220,18 @@ Règles :
 
   // Tes créations marquées « Garder comme exemple » deviennent des exemples pour elle.
   const MOTS_VIDES = new Set(['avec', 'pour', 'dans', 'fais', 'faire', 'fait', 'une', 'des', 'les', 'qui', 'que', 'plus', 'tres', 'cette', 'mais', 'aussi', 'veux', 'voudrais', 'aimerais', 'peux', 'peut', 'code', 'modifie', 'main', 'ajoute', 'moi', 'toi', 'sont', 'etre', 'avoir']);
+  // Côté visiteur, les réussites que tu as publiées servent aussi d'exemples.
   function exemplesPerso() {
-    return (etat.creations || []).filter((c) => c.exemple && c.page).map((c) => ({
-      id: c.id, type: 'exemple', perso: true, titre: `${c.titre} (une de tes réussites)`, code: c.contenu,
-      mots: Array.from(new Set(sansAccents(c.titre + ' ' + c.demande).split(/[^a-z0-9]+/).filter((m) => m.length >= 4 && !MOTS_VIDES.has(m)))),
-    }));
+    const vers = (c, titre) => ({
+      id: c.id, type: 'exemple', perso: true, titre, code: c.contenu,
+      mots: Array.from(new Set(sansAccents(c.titre + ' ' + (c.demande || '')).split(/[^a-z0-9]+/).filter((m) => m.length >= 4 && !MOTS_VIDES.has(m)))),
+    });
+    const miennes = (etat.creations || []).filter((c) => c.exemple && c.page)
+      .map((c) => vers(c, `${c.titre} (une de tes réussites)`));
+    const publiees = MODE_VISITEUR && Array.isArray(PUBLIC.creations)
+      ? PUBLIC.creations.filter((c) => c.exemple && c.page && !miennes.some((m) => m.code === c.contenu)).map((c) => vers(c, `${c.titre} (exemple publié)`))
+      : [];
+    return miennes.concat(publiees);
   }
 
   function choisirSavoirs(demande) {
@@ -310,7 +325,7 @@ Règles :
     return f16 ? id : id.replace('q4f16_1', 'q4f32_1');
   }
 
-  const dejaTelecharge = (cle) => stock.lire('telecharge.' + idPour(cle, true), false) || stock.lire('telecharge.' + idPour(cle, false), false);
+  const dejaTelecharge = (cle) => stockModeles.lire('telecharge.' + idPour(cle, true), false) || stockModeles.lire('telecharge.' + idPour(cle, false), false);
 
   function traduire(texte, progres) {
     const t = String(texte || '');
@@ -410,9 +425,9 @@ Règles :
         const suivi = (p) => {
           let texte = traduire(p.text, p.progress);
           // Elle croyait l'avoir déjà, mais il faut le retélécharger : le navigateur l'avait effacé.
-          if (/Fetching param cache/.test(p.text) && stock.lire('telecharge.' + id, false)) {
+          if (/Fetching param cache/.test(p.text) && stockModeles.lire('telecharge.' + id, false)) {
             efface = true;
-            stock.ecrire('telecharge.' + id, false);
+            stockModeles.ecrire('telecharge.' + id, false);
           }
           if (efface) texte = 'Ton navigateur avait effacé mon grand cerveau pour faire de la place, je le retélécharge. ' + texte;
           progression(p.progress, texte);
@@ -427,7 +442,7 @@ Règles :
           moteur = await creerAvecEssais(id, suivi, {});
           etat.contexte = 4096;
         }
-        stock.ecrire('telecharge.' + id, true);
+        stockModeles.ecrire('telecharge.' + id, true);
         etat.moteur = moteur;
         etat.idModele = id;
         progression(null);
@@ -700,7 +715,8 @@ Règles :
     const fiches = SAVOIRS.filter((s) => s.type === 'fiche');
     const sujets = typeof FESTIVAL_SECTIONS !== 'undefined' ? FESTIVAL_SECTIONS.length : 0;
     const perso = exemplesPerso().length;
-    $('#savoirs-titre').textContent = `Ce qu'elle sait : ${exemples.length} exemples de code${perso ? ` (dont ${perso} de tes réussites)` : ''}, ${fiches.length} fiches` + (sujets ? `, le festival 2K27 (${sujets} sujets)` : '');
+    const dont = !perso ? '' : MODE_VISITEUR ? ` (dont ${perso} réussite${perso > 1 ? 's' : ''} publiée${perso > 1 ? 's' : ''})` : ` (dont ${perso} de tes réussites)`;
+    $('#savoirs-titre').textContent = `Ce qu'elle sait : ${exemples.length} exemples de code${dont}, ${fiches.length} fiches` + (sujets ? `, le festival 2K27 (${sujets} sujets)` : '');
     const box = $('#savoirs-exemples');
     box.textContent = '';
     for (const e of exemples) {
@@ -1036,7 +1052,7 @@ Règles :
       enleverErreur();
       envoyer(demandeCorrection);
     }), bouton('Voir la console', () => choisirVue('console')), bouton('Fermer', enleverErreur));
-    $('.apercu-corps').append(box);
+    $('#cadre').parentElement.append(box);
   });
 
   // Relancer : si tu as modifié le code, c'est ta version qui est lancée et gardée.
@@ -1189,7 +1205,7 @@ Règles :
           etat.creationActuelle = c.id;
           montrer({ langage: c.langage, contenu: c.contenu, page: c.page }, true);
           afficherCreations();
-          document.querySelector('.apercu').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          $('#cadre').closest('.apercu').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }),
         bouton('Renommer', () => {
           const nom = prompt('Nouveau nom pour cette création :', c.titre);
@@ -1305,7 +1321,7 @@ Règles :
           if (!confirm(`Supprimer le grand cerveau « ${m.nom} » de cet ordinateur ? Il faudra le retélécharger (${m.taille}) pour s'en resservir.`)) return;
           if (etat.idModele === id) await endormir();
           try { await etat.webllm.deleteModelAllInfoInCache(id, configuration()); } catch (err) { /* rien */ }
-          stock.ecrire('telecharge.' + id, false);
+          stockModeles.ecrire('telecharge.' + id, false);
           afficherModeles();
           afficherEspace();
           toast('Supprimé. La place est libérée.');
@@ -1316,17 +1332,39 @@ Règles :
   }
 
   // ---------------------------------------------------------------------------
-  // Les deux espaces de la page : Atelier et Laboratoire
+  // Les espaces de la page (les onglets en haut) : chaque onglet ouvre son panneau
   // ---------------------------------------------------------------------------
+  const CLE_VUE = MODE_VISITEUR ? 'mira.visiteur.vue' : 'mira.vue';
+  const onglets = () => Array.from(document.querySelectorAll('.vues [role="tab"]'));
+
   function ouvrirVue(nom) {
-    for (const [onglet, vue] of [['#onglet-atelier', '#vue-atelier'], ['#onglet-labo', '#vue-labo']]) {
-      const actif = vue === '#vue-' + nom;
-      $(onglet).setAttribute('aria-selected', String(actif));
-      $(onglet).tabIndex = actif ? 0 : -1;
-      $(vue).hidden = !actif;
+    const cible = onglets().some((o) => o.getAttribute('aria-controls') === 'vue-' + nom) ? nom : onglets()[0].getAttribute('aria-controls').slice(4);
+    for (const o of onglets()) {
+      const actif = o.getAttribute('aria-controls') === 'vue-' + cible;
+      o.setAttribute('aria-selected', String(actif));
+      o.tabIndex = actif ? 0 : -1;
+      document.getElementById(o.getAttribute('aria-controls')).hidden = !actif;
     }
-    try { localStorage.setItem('mira.vue', nom); } catch (e) { /* rien */ }
+    try { localStorage.setItem(CLE_VUE, cible); } catch (e) { /* rien */ }
+    window.dispatchEvent(new CustomEvent('mira-vue', { detail: cible }));
   }
+  window.miraOuvrirVue = ouvrirVue;
+  window.miraAvecAide = (page) => avecAide(page);
+
+  // Reprendre une création (par exemple de la vitrine) dans l'Atelier pour la faire modifier.
+  window.miraReprendre = (code, titre) => {
+    ouvrirVue('atelier');
+    const c = enregistrerCreation({ langage: code.langage || 'html', contenu: code.contenu, page: code.page !== false }, titre || 'Création reprise');
+    etat.creationActuelle = c.id;
+    montrer({ langage: c.langage, contenu: c.contenu, page: c.page }, true);
+    etat.messages.push(
+      { role: 'user', content: `Voici un code de départ (« ${titre || 'création'} »). Je vais te demander de le modifier :\n\`\`\`${c.langage || 'html'}\n${c.contenu}\n\`\`\``, discret: true },
+      { role: 'assistant', content: "D'accord, je pars de ce code. Qu'est-ce que tu veux changer ?", discret: true },
+    );
+    stock.ecrire('conversation', etat.messages.slice(-40));
+    ajouterNoteFil(`✏️ « ${titre || 'Création'} » est prête à être modifiée : dis-lui ce que tu veux changer.`);
+    $('#texte-demande').focus();
+  };
 
   // ---------------------------------------------------------------------------
   // Mise en route
@@ -1345,24 +1383,26 @@ Règles :
 
   function caseACocher(id, cle) {
     const c = $(id);
+    if (!c) return; // la page des visiteurs n'a pas tous les réglages
     c.checked = !!etat[cle];
     c.addEventListener('change', () => { etat[cle] = c.checked; stock.ecrire(cle, etat[cle]); });
   }
 
   function demarrer() {
-    let vue = 'atelier';
-    try { vue = localStorage.getItem('mira.vue') || 'atelier'; } catch (e) { /* rien */ }
-    ouvrirVue(vue === 'labo' ? 'labo' : 'atelier');
-    $('#onglet-atelier').addEventListener('click', () => ouvrirVue('atelier'));
-    $('#onglet-labo').addEventListener('click', () => ouvrirVue('labo'));
-    for (const o of ['#onglet-atelier', '#onglet-labo']) {
-      $(o).addEventListener('keydown', (e) => {
-        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-        const autre = o === '#onglet-atelier' ? 'labo' : 'atelier';
-        ouvrirVue(autre);
-        $('#onglet-' + autre).focus();
+    let vue = '';
+    try { vue = localStorage.getItem(CLE_VUE) || ''; } catch (e) { /* rien */ }
+    ouvrirVue(vue);
+    onglets().forEach((o, i) => {
+      o.addEventListener('click', () => ouvrirVue(o.getAttribute('aria-controls').slice(4)));
+      o.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        const liste = onglets();
+        const suivant = liste[(i + d + liste.length) % liste.length];
+        ouvrirVue(suivant.getAttribute('aria-controls').slice(4));
+        suivant.focus();
       });
-    }
+    });
 
     afficherModeles();
     majNom();

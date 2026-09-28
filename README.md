@@ -4,7 +4,13 @@
 
 👉 **Essayer : https://natxmans.github.io/mira/** (Chrome ou Edge à jour, sur ordinateur)
 
-## Les deux espaces
+## Deux pages : les visiteurs et le panneau admin
+
+- **`index.html`, la page des visiteurs** : la vitrine des créations publiées (on peut y jouer, voir leur code, et demander à Mira de les modifier), Mira qui code pour eux, et une discussion avec son petit cerveau entraîné. Pas de réglages : tout ce qu'ils font reste dans leur propre navigateur.
+- **`admin.html`, le panneau admin** : tout ce qui est décrit plus bas (Atelier, Laboratoire), plus l'onglet **Publication**. Il est protégé par un code secret, dont seule une empreinte SHA-256 salée est publiée. Honnêtement, ce n'est pas une vraie serrure (un site sans serveur ne peut pas cacher une page) : la vraie protection, c'est que seul le compte GitHub du dépôt peut publier.
+- **La publication** : le panneau prépare `mira-public.json` (nom, message d'accueil, vitrine, réussites partagées comme exemples, petit cerveau entraîné, réglages). Il suffit de déposer ce fichier dans le dépôt pour que les visiteurs voient la nouvelle version. « Voir l'aperçu visiteurs » montre le résultat avant de publier (`index.html?apercu`).
+
+## Les espaces du panneau
 
 ### L'Atelier : elle code
 
@@ -34,7 +40,10 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 
 | Fichier | Rôle |
 | --- | --- |
-| `index.html` | La page et son style |
+| `index.html`, `visiteur.js` | La page des visiteurs |
+| `admin.html`, `admin.js` | Le panneau admin : verrou par code secret et publication |
+| `style.css` | Le style commun aux deux pages |
+| `mira-public.json` | Ce que tu publies pour les visiteurs (créé depuis le panneau) |
 | `atelier.js` | L'Atelier : grand cerveau, recherche dans la bibliothèque, conversation, aperçu du code |
 | `savoirs.js` | Sa bibliothèque : exemples de code testés et fiches |
 | `recherche.js` | La recherche sur des sites fiables (et les livres de Wikisource pour le Laboratoire) |
