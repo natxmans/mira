@@ -363,7 +363,7 @@
   let occupee = false;
 
   function afficherDiscussion() {
-    document.title = `${etat.nom} · l'IA qui code`;
+    document.title = `${etat.nom} · panneau admin`;
     $('#titre-discussion').textContent = `Parler avec ${etat.nom}`;
     $('#message').placeholder = etat.mode === 'ecrire' ? 'Écris le début d\'un texte…' : `Écris quelque chose à ${etat.nom}…`;
     $('#sous-discussion').textContent = etat.mode === 'ecrire'
