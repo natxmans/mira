@@ -1,14 +1,15 @@
 /*
  * sw.js — le « service worker » de Mira : il garde une copie de la page et des
  * bibliothèques pour qu'elle marche aussi sans internet.
- *   - Les fichiers de Mira : on demande d'abord la version en ligne (pour avoir les
- *     mises à jour), et on se sert de la copie seulement si internet ne répond pas.
+ *   - Les fichiers de Mira : on demande d'abord la version en ligne, toujours revérifiée
+ *     (pour avoir les mises à jour tout de suite), et on se sert de la copie seulement si
+ *     internet ne répond pas.
  *   - Les bibliothèques (WebLLM, highlight.js, polices) : leur adresse contient un numéro
  *     de version qui ne change jamais, donc on utilise directement la copie.
  *   - Le grand cerveau n'est pas géré ici : WebLLM le range lui-même dans IndexedDB.
  *   - La recherche sur les sites fiables n'est jamais gardée en copie.
  */
-const VERSION = 'mira-v3';
+const VERSION = 'mira-v4';
 const FICHIERS = [
   './', 'index.html', 'admin.html', 'style.css', 'cerveau.js', 'textes.js', 'festival-resume.js', 'savoirs.js',
   'recherche.js', 'app.js', 'atelier.js', 'outils.js', 'admin.js', 'visiteur.js', 'manifest.webmanifest',
@@ -18,8 +19,15 @@ const FICHIERS = [
 // il est gardé en copie dès qu'il a été lu une fois.
 const BIBLIOTHEQUES = ['https://cdn.jsdelivr.net/', 'https://cdnjs.cloudflare.com/', 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/'];
 
+// GitHub Pages dit aux navigateurs de garder chaque fichier 10 minutes : juste après une mise à
+// jour, une page pourrait mélanger d'anciens et de nouveaux fichiers. On revérifie donc toujours
+// auprès de GitHub (« no-cache » : la réponse est minuscule quand rien n'a changé).
+function frais(requete) {
+  try { return fetch(new Request(requete, { cache: 'no-cache' })); } catch (e) { return fetch(requete); }
+}
+
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -37,7 +45,7 @@ self.addEventListener('fetch', (e) => {
 
   if (url.origin === self.location.origin) {
     e.respondWith(
-      fetch(requete)
+      frais(requete)
         .then((reponse) => {
           if (reponse.ok) {
             const copie = reponse.clone();

@@ -136,7 +136,7 @@
     $('.page').inert = true;
     $('#verrou').hidden = false;
     $('#verrou-confirmation').hidden = !(mode === 'creation' || mode === 'changement');
-    $('#verrou-annuler').hidden = !(mode === 'ancien' || mode === 'changement');
+    if ($('#verrou-annuler')) $('#verrou-annuler').hidden = !(mode === 'ancien' || mode === 'changement');
     $('#verrou-texte').textContent = (note ? note + ' ' : '') + TEXTES_VERROU[mode];
     $('#verrou-valider').textContent = libelle();
     $('#verrou-erreur').textContent = '';
@@ -205,7 +205,8 @@
       : 'Code enregistré ! Pense à publier pour qu\'il soit demandé aussi sur tes autres ordinateurs.');
   });
 
-  $('#verrou-annuler').addEventListener('click', () => { if (estOuvert()) ouvrir(); else verrouiller(); });
+  // (vérifié : une ancienne copie d'admin.html, gardée par le navigateur, n'a pas ce bouton)
+  if ($('#verrou-annuler')) $('#verrou-annuler').addEventListener('click', () => { if (estOuvert()) ouvrir(); else verrouiller(); });
 
   // Ctrl + Maj + Q (attrapé par outils.js, même quand une création a le clavier).
   window.addEventListener('mira-raccourci', () => {
