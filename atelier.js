@@ -16,6 +16,8 @@
 
   const WEBLLM = 'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.85/+esm';
   const HLJS = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+  // Son empreinte : si le fichier du CDN était modifié, le navigateur refuserait de le lancer.
+  const HLJS_EMPREINTE = 'sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==';
   const CONTEXTE_VOULU = 8192; // taille de sa mémoire de travail, en morceaux de mots (tokens)
   const LETTRES_PAR_TOKEN = 3; // estimation prudente pour du code et du français
 
@@ -628,6 +630,8 @@ Règles :
       hljsPromesse = new Promise((ok) => {
         const s = document.createElement('script');
         s.src = HLJS;
+        s.integrity = HLJS_EMPREINTE;
+        s.crossOrigin = 'anonymous';
         s.onload = () => { try { window.hljs.configure({ ignoreUnescapedHTML: true }); } catch (e) { /* rien */ } ok(window.hljs); };
         s.onerror = () => ok(null);
         document.head.append(s);
@@ -909,7 +913,7 @@ Règles :
   // Petit script ajouté au début de sa page (sur la même ligne, pour ne pas décaler les
   // numéros de ligne des erreurs) : il remplace localStorage (interdit dans le cadre
   // isolé), recopie la console et nous signale les erreurs pour qu'elle les corrige.
-  const AIDE_CADRE = '<script>(function(){try{window.localStorage.getItem("x")}catch(e){var m={},f={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}};try{Object.defineProperty(window,"localStorage",{value:f,configurable:true});Object.defineProperty(window,"sessionStorage",{value:f,configurable:true})}catch(e2){}}function p(d){try{parent.postMessage(d,"*")}catch(e3){}}function txt(a){if(a instanceof Error)return a.name+": "+a.message;if(typeof a==="object"&&a!==null){try{return JSON.stringify(a)}catch(e4){}}return String(a)}["log","info","warn","error"].forEach(function(n){var o=console[n];console[n]=function(){p({mira:"console",niveau:n,texte:Array.prototype.map.call(arguments,txt).join(" ")});return o.apply(console,arguments)}});window.addEventListener("error",function(e){p({mira:"erreur",message:String(e.message)});p({mira:"console",niveau:"error",texte:e.message+(e.lineno?" (ligne "+e.lineno+")":"")})});window.addEventListener("unhandledrejection",function(e){var r=e.reason&&e.reason.message||e.reason;p({mira:"erreur",message:String(r)});p({mira:"console",niveau:"error",texte:String(r)})})})();<\/script>';
+  const AIDE_CADRE = '<script>(function(){try{window.localStorage.getItem("x")}catch(e){var m={},f={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}};try{Object.defineProperty(window,"localStorage",{value:f,configurable:true});Object.defineProperty(window,"sessionStorage",{value:f,configurable:true})}catch(e2){}}function p(d){try{parent.postMessage(d,"*")}catch(e3){}}function txt(a){if(a instanceof Error)return a.name+": "+a.message;if(typeof a==="object"&&a!==null){try{return JSON.stringify(a)}catch(e4){}}return String(a)}["log","info","warn","error"].forEach(function(n){var o=console[n];console[n]=function(){p({mira:"console",niveau:n,texte:Array.prototype.map.call(arguments,txt).join(" ")});return o.apply(console,arguments)}});window.addEventListener("keydown",function(e){if(e.ctrlKey&&e.shiftKey&&!e.altKey&&String(e.key).toLowerCase()==="q"){e.preventDefault();p({mira:"raccourci"})}},true);window.addEventListener("error",function(e){p({mira:"erreur",message:String(e.message)});p({mira:"console",niveau:"error",texte:e.message+(e.lineno?" (ligne "+e.lineno+")":"")})});window.addEventListener("unhandledrejection",function(e){var r=e.reason&&e.reason.message||e.reason;p({mira:"erreur",message:String(r)});p({mira:"console",niveau:"error",texte:String(r)})})})();<\/script>';
 
   function avecAide(page) {
     const m = page.match(/<head[^>]*>/i) || page.match(/<html[^>]*>/i);
@@ -1030,6 +1034,11 @@ Règles :
   }
 
   window.addEventListener('message', (ev) => {
+    // Ctrl + Maj + Q tapé pendant qu'une création a le clavier (Atelier ou vitrine).
+    if (ev.data && ev.data.mira === 'raccourci' && ['#cadre', '#cadre-vitrine'].some((s) => $(s) && ev.source === $(s).contentWindow)) {
+      window.dispatchEvent(new Event('mira-raccourci'));
+      return;
+    }
     if (ev.source !== $('#cadre').contentWindow || !ev.data) return;
     if (ev.data.mira === 'console') return ajouterConsole(ev.data.niveau, ev.data.texte);
     if (ev.data.mira !== 'erreur' || etat.erreurMontree) return;

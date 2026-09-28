@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mira · panneau admin</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
 <meta name="description" content="Mira, une IA qui code pour toi et qui tourne entièrement sur ton ordinateur, avec un petit cerveau écrit de zéro que tu entraînes toi-même.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236a4cff'/%3E%3Ccircle cx='11' cy='13' r='3' fill='white'/%3E%3Ccircle cx='21' cy='13' r='3' fill='white'/%3E%3Cpath d='M10 21q6 5 12 0' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
@@ -25,7 +26,8 @@
     <input type="password" id="verrou-confirmation" autocomplete="off" aria-label="Retape le code" placeholder="Retape-le" hidden>
     <p class="verrou-erreur" id="verrou-erreur" role="alert"></p>
     <button class="bouton principal" type="submit" id="verrou-valider">Entrer</button>
-    <p class="verrou-aide">Raccourci : <kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>Q</kbd> pour verrouiller ou déverrouiller. <a href="./">Aller à la page des visiteurs</a></p>
+    <button class="bouton" type="button" id="verrou-annuler" hidden>Annuler</button>
+    <p class="verrou-aide"><kbd>Ctrl</kbd> + <kbd>Maj</kbd> + <kbd>Q</kbd> verrouille ton panneau, et t'amène ici depuis la page des visiteurs. <a href="./">Aller à la page des visiteurs</a></p>
   </form>
 </div>
 <div class="page">
@@ -351,7 +353,7 @@
       <label class="case-pub"><input type="checkbox" id="pub-correction" checked> <span>corrige toute seule ses erreurs (1 essai)</span></label>
 
       <h3>Ton code secret</h3>
-      <p class="sous">Il protège ce panneau sur les ordinateurs partagés. Il est publié seulement sous une forme brouillée (on ne peut pas le retrouver à partir du fichier). Ce n'est pas une vraie serrure : la vraie protection, c'est que toi seul·e peux publier sur ton compte GitHub.</p>
+      <p class="sous">Il protège ce panneau sur les ordinateurs partagés : le panneau ne reste ouvert que dans l'onglet où tu as tapé ton code, il se reverrouille tout seul après 20 minutes sans activité, et après 5 codes faux il faut attendre avant de réessayer. Il est publié seulement sous une forme brouillée (600 000 tours de PBKDF2), et plus il est long, plus il est dur à deviner. Ce n'est pas une vraie serrure : la vraie protection, c'est que toi seul·e peux publier sur ton compte GitHub.</p>
       <button class="bouton petit" type="button" id="changer-code">Changer mon code secret</button>
 
       <div class="avertissement">⚠️ Tout ce qui est publié est visible par tout le monde, y compris le texte de tes demandes sous chaque création. Relis avant de publier, et n'y mets jamais d'informations personnelles.</div>

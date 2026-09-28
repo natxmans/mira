@@ -244,6 +244,9 @@
     maj();
   }
 
+  // Ctrl + Maj + Q : l'entrée discrète vers ton panneau admin (qui demande ton code).
+  window.addEventListener('mira-raccourci', () => { location.href = 'admin.html'; });
+
   // ---------------------------------------------------------------------------
   // Mise en route
   // ---------------------------------------------------------------------------

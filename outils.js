@@ -41,6 +41,17 @@
     setTimeout(() => { if (typeof guide.showModal === 'function' && !document.querySelector('dialog[open]')) guide.showModal(); }, 800);
   }
 
+  // --- Le raccourci Ctrl + Maj + Q ---
+  // Sur le panneau admin, il verrouille ; sur la page des visiteurs, il mène au panneau.
+  // On l'attrape avant tout le reste de la page (phase de capture), et les cadres des
+  // créations nous le renvoient quand ce sont eux qui ont le clavier (voir AIDE_CADRE).
+  window.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && String(e.key).toLowerCase() === 'q') || e.repeat) return;
+    e.preventDefault();
+    e.stopPropagation();
+    window.dispatchEvent(new Event('mira-raccourci'));
+  }, true);
+
   // --- Installer comme une application ---
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => { /* pas grave : le site marche quand même */ });
