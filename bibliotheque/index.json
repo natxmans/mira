@@ -1,0 +1,131 @@
+{
+ "format": "mira-bibliotheque/1",
+ "livres": [
+  {
+   "id": "fables-la-fontaine",
+   "titre": "Fables",
+   "auteur": "Jean de La Fontaine",
+   "annee": "1668-1694",
+   "genre": "Fables en vers",
+   "caracteres": 462079,
+   "source": "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_%28%C3%A9d._1874%29"
+  },
+  {
+   "id": "contes-perrault",
+   "titre": "Contes",
+   "auteur": "Charles Perrault",
+   "annee": "1697",
+   "genre": "Contes de fées",
+   "caracteres": 109765,
+   "source": "https://fr.wikisource.org/wiki/Contes_de_Perrault_%28%C3%A9d._1902%29"
+  },
+  {
+   "id": "andersen",
+   "titre": "Contes d'Andersen",
+   "auteur": "Hans Christian Andersen (trad. David Soldi)",
+   "annee": "1876",
+   "genre": "Contes",
+   "caracteres": 403947,
+   "source": "https://fr.wikisource.org/wiki/Contes_d%E2%80%99Andersen/Texte_entier"
+  },
+  {
+   "id": "grimm",
+   "titre": "Contes choisis",
+   "auteur": "Jacob et Wilhelm Grimm (trad. Frédéric Baudry)",
+   "annee": "1864",
+   "genre": "Contes",
+   "caracteres": 337671,
+   "source": "https://fr.wikisource.org/wiki/Contes_choisis_des_fr%C3%A8res_Grimm/Texte_entier"
+  },
+  {
+   "id": "alice",
+   "titre": "Alice au pays des merveilles",
+   "auteur": "Lewis Carroll (trad. Henri Bué)",
+   "annee": "1869",
+   "genre": "Roman merveilleux",
+   "caracteres": 156358,
+   "source": "https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/Texte_entier"
+  },
+  {
+   "id": "renart",
+   "titre": "Le Roman de Renart",
+   "auteur": "Anonyme (trad. Paulin Paris)",
+   "annee": "1861",
+   "genre": "Récits d’animaux",
+   "caracteres": 373124,
+   "source": "https://fr.wikisource.org/wiki/Le_Roman_de_Renart/Texte_entier"
+  },
+  {
+   "id": "malheurs-sophie",
+   "titre": "Les Malheurs de Sophie",
+   "auteur": "Comtesse de Ségur",
+   "annee": "1858",
+   "genre": "Roman pour la jeunesse",
+   "caracteres": 195972,
+   "source": "https://fr.wikisource.org/wiki/Les_Malheurs_de_Sophie/Texte_entier"
+  },
+  {
+   "id": "poil-de-carotte",
+   "titre": "Poil de Carotte",
+   "auteur": "Jules Renard",
+   "annee": "1894",
+   "genre": "Récits",
+   "caracteres": 190871,
+   "source": "https://fr.wikisource.org/wiki/Poil_de_Carotte/Texte_entier"
+  },
+  {
+   "id": "lettres-moulin",
+   "titre": "Lettres de mon moulin",
+   "auteur": "Alphonse Daudet",
+   "annee": "1869",
+   "genre": "Contes et nouvelles",
+   "caracteres": 274888,
+   "source": "https://fr.wikisource.org/wiki/Lettres_de_mon_moulin/Texte_entier"
+  },
+  {
+   "id": "contes-lundi",
+   "titre": "Les Contes du lundi",
+   "auteur": "Alphonse Daudet",
+   "annee": "1873",
+   "genre": "Contes et nouvelles",
+   "caracteres": 385954,
+   "source": "https://fr.wikisource.org/wiki/Les_Contes_du_lundi"
+  },
+  {
+   "id": "tour-du-monde",
+   "titre": "Le Tour du monde en quatre-vingts jours",
+   "auteur": "Jules Verne",
+   "annee": "1873",
+   "genre": "Roman d'aventures",
+   "caracteres": 418900,
+   "source": "https://fr.wikisource.org/wiki/Le_Tour_du_monde_en_quatre-vingts_jours/Texte_entier"
+  },
+  {
+   "id": "terre-lune",
+   "titre": "De la Terre à la Lune",
+   "auteur": "Jules Verne",
+   "annee": "1865",
+   "genre": "Roman d'aventures",
+   "caracteres": 331062,
+   "source": "https://fr.wikisource.org/wiki/De_la_Terre_%C3%A0_la_Lune/Texte_entier"
+  },
+  {
+   "id": "centre-terre",
+   "titre": "Voyage au centre de la Terre",
+   "auteur": "Jules Verne",
+   "annee": "1864",
+   "genre": "Roman d'aventures",
+   "caracteres": 415859,
+   "source": "https://fr.wikisource.org/wiki/Voyage_au_centre_de_la_Terre/Texte_entier"
+  },
+  {
+   "id": "vingt-mille-lieues",
+   "titre": "Vingt mille lieues sous les mers",
+   "auteur": "Jules Verne",
+   "annee": "1870",
+   "genre": "Roman d'aventures",
+   "caracteres": 872231,
+   "source": "https://fr.wikisource.org/wiki/Vingt_mille_lieues_sous_les_mers/Texte_entier"
+  }
+ ]
+}
