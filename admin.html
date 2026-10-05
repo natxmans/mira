@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#6a4cff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-mode="admin" class="verrouille">
@@ -86,9 +86,9 @@
   </dialog>
 
   <nav class="vues" role="tablist" aria-label="Espaces">
-    <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="true">Atelier <small>· elle code</small></button>
-    <button role="tab" id="onglet-labo" aria-controls="vue-labo" aria-selected="false" tabindex="-1">Laboratoire <small>· son petit cerveau</small></button>
-    <button role="tab" id="onglet-publication" aria-controls="vue-publication" aria-selected="false" tabindex="-1">Publication <small>· pour les visiteurs</small></button>
+    <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="true"><span aria-hidden="true">✨</span> Atelier <small>· elle code</small></button>
+    <button role="tab" id="onglet-labo" aria-controls="vue-labo" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧪</span> Laboratoire <small>· son petit cerveau</small></button>
+    <button role="tab" id="onglet-publication" aria-controls="vue-publication" aria-selected="false" tabindex="-1"><span aria-hidden="true">🚀</span> Publication <small>· pour les visiteurs</small></button>
   </nav>
 
   <div class="vue" id="vue-atelier" role="tabpanel" aria-labelledby="onglet-atelier">
@@ -149,10 +149,12 @@
             <button type="button" id="voir-console" aria-pressed="false">Console <span id="compte-console"></span></button>
           </div>
           <span class="espace"></span>
-          <button class="bouton petit" type="button" id="recharger" disabled>Relancer</button>
-          <button class="bouton petit" type="button" id="copier" disabled>Copier</button>
-          <button class="bouton petit" type="button" id="telecharger-code" disabled>Télécharger</button>
-          <button class="bouton petit" type="button" id="plein-ecran" disabled>Plein écran</button>
+          <div class="actions-apercu">
+            <button class="bouton petit" type="button" id="recharger" disabled title="Relancer" aria-label="Relancer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span class="etiquette-bouton">Relancer</span></button>
+            <button class="bouton petit" type="button" id="copier" disabled title="Copier le code" aria-label="Copier le code"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span class="etiquette-bouton">Copier</span></button>
+            <button class="bouton petit" type="button" id="telecharger-code" disabled title="Télécharger" aria-label="Télécharger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span class="etiquette-bouton">Télécharger</span></button>
+            <button class="bouton petit" type="button" id="plein-ecran" disabled title="Plein écran" aria-label="Plein écran"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg><span class="etiquette-bouton">Plein écran</span></button>
+          </div>
         </div>
         <div class="apercu-corps">
           <iframe id="cadre" title="Aperçu du code de Mira" sandbox="allow-scripts allow-modals allow-forms allow-pointer-lock" hidden></iframe>

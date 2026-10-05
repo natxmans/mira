@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#6a4cff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-mode="visiteur">
@@ -23,9 +23,14 @@
       <svg viewBox="0 0 34 34"><g class="oeil"><circle cx="11" cy="14" r="3.4" fill="#fff"/><circle cx="23" cy="14" r="3.4" fill="#fff"/></g><path d="M10 22.5q7 5.5 14 0" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>
     </div>
     <div class="titre">
-      <h1 class="nom-mira" style="margin:0;font-size:30px;font-weight:800">Mira</h1>
+      <h1 class="nom-mira">Mira</h1>
       <input id="nom" type="hidden" value="Mira">
-      <p>Une IA qui code, avec un petit cerveau écrit de zéro. Tout se passe dans ton navigateur.</p>
+      <p>L'IA qui code des jeux et des pages pour toi, avec un petit cerveau écrit de zéro.</p>
+      <div class="pastilles-hero">
+        <span><span aria-hidden="true">⚡</span> Le résultat en direct</span>
+        <span><span aria-hidden="true">🔒</span> Tout reste sur ton ordinateur</span>
+        <span><span aria-hidden="true">🧠</span> Un cerveau fait maison</span>
+      </div>
     </div>
     <div class="outils-entete">
       <button class="bouton petit" type="button" id="installer" hidden title="Installer Mira comme une application sur cet ordinateur">Installer</button>
@@ -38,9 +43,9 @@
   <div class="accueil-visiteurs" id="accueil" hidden></div>
 
   <nav class="vues" role="tablist" aria-label="Espaces">
-    <button role="tab" id="onglet-vitrine" aria-controls="vue-vitrine" aria-selected="true">Vitrine <small>· ses créations</small></button>
-    <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="false" tabindex="-1">Fais-la coder <small>· pour toi</small></button>
-    <button role="tab" id="onglet-cerveau" aria-controls="vue-cerveau" aria-selected="false" tabindex="-1">Son petit cerveau <small>· fait maison</small></button>
+    <button role="tab" id="onglet-vitrine" aria-controls="vue-vitrine" aria-selected="true"><span aria-hidden="true">🎮</span> Vitrine <small>· ses créations</small></button>
+    <button role="tab" id="onglet-atelier" aria-controls="vue-atelier" aria-selected="false" tabindex="-1"><span aria-hidden="true">✨</span> Fais-la coder <small>· pour toi</small></button>
+    <button role="tab" id="onglet-cerveau" aria-controls="vue-cerveau" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧠</span> Son petit cerveau <small>· fait maison</small></button>
   </nav>
 
   <div class="vue" id="vue-vitrine" role="tabpanel" aria-labelledby="onglet-vitrine">
@@ -125,10 +130,12 @@
             <button type="button" id="voir-console" aria-pressed="false">Console <span id="compte-console"></span></button>
           </div>
           <span class="espace"></span>
-          <button class="bouton petit" type="button" id="recharger" disabled>Relancer</button>
-          <button class="bouton petit" type="button" id="copier" disabled>Copier</button>
-          <button class="bouton petit" type="button" id="telecharger-code" disabled>Télécharger</button>
-          <button class="bouton petit" type="button" id="plein-ecran" disabled>Plein écran</button>
+          <div class="actions-apercu">
+            <button class="bouton petit" type="button" id="recharger" disabled title="Relancer" aria-label="Relancer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span class="etiquette-bouton">Relancer</span></button>
+            <button class="bouton petit" type="button" id="copier" disabled title="Copier le code" aria-label="Copier le code"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span class="etiquette-bouton">Copier</span></button>
+            <button class="bouton petit" type="button" id="telecharger-code" disabled title="Télécharger" aria-label="Télécharger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span class="etiquette-bouton">Télécharger</span></button>
+            <button class="bouton petit" type="button" id="plein-ecran" disabled title="Plein écran" aria-label="Plein écran"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg><span class="etiquette-bouton">Plein écran</span></button>
+          </div>
         </div>
         <div class="apercu-corps">
           <iframe id="cadre" title="Aperçu du code de Mira" sandbox="allow-scripts allow-modals allow-forms allow-pointer-lock" hidden></iframe>
