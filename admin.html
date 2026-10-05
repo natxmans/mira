@@ -242,6 +242,8 @@
       <div class="boutons" style="margin-bottom:10px">
         <button class="bouton petit" type="button" data-modele="tout">Tout lire (le plus de données)</button>
         <button class="bouton petit" type="button" data-modele="discussions">Modèle : discussions</button>
+        <button class="bouton petit" type="button" data-modele="connaissances">Modèle : connaissances</button>
+        <button class="bouton petit" type="button" data-modele="code">Modèle : apprendre à coder</button>
         <button class="bouton petit" type="button" data-modele="festival">Modèle : festival 2K27</button>
         <button class="bouton petit" type="button" data-modele="histoires">Modèle : histoires</button>
         <button class="bouton petit" type="button" data-modele="vide">Page blanche</button>
@@ -252,6 +254,20 @@
         <button class="bouton principal" type="button" id="utiliser" disabled>Utiliser ce texte</button>
         <button class="bouton" type="button" id="annuler-textes" disabled>Annuler les changements</button>
       </div>
+      <h3>Sa bibliothèque : de vrais livres</h3>
+      <p class="sous" style="margin-bottom:8px">14 livres du domaine public (fables, contes, romans d'aventures : près de 5 millions de caractères), transcrits par les bénévoles de Wikisource. Coche ceux qu'elle doit lire en plus de ses textes. Ce sont des textes anciens : certains mots et certaines idées ont vieilli.</p>
+      <div class="boutons" style="margin-bottom:8px">
+        <button class="bouton petit" type="button" id="livres-tous">Tout cocher</button>
+        <button class="bouton petit" type="button" id="livres-aucun">Tout décocher</button>
+        <select class="bouton petit" id="part-livres" aria-label="Mélange entre ses textes et les livres">
+          <option value="0.25">Mélange : surtout ses textes (1/4 de livres)</option>
+          <option value="0.5">Mélange : moitié textes, moitié livres</option>
+          <option value="0.75">Mélange : surtout les livres (3/4)</option>
+        </select>
+      </div>
+      <ul class="lecons pub-liste" id="liste-bibliotheque"></ul>
+      <p class="compteur" id="etat-bibliotheque"></p>
+
       <h3>Lui donner encore plus à lire</h3>
       <p class="sous" style="margin-bottom:8px">Cherche un livre libre de droits (fables, contes, romans anciens sur Wikisource) ou un article (Vikidia, Wikipédia), puis ajoute-le à ses textes. Plus elle lit, plus elle apprend… mais plus son entraînement est long.</p>
       <form class="boutons" id="form-livres" autocomplete="off">

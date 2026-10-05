@@ -469,11 +469,14 @@ function installerCerveau() {
     }
 
     // Une étape d'entraînement : B morceaux de texte pris au hasard, aller, retour, ajustement.
-    entrainer(donnees, B, vitesse, hasard, lecons) {
+    // Un morceau sur quatre vient des leçons (s'il y en a) ; parmi les autres, une part
+    // « partLivres » vient des livres de sa bibliothèque, pour qu'ils ne noient pas ses textes.
+    entrainer(donnees, B, vitesse, hasard, lecons, livres, partLivres) {
       const T = this.cfg.T;
       const idx = new Int32Array(B * T), cibles = new Int32Array(B * T);
       for (let b = 0; b < B; b++) {
-        const source = lecons && hasard() < 0.25 ? lecons : donnees;
+        const source = lecons && hasard() < 0.25 ? lecons
+          : livres && hasard() < (partLivres || 0.5) ? livres : donnees;
         const debut = Math.floor(hasard() * (source.length - T - 1));
         for (let t = 0; t < T; t++) {
           idx[b * T + t] = source[debut + t];
@@ -567,7 +570,7 @@ function installerCerveau() {
  */
 function ouvrier(port, IA) {
   'use strict';
-  let cerveau = null, donnees = null, lecons = null;
+  let cerveau = null, donnees = null, lecons = null, livres = null, partLivres = 0.5;
   let paquet = 8, enCours = false, amorce = '\n', discussion = true;
   let cumulPerte = 0, cumulReussite = 0, nbCumul = 0, dernierEnvoi = 0;
   const hasard = IA.creerHasard((Date.now() ^ 0x5bd1e995) >>> 0);
@@ -626,7 +629,7 @@ function ouvrier(port, IA) {
     if (!cerveau || !donnees) { enCours = false; envoyer({ type: 'etat', enCours }); return; }
     const debut = Date.now();
     do {
-      const r = cerveau.entrainer(donnees, paquet, vitesse(cerveau.etape), hasard, lecons);
+      const r = cerveau.entrainer(donnees, paquet, vitesse(cerveau.etape), hasard, lecons, livres, partLivres);
       cumulPerte += r.perte; cumulReussite += r.reussite; nbCumul++;
       if (estJalon(cerveau.etape)) journal(r.perte);
     } while (Date.now() - debut < 60);
@@ -660,6 +663,8 @@ function ouvrier(port, IA) {
         case 'textes':
           donnees = etirer(IA.encoder(m.base));
           lecons = m.lecons ? etirer(IA.encoder(m.lecons)) : null;
+          livres = m.livres ? etirer(IA.encoder(m.livres)) : null;
+          partLivres = typeof m.partLivres === 'number' ? Math.min(0.9, Math.max(0.05, m.partLivres)) : 0.5;
           amorce = m.amorce || '\n';
           discussion = !!m.discussion;
           break;

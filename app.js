@@ -50,6 +50,15 @@
   };
   if (!TAILLES[etat.taille]) etat.taille = 'petite';
 
+  // Sa bibliothèque : de vrais livres du domaine public (dossier bibliotheque/), lus en plus
+  // de ses textes. Seuls les livres choisis sont gardés dans le navigateur, pas leur texte.
+  const livres = {
+    index: [],
+    textes: new Map(),
+    choisis: new Set(stock.lire('livres', [])),
+    part: [0.25, 0.5, 0.75].includes(stock.lire('part-livres', 0.5)) ? stock.lire('part-livres', 0.5) : 0.5,
+  };
+
   // ---------------------------------------------------------------------------
   // Le moteur : le cerveau tourne dans un « Worker » (en arrière-plan).
   // Si le navigateur refuse, il tourne directement dans la page.
@@ -155,7 +164,11 @@
     const lecons = etat.lecons.map((l) => `Toi : ${l.q}\nIA : ${avecNom(l.r)}\n`).join('');
     let amorce = "\nToi : Salut ! Tu t'appelles comment ?\nIA : ";
     if (!etat.discussion) amorce = /Il était une fois/.test(base) ? 'Il était une fois' : base.trim().split(/\s+/).slice(0, 3).join(' ');
-    moteur.envoyer({ type: 'textes', base, lecons: lecons ? '\n' + lecons : '', discussion: etat.discussion, amorce });
+    const livresLus = livres.index.filter((l) => livres.choisis.has(l.id) && livres.textes.has(l.id)).map((l) => livres.textes.get(l.id));
+    moteur.envoyer({
+      type: 'textes', base, lecons: lecons ? '\n' + lecons : '', discussion: etat.discussion, amorce,
+      livres: livresLus.length ? livresLus.join('\n\n') : null, partLivres: livres.part,
+    });
     afficherDiscussion();
   }
 
@@ -543,6 +556,97 @@
     });
   }
 
+  // Sa bibliothèque : on charge l'index, puis le texte des livres cochés seulement.
+  function afficherEtatBibliotheque() {
+    const choisis = livres.index.filter((l) => livres.choisis.has(l.id));
+    const total = choisis.reduce((n, l) => n + l.caracteres, 0);
+    $('#etat-bibliotheque').textContent = choisis.length
+      ? `${choisis.length} livre${choisis.length > 1 ? 's' : ''} : ${nombre.format(total)} caractères, soit environ ${nombre.format(Math.round(total / PAGE))} pages, en plus de ses textes.`
+      : 'Aucun livre coché : elle ne lit que ses textes.';
+  }
+
+  async function chargerLivresChoisis() {
+    const manquants = livres.index.filter((l) => livres.choisis.has(l.id) && !livres.textes.has(l.id));
+    if (!manquants.length) return;
+    $('#etat-bibliotheque').textContent = `Chargement de ${manquants.length} livre${manquants.length > 1 ? 's' : ''}…`;
+    const rates = [];
+    await Promise.all(manquants.map(async (l) => {
+      try {
+        const r = await fetch('bibliotheque/' + encodeURIComponent(l.id) + '.txt');
+        if (!r.ok) throw new Error(String(r.status));
+        livres.textes.set(l.id, await r.text());
+      } catch (e) { rates.push(l.titre); }
+    }));
+    if (rates.length) afficherToast(`Impossible de charger : ${rates.join(', ')}. Vérifie ta connexion internet.`);
+  }
+
+  async function majLivres() {
+    stock.ecrire('livres', Array.from(livres.choisis));
+    await chargerLivresChoisis();
+    afficherEtatBibliotheque();
+    envoyerTextes();
+  }
+
+  function afficherBibliotheque() {
+    const ul = $('#liste-bibliotheque');
+    ul.textContent = '';
+    for (const l of livres.index) {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      const caseL = document.createElement('input');
+      caseL.type = 'checkbox';
+      caseL.checked = livres.choisis.has(l.id);
+      caseL.addEventListener('change', () => {
+        if (caseL.checked) livres.choisis.add(l.id); else livres.choisis.delete(l.id);
+        majLivres();
+      });
+      const texte = document.createElement('span');
+      const titre = document.createElement('b');
+      titre.textContent = l.titre;
+      const petit = document.createElement('small');
+      petit.textContent = `${l.auteur} · ${l.annee} · ${l.genre} · environ ${nombre.format(Math.round(l.caracteres / PAGE))} pages`;
+      texte.append(titre, petit);
+      label.append(caseL, texte);
+      li.append(label);
+      ul.append(li);
+    }
+    afficherEtatBibliotheque();
+  }
+
+  async function preparerBibliotheque() {
+    try {
+      const r = await fetch('bibliotheque/index.json');
+      if (!r.ok) throw new Error(String(r.status));
+      livres.index = (await r.json()).livres || [];
+    } catch (e) {
+      $('#etat-bibliotheque').textContent = "La bibliothèque n'a pas pu être chargée (il faut une connexion internet la première fois).";
+      return;
+    }
+    livres.choisis = new Set(Array.from(livres.choisis).filter((id) => livres.index.some((l) => l.id === id)));
+    afficherBibliotheque();
+    $('#livres-tous').addEventListener('click', () => {
+      for (const l of livres.index) livres.choisis.add(l.id);
+      afficherBibliotheque();
+      majLivres();
+    });
+    $('#livres-aucun').addEventListener('click', () => {
+      livres.choisis.clear();
+      afficherBibliotheque();
+      majLivres();
+    });
+    $('#part-livres').value = String(livres.part);
+    $('#part-livres').addEventListener('change', () => {
+      livres.part = parseFloat($('#part-livres').value);
+      stock.ecrire('part-livres', livres.part);
+      envoyerTextes();
+    });
+    if (livres.choisis.size) {
+      await chargerLivresChoisis();
+      afficherEtatBibliotheque();
+      envoyerTextes();
+    }
+  }
+
   // Lui donner encore plus à lire : livres libres de droits (Wikisource) et articles.
   async function chercherLivres(source, requete) {
     const ligne = $('#etat-livres');
@@ -650,6 +754,7 @@
       const fichier = {
         app: 'mon-ia', version: 1, nom: etat.nom, taille: etat.taille,
         textes: etat.textes, lecons: etat.lecons, historique: etat.historique, journal: etat.journal, cerveau,
+        livres: Array.from(livres.choisis), partLivres: livres.part,
       };
       const lien = document.createElement('a');
       lien.href = URL.createObjectURL(new Blob([JSON.stringify(fichier)], { type: 'application/json' }));
@@ -676,6 +781,13 @@
       etat.taille = TAILLES[f.taille] ? f.taille : trouverTaille(f.cerveau.cfg);
       if (typeof f.textes === 'string') etat.textes = f.textes;
       if (Array.isArray(f.lecons)) etat.lecons = f.lecons;
+      if (Array.isArray(f.livres)) {
+        livres.choisis = new Set(f.livres.filter((id) => !livres.index.length || livres.index.some((l) => l.id === id)));
+        if ([0.25, 0.5, 0.75].includes(f.partLivres)) livres.part = f.partLivres;
+        stock.ecrire('part-livres', livres.part);
+        if (livres.index.length) { $('#part-livres').value = String(livres.part); afficherBibliotheque(); }
+        majLivres();
+      }
       etat.historique = Array.isArray(f.historique) ? f.historique : [];
       etat.journal = Array.isArray(f.journal) ? f.journal : [];
       etat.perte = etat.historique.length ? etat.historique[etat.historique.length - 1][1] : null;
@@ -826,6 +938,7 @@
     $('#annuler-textes').addEventListener('click', () => { zone.value = etat.textes; compter(); });
     compter();
     afficherLecons();
+    preparerBibliotheque();
     if (typeof RECHERCHE === 'undefined') $('#form-livres').hidden = true;
     $('#form-livres').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -859,7 +972,7 @@
     });
     $('#tout-effacer').addEventListener('click', () => {
       if (!confirm('Tout effacer : son cerveau, ses textes, ses leçons et son nom ? Tu ne pourras pas revenir en arrière.')) return;
-      for (const cle of ['nom', 'taille', 'textes', 'lecons', 'historique', 'journal', 'cerveau']) stock.effacer(cle);
+      for (const cle of ['nom', 'taille', 'textes', 'lecons', 'historique', 'journal', 'cerveau', 'livres', 'part-livres']) stock.effacer(cle);
       location.reload();
     });
     setInterval(() => { if (etat.enCours) sauvegarder(); }, 20000);

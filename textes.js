@@ -678,6 +678,36 @@ Il était une fois un ours qui adorait le miel. Un jour, il trouva une ruche tou
 Il était une fois un garçon qui collectionnait les étoiles. Chaque nuit, il en dessinait une nouvelle dans son cahier. Un soir, une étoile filante passa devant sa fenêtre et lui dit : « Tu m'as oubliée ! » Le garçon rit, et il la dessina en premier, tout en haut de la page.
 
 Il était une fois une fille qui parlait aux arbres. Personne ne la croyait. Mais un jour de tempête, un vieux chêne lui chuchota de rentrer vite à la maison. Elle courut prévenir tout le village, et chacun se mit à l'abri juste à temps. Depuis, tout le monde écoute les arbres.
+
+Il était une fois une manette de jeu oubliée au fond d'un placard. Elle se souvenait des parties d'autrefois, des cris de joie et des boutons qu'on écrasait trop fort. Un jour, une petite fille ouvrit le placard, souffla sur la poussière et la brancha. L'écran s'alluma, la musique démarra, et la vieille manette vibra de bonheur.
+
+Il était une fois un pixel tout seul au milieu d'un écran noir. Il clignotait pour qu'on le remarque, mais personne ne le voyait. Alors il appela ses voisins, un par un. Bientôt, mille pixels s'allumèrent ensemble et dessinèrent un grand soleil. Le pixel comprit qu'à plusieurs, on brille beaucoup plus fort.
+
+Il était une fois un escargot qui rêvait de faire le tour du jardin. Il partit un lundi matin, avec sa maison sur le dos. Il traversa le potager, contourna la mare et grimpa sur le muret. Il arriva le dimanche suivant, juste à temps pour voir le coucher du soleil. Personne n'avait vu le jardin d'aussi près que lui.
+
+Il était une fois une équipe de quatre amis qui voulait gagner un tournoi de jeux vidéo. Le premier était rapide, le deuxième patient, le troisième malin, et le quatrième riait tout le temps. Ils perdirent leur premier match, puis s'entraînèrent ensemble chaque soir. Le jour de la finale, ils ne gagnèrent pas, mais ils jouèrent si bien que toute la salle se leva pour les applaudir.
+
+Il était une fois un phare qui veillait sur la mer. Toutes les nuits, il tournait sa lumière pour guider les bateaux. Un soir de brouillard, sa lampe s'éteignit. Le gardien grimpa les cent marches en courant et ralluma la flamme. Au loin, un petit bateau de pêche fit trois coups de sirène pour dire merci.
+
+Il était une fois une graine qui avait peur de grandir. Sous la terre, il faisait chaud et tout était calme. Mais la pluie tomba, le soleil chauffa, et la graine sentit une petite tige pousser vers le haut. Quand elle sortit enfin de terre, elle découvrit le ciel bleu, les papillons et le vent. Elle se demanda pourquoi elle avait attendu si longtemps.
+
+Il était une fois un robot jardinier qui ne savait pas reconnaître les fleurs des mauvaises herbes. Le premier jour, il arracha toutes les tulipes. Le deuxième jour, il demanda de l'aide à une vieille dame. Elle lui apprit le nom de chaque plante, une par une. Au printemps suivant, son jardin était le plus beau de toute la ville.
+
+Il était une fois une baleine qui chantait faux. Les autres baleines se bouchaient les oreilles quand elle commençait. Un jour, un bateau perdu dans la tempête entendit son chant bizarre et le suivit jusqu'au port. Depuis ce jour, les marins l'appellent la baleine boussole, et ils adorent sa chanson.
+
+Il était une fois deux frères qui se disputaient toujours pour la télécommande. Un soir, la télécommande disparut. Ils la cherchèrent partout, sous les coussins, derrière le canapé, dans le frigo. Ils ne la trouvèrent pas, alors ils sortirent un vieux jeu de société. Ils rirent tellement que, le lendemain, ils cachèrent eux-mêmes la télécommande.
+
+Il était une fois une étoile qui voulait descendre sur la Terre. Elle demanda conseil à la Lune, qui lui répondit : « Si tu descends, tu ne brilleras plus pour personne. » L'étoile réfléchit, puis décida de rester dans le ciel. Mais chaque nuit, elle cligne un peu plus fort pour saluer les enfants qui la regardent.
+
+Il était une fois un ordinateur très lent qui avait honte de lui. Les autres ordinateurs calculaient en un éclair, lui mettait des heures. Mais une famille l'adopta pour écrire des histoires. Il n'avait pas besoin d'aller vite pour ça. Chaque soir, il affichait une nouvelle aventure, lettre après lettre, et tout le monde attendait la suite avec impatience.
+
+Il était une fois un renard qui voulait apprendre à compter. Il compta les poules, mais elles bougeaient tout le temps. Il compta les étoiles, mais il y en avait trop. Alors il compta ses propres pas, un, deux, trois, jusqu'à la rivière. Ce soir-là, il savait compter jusqu'à cent, et il était très fier.
+
+Il était une fois une petite fille qui inventait des jeux. Elle dessinait les niveaux sur du papier, avec des pièges, des trésors et des monstres gentils. Un jour, elle apprit à programmer. Elle transforma son premier dessin en vrai jeu, et ses amis y jouèrent pendant toute la récréation. Elle avait déjà une idée pour le niveau deux.
+
+Il était une fois un vieux dictionnaire qui connaissait tous les mots, sauf un. Il chercha ce mot dans toutes ses pages, de A jusqu'à Z. Un enfant qui passait par là lui dit : « Le mot qui te manque, c'est peut-être celui que tu n'as pas encore inventé. » Le dictionnaire sourit, et il garda une page blanche pour les mots de demain.
+
+Il était une fois un champion de course qui se tordit la cheville la veille de la grande compétition. Il ne pouvait pas courir, alors il devint l'entraîneur de son petit frère. Il lui apprit à bien respirer, à partir vite et à ne jamais abandonner. Le lendemain, le petit frère franchit la ligne en premier, et les deux frères levèrent les bras ensemble.
 `;
 
 // Tout ce que l'IA sait du festival vient de ../Projet 2K27/Festival 2K27/donnees-festival.js
@@ -860,5 +890,733 @@ Toi : Le programme peut changer ?
 IA : Oui, c'est encore une hypothèse. Il sera validé par les jeunes à la séance du mercredi 30 septembre.
 `;
 
+// Des connaissances, sous forme de questions et réponses (une réponse par ligne).
+TEXTES.connaissances = `Toi : Combien de pattes a une araignée ?
+IA : Une araignée a huit pattes. Les insectes, eux, en ont six.
+Toi : Combien de pattes a un insecte ?
+IA : Un insecte a six pattes, comme la fourmi, l'abeille ou la coccinelle.
+Toi : L'araignée est un insecte ?
+IA : Non ! L'araignée a huit pattes : c'est un arachnide, pas un insecte.
+Toi : Le dauphin est un poisson ?
+IA : Non, le dauphin est un mammifère : il respire de l'air et allaite ses petits.
+Toi : La baleine est un poisson ?
+IA : Non, la baleine est un mammifère marin. Elle remonte à la surface pour respirer.
+Toi : C'est quoi un mammifère ?
+IA : C'est un animal qui allaite ses petits, comme le chien, la baleine, la chauve-souris ou l'humain.
+Toi : C'est quoi un reptile ?
+IA : C'est un animal couvert d'écailles, comme le serpent, le lézard, le crocodile ou la tortue.
+Toi : C'est quoi un amphibien ?
+IA : C'est un animal qui vit d'abord dans l'eau puis sur terre, comme la grenouille ou le triton.
+Toi : C'est quoi un herbivore ?
+IA : C'est un animal qui mange des plantes, comme la vache, le lapin ou l'éléphant.
+Toi : C'est quoi un carnivore ?
+IA : C'est un animal qui mange de la viande, comme le lion, le loup ou le requin.
+Toi : C'est quoi un omnivore ?
+IA : C'est un animal qui mange de tout, des plantes et de la viande, comme l'ours, le cochon ou l'humain.
+Toi : Quel est le plus grand animal terrestre ?
+IA : C'est l'éléphant d'Afrique. Il peut peser plus de six tonnes !
+Toi : Quel est l'animal le plus haut ?
+IA : C'est la girafe. Elle peut dépasser cinq mètres de haut.
+Toi : Quel est l'oiseau le plus rapide ?
+IA : C'est le faucon pèlerin. En piqué, il dépasse 300 kilomètres par heure !
+Toi : Quel est le plus grand oiseau ?
+IA : C'est l'autruche. Elle ne vole pas, mais elle court très vite.
+Toi : Combien de cœurs a une pieuvre ?
+IA : Une pieuvre a trois cœurs, et son sang est bleu !
+Toi : Combien de bras a une pieuvre ?
+IA : Une pieuvre a huit bras couverts de ventouses.
+Toi : Comment respirent les poissons ?
+IA : Avec leurs branchies, qui prennent l'oxygène dissous dans l'eau.
+Toi : Que mange le panda ?
+IA : Le panda mange surtout du bambou, des kilos et des kilos chaque jour.
+Toi : Les chauves-souris sont aveugles ?
+IA : Non ! Elles voient, et beaucoup se repèrent aussi avec l'écho de leurs cris : c'est l'écholocalisation.
+Toi : Pourquoi les chats ronronnent ?
+IA : Souvent quand ils sont détendus, mais aussi pour se rassurer quand ils ont mal ou peur.
+Toi : Combien de temps vit un chat ?
+IA : Un chat vit en général entre 12 et 18 ans.
+Toi : Combien de temps vit une tortue ?
+IA : Certaines tortues géantes vivent plus de 100 ans !
+Toi : Où vivent les manchots ?
+IA : Les manchots vivent dans l'hémisphère sud, par exemple en Antarctique.
+Toi : Quelle est la différence entre un manchot et un pingouin ?
+IA : Le pingouin vit dans le nord et sait voler. Le manchot vit dans le sud et ne vole pas, mais il nage très bien.
+Toi : Comment les abeilles font le miel ?
+IA : Elles récoltent le nectar des fleurs, le transforment dans leur jabot, puis le laissent sécher dans les alvéoles de la ruche.
+Toi : C'est quoi la pollinisation ?
+IA : C'est le transport du pollen d'une fleur à une autre, souvent par les insectes. Ça permet aux plantes de faire des fruits et des graines.
+Toi : C'est quoi un dinosaure ?
+IA : Ce sont des reptiles qui ont vécu pendant des millions d'années. Les oiseaux sont leurs descendants !
+Toi : Quand les dinosaures ont disparu ?
+IA : Il y a environ 66 millions d'années, sans doute après la chute d'un énorme astéroïde.
+Toi : C'est quoi le tyrannosaure ?
+IA : C'était un grand dinosaure carnivore, avec une énorme mâchoire et de tout petits bras.
+Toi : Les humains ont vu les dinosaures ?
+IA : Non ! Les dinosaures ont disparu des millions d'années avant l'apparition des humains.
+Toi : Pourquoi les feuilles tombent en automne ?
+IA : Pour économiser l'eau et l'énergie pendant l'hiver, beaucoup d'arbres laissent tomber leurs feuilles.
+Toi : Pourquoi les feuilles sont vertes ?
+IA : Grâce à la chlorophylle, qui capte la lumière du soleil pour la photosynthèse.
+Toi : Quel est l'arbre le plus vieux ?
+IA : Certains pins de Californie ont plus de 4 000 ans !
+Toi : Combien d'os a le corps humain ?
+IA : Un adulte a environ 206 os. Un bébé en a plus, car certains se soudent en grandissant.
+Toi : À quoi sert le cœur ?
+IA : Le cœur est un muscle qui pompe le sang dans tout le corps.
+Toi : Combien de fois bat le cœur ?
+IA : Environ 70 fois par minute au repos chez un adulte, un peu plus vite chez un enfant.
+Toi : À quoi servent les poumons ?
+IA : Ils font entrer l'oxygène de l'air dans le sang et ressortir le dioxyde de carbone.
+Toi : À quoi sert le cerveau ?
+IA : Il commande tout le corps : il pense, il se souvient, il ressent et il apprend.
+Toi : À quoi sert le sang ?
+IA : Il transporte l'oxygène et la nourriture dans tout le corps, et il emporte les déchets.
+Toi : Combien de dents on a ?
+IA : Un enfant a 20 dents de lait, et un adulte a 32 dents.
+Toi : Quels sont les cinq sens ?
+IA : La vue, l'ouïe, le toucher, l'odorat et le goût.
+Toi : Quel est le plus grand organe du corps ?
+IA : C'est la peau ! Elle nous protège de l'extérieur.
+Toi : Pourquoi on dort ?
+IA : Pour reposer le corps et le cerveau. Pendant le sommeil, le cerveau range ce qu'on a appris.
+Toi : Combien d'heures il faut dormir ?
+IA : Entre 9 et 12 heures pour un enfant, et entre 8 et 10 heures pour un ado.
+Toi : Pourquoi il faut se laver les mains ?
+IA : Pour enlever les microbes qui pourraient nous rendre malades.
+Toi : C'est quoi un microbe ?
+IA : C'est un être minuscule qu'on ne voit qu'au microscope. Certains rendent malade, d'autres sont très utiles.
+Toi : C'est quoi un vaccin ?
+IA : Un vaccin apprend au corps à se défendre contre une maladie avant de la rencontrer.
+Toi : Pourquoi on a le hoquet ?
+IA : Parce qu'un muscle sous les poumons, le diaphragme, se contracte tout seul par petits coups.
+Toi : Pourquoi on bâille ?
+IA : Les scientifiques ne savent pas encore tout ! Ça arrive souvent quand on est fatigué ou qu'on s'ennuie.
+Toi : Pourquoi il faut manger des légumes ?
+IA : Ils apportent des vitamines, des minéraux et des fibres qui aident le corps à bien fonctionner.
+Toi : Pourquoi il faut boire de l'eau ?
+IA : Parce que le corps est fait en grande partie d'eau, et qu'on en perd toute la journée.
+Toi : Pourquoi il faut faire du sport ?
+IA : Le sport rend le cœur et les muscles plus forts, et il aide aussi à se sentir bien.
+Toi : Combien de temps met la Terre pour tourner autour du Soleil ?
+IA : Environ 365 jours et quart : c'est une année.
+Toi : Pourquoi il y a le jour et la nuit ?
+IA : Parce que la Terre tourne sur elle-même en 24 heures. La moitié tournée vers le Soleil est dans le jour.
+Toi : Pourquoi il y a des saisons ?
+IA : Parce que l'axe de la Terre est penché. Selon le moment de l'année, on reçoit plus ou moins de lumière du Soleil.
+Toi : Qui a marché sur la Lune en premier ?
+IA : Neil Armstrong, en juillet 1969, pendant la mission Apollo 11.
+Toi : C'est quoi une étoile ?
+IA : C'est une énorme boule de gaz très chaude qui produit sa propre lumière. Le Soleil est une étoile.
+Toi : C'est quoi une galaxie ?
+IA : C'est un immense groupe de milliards d'étoiles. La nôtre s'appelle la Voie lactée.
+Toi : C'est quoi la Voie lactée ?
+IA : C'est notre galaxie. Le Soleil n'est qu'une étoile parmi des milliards d'autres dedans.
+Toi : C'est quoi un trou noir ?
+IA : C'est un endroit de l'espace où la gravité est si forte que même la lumière ne peut pas en sortir.
+Toi : C'est quoi une comète ?
+IA : C'est une boule de glace et de poussière. Près du Soleil, elle forme une longue queue brillante.
+Toi : C'est quoi une étoile filante ?
+IA : C'est un petit caillou venu de l'espace qui brûle en entrant dans l'atmosphère de la Terre.
+Toi : La Lune est loin ?
+IA : La Lune est à environ 384 000 kilomètres de la Terre.
+Toi : Le Soleil est loin ?
+IA : Le Soleil est à environ 150 millions de kilomètres. Sa lumière met huit minutes pour nous arriver.
+Toi : Quelle est la planète la plus proche du Soleil ?
+IA : C'est Mercure.
+Toi : Pourquoi Mars est rouge ?
+IA : Parce que son sol est couvert d'une poussière qui contient du fer rouillé.
+Toi : C'est quoi les anneaux de Saturne ?
+IA : Ce sont des milliards de morceaux de glace et de roche qui tournent autour de la planète.
+Toi : Pluton est une planète ?
+IA : Depuis 2006, Pluton est classée comme une planète naine.
+Toi : C'est quoi l'ISS ?
+IA : C'est la Station spatiale internationale, un laboratoire qui tourne autour de la Terre à environ 400 kilomètres d'altitude.
+Toi : Qui est Thomas Pesquet ?
+IA : C'est un astronaute français. Il a séjourné plusieurs mois dans la Station spatiale internationale.
+Toi : C'est quoi la gravité ?
+IA : C'est la force qui attire les objets les uns vers les autres. C'est elle qui nous garde les pieds sur la Terre.
+Toi : Pourquoi la Lune change de forme ?
+IA : Elle ne change pas vraiment : on voit seulement une partie plus ou moins grande de sa face éclairée. Ce sont les phases de la Lune.
+Toi : Quel âge a la Terre ?
+IA : La Terre a environ 4,5 milliards d'années.
+Toi : Quel âge a l'univers ?
+IA : L'univers a environ 13,8 milliards d'années.
+Toi : Combien il y a de continents ?
+IA : On compte souvent six continents : l'Afrique, l'Amérique, l'Antarctique, l'Asie, l'Europe et l'Océanie.
+Toi : Combien il y a d'océans ?
+IA : Cinq : le Pacifique, l'Atlantique, l'océan Indien, l'océan Arctique et l'océan Austral.
+Toi : Quel est le plus grand désert ?
+IA : Le plus grand désert chaud, c'est le Sahara. Mais l'Antarctique est un désert froid encore plus grand !
+Toi : Quel est le plus long fleuve du monde ?
+IA : C'est le Nil ou l'Amazone : les scientifiques en discutent encore !
+Toi : Quel est le plus grand pays du monde ?
+IA : C'est la Russie.
+Toi : Quel est le pays le plus peuplé ?
+IA : C'est l'Inde, juste devant la Chine.
+Toi : Combien il y a d'habitants sur Terre ?
+IA : Plus de 8 milliards.
+Toi : Combien il y a d'habitants en France ?
+IA : Environ 68 millions.
+Toi : C'est quoi un volcan ?
+IA : C'est une montagne d'où sort le magma, de la roche fondue venue de l'intérieur de la Terre. Dehors, on l'appelle la lave.
+Toi : C'est quoi un séisme ?
+IA : C'est un tremblement de terre : le sol bouge quand des plaques de la croûte terrestre glissent d'un coup.
+Toi : C'est quoi un tsunami ?
+IA : C'est une vague géante, souvent causée par un séisme sous la mer.
+Toi : C'est quoi un arc-en-ciel ?
+IA : C'est la lumière du soleil qui traverse des gouttes de pluie et se sépare en couleurs.
+Toi : Quelles sont les couleurs de l'arc-en-ciel ?
+IA : Rouge, orange, jaune, vert, bleu, indigo et violet.
+Toi : C'est quoi la foudre ?
+IA : C'est une énorme étincelle électrique entre un nuage et le sol. Le tonnerre, c'est son bruit.
+Toi : Pourquoi on voit l'éclair avant le tonnerre ?
+IA : Parce que la lumière va beaucoup plus vite que le son.
+Toi : C'est quoi le cycle de l'eau ?
+IA : L'eau s'évapore, forme des nuages, retombe en pluie, coule dans les rivières jusqu'à la mer, et tout recommence.
+Toi : Pourquoi il neige ?
+IA : Quand il fait très froid dans les nuages, les gouttes d'eau deviennent des cristaux de glace : ce sont les flocons.
+Toi : C'est quoi le réchauffement climatique ?
+IA : La Terre se réchauffe, surtout à cause des gaz à effet de serre rejetés quand on brûle du pétrole, du charbon ou du gaz.
+Toi : Comment protéger la planète ?
+IA : Économiser l'énergie et l'eau, trier ses déchets, moins gaspiller, et prendre le vélo ou les transports en commun.
+Toi : C'est quoi le recyclage ?
+IA : C'est transformer des déchets en nouveaux objets, par exemple des bouteilles en plastique en pulls polaires.
+Toi : C'est quoi la biodiversité ?
+IA : C'est toute la variété des êtres vivants : les plantes, les animaux, les champignons et les microbes.
+Toi : C'est quoi une énergie renouvelable ?
+IA : C'est une énergie qui ne s'épuise pas, comme le soleil, le vent ou l'eau des rivières.
+Toi : Quels sont les états de l'eau ?
+IA : Solide, c'est la glace. Liquide, c'est l'eau. Gazeux, c'est la vapeur d'eau.
+Toi : C'est quoi l'électricité ?
+IA : C'est un courant de minuscules particules, les électrons, qui circulent dans les fils.
+Toi : C'est quoi un aimant ?
+IA : C'est un objet qui attire le fer. Il a un pôle nord et un pôle sud.
+Toi : De quoi est fait l'air ?
+IA : Surtout d'azote, environ 78 %, et d'oxygène, environ 21 %.
+Toi : C'est quoi l'oxygène ?
+IA : C'est un gaz de l'air que nous respirons pour vivre.
+Toi : C'est quoi l'ADN ?
+IA : C'est une longue molécule qui contient les instructions pour fabriquer et faire fonctionner un être vivant.
+Toi : Quelle est la vitesse du son ?
+IA : Environ 340 mètres par seconde dans l'air.
+Toi : Qui était Isaac Newton ?
+IA : Un savant anglais du dix-septième siècle. Il a expliqué la gravitation et le mouvement des planètes.
+Toi : Qui était Albert Einstein ?
+IA : Un physicien célèbre pour la théorie de la relativité et la formule E = mc2.
+Toi : Qui était Marie Curie ?
+IA : Une scientifique qui a étudié la radioactivité. Elle a reçu deux prix Nobel.
+Toi : Qui était Louis Pasteur ?
+IA : Un scientifique français qui a mis au point le vaccin contre la rage et la pasteurisation.
+Toi : Qui était Galilée ?
+IA : Un savant italien qui a observé le ciel avec une lunette et défendu l'idée que la Terre tourne autour du Soleil.
+Toi : Quelle est la capitale de la Suisse ?
+IA : La capitale de la Suisse, c'est Berne.
+Toi : Quelle est la capitale des Pays-Bas ?
+IA : La capitale des Pays-Bas, c'est Amsterdam.
+Toi : Quelle est la capitale de la Grèce ?
+IA : La capitale de la Grèce, c'est Athènes.
+Toi : Quelle est la capitale de la Russie ?
+IA : La capitale de la Russie, c'est Moscou.
+Toi : Quelle est la capitale de la Chine ?
+IA : La capitale de la Chine, c'est Pékin.
+Toi : Quelle est la capitale de l'Inde ?
+IA : La capitale de l'Inde, c'est New Delhi.
+Toi : Quelle est la capitale du Brésil ?
+IA : La capitale du Brésil, c'est Brasilia.
+Toi : Quelle est la capitale de l'Argentine ?
+IA : La capitale de l'Argentine, c'est Buenos Aires.
+Toi : Quelle est la capitale du Mexique ?
+IA : La capitale du Mexique, c'est Mexico.
+Toi : Quelle est la capitale de l'Égypte ?
+IA : La capitale de l'Égypte, c'est Le Caire.
+Toi : Quelle est la capitale du Maroc ?
+IA : La capitale du Maroc, c'est Rabat.
+Toi : Quelle est la capitale de l'Algérie ?
+IA : La capitale de l'Algérie, c'est Alger.
+Toi : Quelle est la capitale de la Tunisie ?
+IA : La capitale de la Tunisie, c'est Tunis.
+Toi : Quelle est la capitale du Sénégal ?
+IA : La capitale du Sénégal, c'est Dakar.
+Toi : Quelle est la capitale de l'Australie ?
+IA : La capitale de l'Australie, c'est Canberra, et pas Sydney !
+Toi : Quelle est la capitale de l'Irlande ?
+IA : La capitale de l'Irlande, c'est Dublin.
+Toi : Quelle est la capitale de la Suède ?
+IA : La capitale de la Suède, c'est Stockholm.
+Toi : Quelle est la capitale de la Norvège ?
+IA : La capitale de la Norvège, c'est Oslo.
+Toi : Quelle est la capitale du Danemark ?
+IA : La capitale du Danemark, c'est Copenhague.
+Toi : Quelle est la capitale de la Pologne ?
+IA : La capitale de la Pologne, c'est Varsovie.
+Toi : Quelle est la capitale de l'Autriche ?
+IA : La capitale de l'Autriche, c'est Vienne.
+Toi : Quelle est la capitale de la Turquie ?
+IA : La capitale de la Turquie, c'est Ankara.
+Toi : Quelle est la capitale de la Corée du Sud ?
+IA : La capitale de la Corée du Sud, c'est Séoul.
+Toi : Quelle est la capitale de la Finlande ?
+IA : La capitale de la Finlande, c'est Helsinki.
+Toi : Quelle est la capitale de la Hongrie ?
+IA : La capitale de la Hongrie, c'est Budapest.
+Toi : Quelle est la capitale de la Roumanie ?
+IA : La capitale de la Roumanie, c'est Bucarest.
+Toi : Quelle est la capitale du Kenya ?
+IA : La capitale du Kenya, c'est Nairobi.
+Toi : Combien de régions a la France ?
+IA : La France a 18 régions : 13 en métropole et 5 en outre-mer.
+Toi : Combien de départements a la France ?
+IA : La France a 101 départements.
+Toi : Quelle est la deuxième plus grande ville de France ?
+IA : C'est Marseille, après Paris.
+Toi : Quels sont les grands fleuves de France ?
+IA : La Loire, la Seine, le Rhône et la Garonne.
+Toi : Dans quelle région est Bordeaux ?
+IA : Bordeaux est en Nouvelle-Aquitaine, dans le département de la Gironde.
+Toi : C'est quoi la Marseillaise ?
+IA : C'est l'hymne national de la France, écrit en 1792.
+Toi : Quelle est la devise de la France ?
+IA : Liberté, Égalité, Fraternité.
+Toi : De quelles couleurs est le drapeau français ?
+IA : Bleu, blanc et rouge.
+Toi : C'est quoi la préhistoire ?
+IA : C'est la très longue période avant l'invention de l'écriture.
+Toi : Quand a été inventée l'écriture ?
+IA : Il y a environ 5 000 ans, en Mésopotamie.
+Toi : Qui a construit les pyramides ?
+IA : Les anciens Égyptiens, il y a environ 4 500 ans, pour servir de tombeaux aux pharaons.
+Toi : Qui était Jules César ?
+IA : Un général romain qui a conquis la Gaule, au premier siècle avant Jésus-Christ.
+Toi : Qui était Vercingétorix ?
+IA : Un chef gaulois qui a résisté à Jules César. Il a dû se rendre à Alésia en 52 avant Jésus-Christ.
+Toi : Qui était Jeanne d'Arc ?
+IA : Une jeune femme qui a combattu les Anglais pendant la guerre de Cent Ans, au quinzième siècle.
+Toi : Qui a découvert l'Amérique ?
+IA : En 1492, Christophe Colomb a traversé l'Atlantique jusqu'en Amérique. Mais des peuples y vivaient déjà depuis très longtemps !
+Toi : Qui a inventé l'imprimerie ?
+IA : Gutenberg l'a mise au point en Europe vers 1450.
+Toi : C'est quoi la Renaissance ?
+IA : Une période des quinzième et seizième siècles où les arts et les sciences se sont épanouis en Europe.
+Toi : Qui était Léonard de Vinci ?
+IA : Un peintre, inventeur et savant italien de la Renaissance. Il a peint la Joconde.
+Toi : Où est la Joconde ?
+IA : Au musée du Louvre, à Paris.
+Toi : Quand a eu lieu la Première Guerre mondiale ?
+IA : De 1914 à 1918.
+Toi : Quand a eu lieu la Seconde Guerre mondiale ?
+IA : De 1939 à 1945.
+Toi : Pourquoi on fête le 14 juillet ?
+IA : C'est la fête nationale. Elle rappelle la prise de la Bastille en 1789 et la fête de la Fédération en 1790.
+Toi : Pourquoi on fête le 11 novembre ?
+IA : C'est l'anniversaire de l'armistice de 1918, la fin des combats de la Première Guerre mondiale.
+Toi : Quand a été construite la tour Eiffel ?
+IA : Pour l'Exposition universelle de 1889. Elle mesure environ 330 mètres.
+Toi : C'est quoi les Jeux olympiques ?
+IA : Une grande compétition sportive née dans la Grèce antique. Les Jeux modernes ont recommencé en 1896.
+Toi : Paris a eu les Jeux olympiques ?
+IA : Oui, Paris a accueilli les Jeux olympiques en 1900, en 1924 et en 2024.
+Toi : Qui était Victor Hugo ?
+IA : Un grand écrivain français, auteur des Misérables et de Notre-Dame de Paris.
+Toi : Qui était Molière ?
+IA : Un auteur de théâtre du dix-septième siècle, qui a écrit L'Avare et Le Malade imaginaire.
+Toi : Qui était Jean de La Fontaine ?
+IA : Un poète du dix-septième siècle, célèbre pour ses Fables, comme Le Corbeau et le Renard.
+Toi : Qui était Jules Verne ?
+IA : Un écrivain français d'aventures, auteur du Tour du monde en quatre-vingts jours.
+Toi : Qui était Mozart ?
+IA : Un compositeur autrichien du dix-huitième siècle. Il composait déjà de la musique quand il était enfant.
+Toi : Qui était Beethoven ?
+IA : Un compositeur allemand. Il a continué à composer même en devenant sourd.
+Toi : Qui était Picasso ?
+IA : Un peintre espagnol du vingtième siècle, l'un des inventeurs du cubisme.
+Toi : Qui était Van Gogh ?
+IA : Un peintre néerlandais, célèbre pour La Nuit étoilée et Les Tournesols.
+Toi : Qui était Claude Monet ?
+IA : Un peintre français impressionniste, célèbre pour ses tableaux de nymphéas.
+Toi : Combien d'instruments dans un orchestre ?
+IA : Un grand orchestre symphonique peut réunir près de cent musiciens.
+Toi : Quelles sont les notes de musique ?
+IA : Do, ré, mi, fa, sol, la, si.
+Toi : Comment on conjugue faire au présent ?
+IA : Je fais, tu fais, il fait, nous faisons, vous faites, ils font.
+Toi : Comment on conjugue dire au présent ?
+IA : Je dis, tu dis, il dit, nous disons, vous dites, ils disent.
+Toi : Comment on conjugue pouvoir au présent ?
+IA : Je peux, tu peux, il peut, nous pouvons, vous pouvez, ils peuvent.
+Toi : Comment on conjugue vouloir au présent ?
+IA : Je veux, tu veux, il veut, nous voulons, vous voulez, ils veulent.
+Toi : Comment on conjugue savoir au présent ?
+IA : Je sais, tu sais, il sait, nous savons, vous savez, ils savent.
+Toi : Comment on conjugue venir au présent ?
+IA : Je viens, tu viens, il vient, nous venons, vous venez, ils viennent.
+Toi : Comment on conjugue prendre au présent ?
+IA : Je prends, tu prends, il prend, nous prenons, vous prenez, ils prennent.
+Toi : Comment on conjugue être à l'imparfait ?
+IA : J'étais, tu étais, il était, nous étions, vous étiez, ils étaient.
+Toi : Comment on conjugue avoir à l'imparfait ?
+IA : J'avais, tu avais, il avait, nous avions, vous aviez, ils avaient.
+Toi : Comment on conjugue être au futur ?
+IA : Je serai, tu seras, il sera, nous serons, vous serez, ils seront.
+Toi : Comment on conjugue avoir au futur ?
+IA : J'aurai, tu auras, il aura, nous aurons, vous aurez, ils auront.
+Toi : Comment on conjugue chanter au présent ?
+IA : Je chante, tu chantes, il chante, nous chantons, vous chantez, ils chantent.
+Toi : Comment on conjugue finir au présent ?
+IA : Je finis, tu finis, il finit, nous finissons, vous finissez, ils finissent.
+Toi : C'est quoi le passé composé ?
+IA : C'est un temps du passé fait avec être ou avoir et un participe passé, comme j'ai mangé ou je suis parti.
+Toi : Quand on accorde le participe passé avec être ?
+IA : Avec être, il s'accorde avec le sujet : elle est partie, ils sont partis.
+Toi : Comment ne pas confondre a et à ?
+IA : Si tu peux le remplacer par avait, c'est a sans accent. Sinon, c'est à.
+Toi : Comment ne pas confondre et et est ?
+IA : Si tu peux le remplacer par était, c'est est. Si c'est et puis, c'est et.
+Toi : Comment ne pas confondre son et sont ?
+IA : Si tu peux le remplacer par étaient, c'est sont. Si c'est le sien, c'est son.
+Toi : Comment ne pas confondre ou et où ?
+IA : Si tu peux le remplacer par ou bien, c'est ou. Si ça parle d'un lieu, c'est où.
+Toi : C'est quoi un synonyme ?
+IA : C'est un mot qui a presque le même sens qu'un autre, comme content et joyeux.
+Toi : C'est quoi un antonyme ?
+IA : C'est un mot de sens contraire, comme grand et petit.
+Toi : C'est quoi un homonyme ?
+IA : C'est un mot qui se prononce pareil qu'un autre mais qui n'a pas le même sens, comme vert, verre et ver.
+Toi : C'est quoi un pronom ?
+IA : C'est un mot qui remplace un nom, comme il, elle, nous ou eux.
+Toi : C'est quoi un déterminant ?
+IA : C'est un petit mot placé devant le nom, comme le, la, un, une, mon ou ces.
+Toi : C'est quoi un adverbe ?
+IA : C'est un mot invariable qui précise un verbe ou un adjectif, comme vite, très ou souvent.
+Toi : C'est quoi le sujet ?
+IA : C'est le mot qui fait l'action du verbe. Pour le trouver, on demande qui est-ce qui ?
+Toi : C'est quoi une métaphore ?
+IA : C'est une image sans mot de comparaison, comme dire que la Lune est une lanterne.
+Toi : C'est quoi une comparaison ?
+IA : C'est rapprocher deux choses avec un mot comme comme : il est rapide comme l'éclair.
+Toi : C'est quoi un alexandrin ?
+IA : C'est un vers de douze syllabes.
+Toi : C'est quoi une rime ?
+IA : C'est quand deux vers se terminent par le même son.
+Toi : Quel est le pluriel de cheval ?
+IA : Des chevaux.
+Toi : Quel est le pluriel de œil ?
+IA : Des yeux.
+Toi : Quels mots en ou prennent un x au pluriel ?
+IA : Bijou, caillou, chou, genou, hibou, joujou et pou.
+Toi : Comment on dit rouge en anglais ?
+IA : On dit red.
+Toi : Comment on dit bleu en anglais ?
+IA : On dit blue.
+Toi : Comment on dit vert en anglais ?
+IA : On dit green.
+Toi : Comment on dit jaune en anglais ?
+IA : On dit yellow.
+Toi : Comment on dit ami en anglais ?
+IA : On dit friend.
+Toi : Comment on dit école en anglais ?
+IA : On dit school.
+Toi : Comment on dit ordinateur en anglais ?
+IA : On dit computer.
+Toi : Comment on dit jeu en anglais ?
+IA : On dit game.
+Toi : Comment on dit s'il te plaît en anglais ?
+IA : On dit please.
+Toi : Comment on dit désolé en anglais ?
+IA : On dit sorry.
+Toi : Comment on dit bonne nuit en anglais ?
+IA : On dit good night.
+Toi : Comment on dit je t'aime en anglais ?
+IA : On dit I love you.
+Toi : Que veut dire how are you ?
+IA : Ça veut dire comment vas-tu ?
+Toi : Que veut dire good morning ?
+IA : Ça veut dire bonjour, le matin.
+Toi : Compte jusqu'à dix en anglais
+IA : One, two, three, four, five, six, seven, eight, nine, ten !
+Toi : Quels sont les jours de la semaine en anglais ?
+IA : Monday, Tuesday, Wednesday, Thursday, Friday, Saturday et Sunday.
+Toi : Comment on dit merci en allemand ?
+IA : On dit danke.
+Toi : Comment on dit merci en italien ?
+IA : On dit grazie.
+Toi : Comment on dit merci en japonais ?
+IA : On dit arigatou.
+Toi : Combien font 6 x 6 ?
+IA : 6 x 6 = 36.
+Toi : Combien font 7 x 7 ?
+IA : 7 x 7 = 49.
+Toi : Combien font 6 x 8 ?
+IA : 6 x 8 = 48.
+Toi : Combien font 7 x 6 ?
+IA : 7 x 6 = 42.
+Toi : Combien font 8 x 9 ?
+IA : 8 x 9 = 72.
+Toi : Combien font 9 x 7 ?
+IA : 9 x 7 = 63.
+Toi : Combien font 4 x 8 ?
+IA : 4 x 8 = 32.
+Toi : Combien font 11 x 11 ?
+IA : 11 x 11 = 121.
+Toi : Combien font 25 x 4 ?
+IA : 25 x 4 = 100.
+Toi : Combien font 100 divisé par 4 ?
+IA : 100 divisé par 4 = 25.
+Toi : Combien font 50 + 50 ?
+IA : 50 + 50 = 100.
+Toi : Combien font 1000 - 1 ?
+IA : 1000 - 1 = 999.
+Toi : C'est quoi la table de 2 ?
+IA : 2, 4, 6, 8, 10, 12, 14, 16, 18, 20.
+Toi : C'est quoi la table de 5 ?
+IA : 5, 10, 15, 20, 25, 30, 35, 40, 45, 50.
+Toi : C'est quoi la table de 9 ?
+IA : 9, 18, 27, 36, 45, 54, 63, 72, 81, 90.
+Toi : C'est quoi pi ?
+IA : Pi vaut environ 3,14. C'est le nombre qui relie le tour d'un cercle à son diamètre.
+Toi : Comment calculer le périmètre d'un cercle ?
+IA : On fait 2 fois pi fois le rayon.
+Toi : Comment calculer l'aire d'un disque ?
+IA : On fait pi fois le rayon fois le rayon.
+Toi : Combien mesure un angle droit ?
+IA : Un angle droit mesure 90 degrés.
+Toi : Combien font les angles d'un triangle ?
+IA : La somme des angles d'un triangle fait toujours 180 degrés.
+Toi : C'est quoi un carré ?
+IA : Un quadrilatère avec quatre côtés égaux et quatre angles droits.
+Toi : C'est quoi un rectangle ?
+IA : Un quadrilatère avec quatre angles droits. Ses côtés opposés sont égaux.
+Toi : C'est quoi un losange ?
+IA : Un quadrilatère avec quatre côtés égaux.
+Toi : C'est quoi un nombre pair ?
+IA : Un nombre qu'on peut diviser par 2 sans reste, comme 2, 4, 6 ou 100.
+Toi : C'est quoi un nombre impair ?
+IA : Un nombre qui n'est pas divisible par 2, comme 1, 3, 5 ou 99.
+Toi : C'est quoi une moyenne ?
+IA : On additionne toutes les valeurs, puis on divise par le nombre de valeurs.
+Toi : C'est quoi un multiple ?
+IA : Un multiple de 3, c'est un nombre de la table de 3, comme 3, 6, 9 ou 12.
+Toi : C'est quoi un diviseur ?
+IA : Un diviseur de 12, c'est un nombre qui divise 12 sans reste, comme 1, 2, 3, 4, 6 ou 12.
+Toi : Combien de mètres dans un kilomètre ?
+IA : Il y a 1 000 mètres dans un kilomètre.
+Toi : Combien de centimètres dans un mètre ?
+IA : Il y a 100 centimètres dans un mètre.
+Toi : Combien de grammes dans un kilo ?
+IA : Il y a 1 000 grammes dans un kilogramme.
+Toi : Combien de secondes dans une heure ?
+IA : Il y a 3 600 secondes dans une heure.
+Toi : Combien d'heures dans une journée ?
+IA : Il y a 24 heures dans une journée.
+Toi : C'est quoi les chiffres romains ?
+IA : I vaut 1, V vaut 5, X vaut 10, L vaut 50, C vaut 100, D vaut 500 et M vaut 1 000.
+Toi : Comment on écrit 2027 en chiffres romains ?
+IA : MMXXVII.
+Toi : C'est quoi le binaire ?
+IA : C'est une façon d'écrire les nombres avec seulement des 0 et des 1. Par exemple, 5 s'écrit 101.
+Toi : Combien font 2 puissance 10 ?
+IA : 2 puissance 10 = 1 024.
+Toi : C'est quoi un ordinateur ?
+IA : C'est une machine qui suit des instructions très vite pour calculer, afficher et ranger des informations.
+Toi : C'est quoi un processeur ?
+IA : C'est le cerveau de l'ordinateur : il exécute les instructions des programmes.
+Toi : C'est quoi une carte graphique ?
+IA : C'est une puce qui fait des milliers de calculs en même temps pour afficher les images. Mon grand cerveau s'en sert pour réfléchir !
+Toi : C'est quoi la mémoire vive ?
+IA : C'est la mémoire rapide où l'ordinateur range ce qu'il est en train d'utiliser. Elle s'efface quand on l'éteint.
+Toi : C'est quoi un pixel ?
+IA : C'est un tout petit point de couleur. Une image sur un écran est faite de milliers de pixels.
+Toi : C'est quoi un octet ?
+IA : C'est une petite unité d'information faite de 8 bits, c'est-à-dire 8 chiffres 0 ou 1.
+Toi : C'est quoi un bit ?
+IA : C'est la plus petite information possible : un 0 ou un 1.
+Toi : C'est quoi un giga-octet ?
+IA : C'est environ un milliard d'octets. Un film peut peser quelques giga-octets.
+Toi : C'est quoi internet ?
+IA : C'est un immense réseau qui relie des ordinateurs du monde entier.
+Toi : Quelle est la différence entre internet et le web ?
+IA : Internet, c'est le réseau. Le web, ce sont les pages et les sites qu'on visite grâce à ce réseau.
+Toi : C'est quoi un navigateur ?
+IA : C'est le programme qui affiche les sites web, comme Chrome, Firefox, Edge ou Safari.
+Toi : C'est quoi un algorithme ?
+IA : C'est une suite d'étapes précises pour résoudre un problème, comme une recette de cuisine.
+Toi : C'est quoi un bug ?
+IA : C'est une erreur dans un programme, qui le fait marcher de travers.
+Toi : Pourquoi on dit bug ?
+IA : En 1947, des informaticiens ont trouvé un vrai insecte coincé dans leur ordinateur. Bug veut dire insecte en anglais !
+Toi : Qui était Ada Lovelace ?
+IA : Une mathématicienne anglaise du dix-neuvième siècle. On la considère comme la première programmeuse de l'histoire.
+Toi : Qui était Alan Turing ?
+IA : Un mathématicien anglais, l'un des pères de l'informatique et de l'intelligence artificielle.
+Toi : C'est quoi l'open source ?
+IA : C'est quand le code d'un programme est publié pour que tout le monde puisse le lire, l'utiliser et l'améliorer.
+Toi : C'est quoi un modèle de langage ?
+IA : C'est une IA qui a appris à prévoir la suite d'un texte, mot après mot. Les grandes IA qui discutent sont des modèles de langage.
+Toi : C'est quoi l'apprentissage automatique ?
+IA : C'est quand un programme apprend à partir d'exemples, au lieu qu'on lui écrive toutes les règles.
+Toi : Une IA peut se tromper ?
+IA : Oui ! Même les grandes IA peuvent inventer des choses fausses. Il faut toujours vérifier.
+Toi : Comment faire un bon mot de passe ?
+IA : Prends une phrase longue que toi seul connais, utilise un mot de passe différent pour chaque site, et ne le donne à personne.
+Toi : Je peux donner mon adresse sur internet ?
+IA : Non. Ne donne jamais ton adresse, ton numéro de téléphone ou le nom de ton école à quelqu'un que tu ne connais pas.
+Toi : Quelqu'un m'embête sur internet
+IA : Ne réponds pas, garde des captures d'écran, bloque la personne et parles-en à un adulte de confiance. En France, tu peux aussi appeler le 3018, c'est gratuit.
+Toi : C'est quoi le 3018 ?
+IA : C'est le numéro gratuit pour les jeunes victimes de harcèlement ou de violences sur internet, en France.
+Toi : C'est quoi le hameçonnage ?
+IA : C'est un faux message qui imite une vraie entreprise pour te voler ton mot de passe. Ne clique pas sur les liens bizarres !
+Toi : C'est quoi un virus informatique ?
+IA : C'est un programme malveillant qui peut abîmer l'ordinateur ou voler des informations.
+Toi : On peut croire tout ce qu'on lit sur internet ?
+IA : Non ! Vérifie avec plusieurs sources fiables, et demande-toi qui a écrit l'information.
+Toi : C'est quoi une source fiable ?
+IA : C'est un site sérieux qui cite ses sources, comme une encyclopédie, un musée ou un site officiel.
+Toi : Je peux publier une photo d'un ami ?
+IA : Seulement s'il est d'accord ! Chacun a le droit de décider ce qu'on publie de lui.
+`;
+
+// Pour apprendre à coder (le petit cerveau ne code pas, mais il peut en parler).
+TEXTES.code = `Toi : C'est quoi coder ?
+IA : Coder, c'est écrire des instructions qu'un ordinateur peut suivre.
+Toi : C'est quoi un langage de programmation ?
+IA : C'est une langue faite pour donner des ordres à un ordinateur, comme JavaScript ou Python.
+Toi : Par quoi je commence pour apprendre à coder ?
+IA : Commence par une petite page web en HTML, puis ajoute un peu de JavaScript pour la rendre vivante.
+Toi : C'est quoi HTML ?
+IA : C'est le langage qui décrit le contenu d'une page web : les titres, les paragraphes, les images et les boutons.
+Toi : C'est quoi CSS ?
+IA : C'est le langage qui décide de l'apparence d'une page : les couleurs, les tailles et la place des éléments.
+Toi : C'est quoi JavaScript ?
+IA : C'est le langage qui rend une page interactive : les boutons qui réagissent, les jeux, les animations.
+Toi : C'est quoi Python ?
+IA : C'est un langage très lisible, souvent utilisé pour apprendre, pour les sciences et pour l'intelligence artificielle.
+Toi : Comment afficher bonjour en JavaScript ?
+IA : On écrit console.log("Bonjour"); et le message apparaît dans la console.
+Toi : Comment afficher bonjour en Python ?
+IA : On écrit print("Bonjour").
+Toi : C'est quoi une variable ?
+IA : C'est une boîte avec un nom, dans laquelle on range une valeur. En JavaScript : let score = 0;
+Toi : Quelle est la différence entre let et const ?
+IA : Une variable let peut changer de valeur. Une constante const ne change jamais.
+Toi : C'est quoi une condition ?
+IA : C'est un choix : si quelque chose est vrai, on fait une action, sinon une autre. En JavaScript : if (score > 10) { ... } else { ... }
+Toi : C'est quoi une boucle ?
+IA : C'est répéter des instructions plusieurs fois. En JavaScript : for (let i = 0; i < 10; i++) { ... }
+Toi : C'est quoi une boucle while ?
+IA : C'est une boucle qui recommence tant qu'une condition est vraie.
+Toi : C'est quoi une fonction ?
+IA : C'est un morceau de code avec un nom, qu'on peut lancer quand on veut. Par exemple : function saluer(nom) { return "Bonjour " + nom; }
+Toi : C'est quoi un tableau ?
+IA : C'est une liste de valeurs rangées dans l'ordre. En JavaScript : let fruits = ["pomme", "banane", "kiwi"];
+Toi : Comment ajouter un élément à un tableau ?
+IA : Avec push : fruits.push("cerise");
+Toi : Comment connaître la taille d'un tableau ?
+IA : Avec length : fruits.length donne le nombre d'éléments.
+Toi : Pourquoi le premier élément est le numéro 0 ?
+IA : En programmation, on compte souvent à partir de 0 : fruits[0] est le premier élément.
+Toi : C'est quoi un objet en JavaScript ?
+IA : C'est un groupe de valeurs avec des noms, comme let joueur = { nom: "Léa", score: 12 };
+Toi : C'est quoi un booléen ?
+IA : C'est une valeur qui vaut seulement vrai ou faux : true ou false.
+Toi : C'est quoi une chaîne de caractères ?
+IA : C'est du texte, écrit entre guillemets, comme "Bonjour".
+Toi : Comment coller deux textes ensemble ?
+IA : Avec le signe plus : "Bonjour " + "Léa" donne "Bonjour Léa".
+Toi : Comment tirer un nombre au hasard ?
+IA : Math.random() donne un nombre entre 0 et 1. Pour un dé : Math.floor(Math.random() * 6) + 1.
+Toi : Comment arrondir un nombre ?
+IA : Math.round arrondit, Math.floor arrondit en dessous, et Math.ceil arrondit au-dessus.
+Toi : C'est quoi un événement ?
+IA : C'est quelque chose qui se passe, comme un clic ou une touche appuyée. On le surveille avec addEventListener.
+Toi : Comment réagir à un clic ?
+IA : bouton.addEventListener("click", function () { ... }); et le code s'exécute à chaque clic.
+Toi : Comment réagir au clavier ?
+IA : document.addEventListener("keydown", function (e) { ... }); et e.key te dit quelle touche a été appuyée.
+Toi : Comment changer le texte d'un élément ?
+IA : document.querySelector("#titre").textContent = "Salut !";
+Toi : Comment trouver un élément de la page ?
+IA : Avec document.querySelector, en donnant son id avec un dièse, comme "#score", ou sa classe avec un point, comme ".carte".
+Toi : Comment changer la couleur d'un élément en JavaScript ?
+IA : element.style.color = "red"; ou element.style.background = "yellow";
+Toi : Comment cacher un élément ?
+IA : element.hidden = true; le cache, et element.hidden = false; le montre à nouveau.
+Toi : Comment sauvegarder un score ?
+IA : Avec localStorage : localStorage.setItem("score", 10); puis localStorage.getItem("score") pour le relire.
+Toi : Comment faire une animation fluide ?
+IA : Avec requestAnimationFrame : le navigateur rappelle ta fonction environ 60 fois par seconde.
+Toi : C'est quoi un canvas ?
+IA : C'est une zone de dessin dans la page. On y dessine avec du code, par exemple ctx.fillRect(x, y, largeur, hauteur).
+Toi : Comment dessiner un rond sur un canvas ?
+IA : ctx.beginPath(); ctx.arc(x, y, rayon, 0, Math.PI * 2); ctx.fill();
+Toi : Comment faire une boucle de jeu ?
+IA : Une fonction qui met à jour le jeu, redessine tout, puis se rappelle avec requestAnimationFrame.
+Toi : Comment savoir si deux objets se touchent ?
+IA : Pour deux rectangles, on vérifie qu'ils se chevauchent en largeur et en hauteur. C'est la détection de collision.
+Toi : Comment faire un minuteur ?
+IA : setTimeout lance du code une fois après un délai, et setInterval le relance à intervalles réguliers.
+Toi : Comment centrer un élément en CSS ?
+IA : Sur le parent : display: flex; justify-content: center; align-items: center;
+Toi : Comment changer la couleur de fond en CSS ?
+IA : body { background: #1e1e2e; } par exemple, pour un fond sombre.
+Toi : Comment arrondir les coins en CSS ?
+IA : Avec border-radius, par exemple border-radius: 12px;
+Toi : Comment faire une ombre en CSS ?
+IA : Avec box-shadow, par exemple box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+Toi : C'est quoi une classe CSS ?
+IA : C'est un nom qu'on donne à plusieurs éléments pour leur appliquer le même style, avec un point devant : .bouton { ... }
+Toi : C'est quoi un id ?
+IA : C'est un nom unique pour un seul élément de la page, avec un dièse devant en CSS : #score { ... }
+Toi : C'est quoi une balise ?
+IA : C'est un mot entre chevrons, comme <p> ou <button>, qui dit quel genre de contenu on écrit en HTML.
+Toi : Comment faire un titre en HTML ?
+IA : Avec <h1>Mon titre</h1>. Les balises h2, h3 et suivantes font des titres plus petits.
+Toi : Comment mettre une image en HTML ?
+IA : Avec <img src="chat.png" alt="Un chat">. Le texte alt décrit l'image pour ceux qui ne la voient pas.
+Toi : Comment faire un lien en HTML ?
+IA : Avec <a href="https://exemple.fr">Le texte du lien</a>.
+Toi : Comment faire un bouton en HTML ?
+IA : Avec <button>Clique-moi</button>.
+Toi : Comment écrire un commentaire ?
+IA : En JavaScript avec deux barres obliques, en Python avec un dièse, et en HTML entre <!-- et -->.
+Toi : Mon code ne marche pas
+IA : Ouvre la console, lis le message d'erreur et regarde le numéro de ligne. C'est souvent une faute de frappe !
+Toi : C'est quoi la console ?
+IA : C'est une fenêtre où s'affichent les messages et les erreurs du programme. Dans le navigateur, on l'ouvre avec F12.
+Toi : Que veut dire undefined ?
+IA : Ça veut dire que la variable existe mais qu'elle n'a pas encore de valeur, ou que tu as mal écrit un nom.
+Toi : Que veut dire is not a function ?
+IA : Tu essaies d'appeler quelque chose comme une fonction alors que ce n'en est pas une. Vérifie le nom et les parenthèses.
+Toi : Que veut dire Cannot read properties of null ?
+IA : Le code n'a pas trouvé l'élément. Vérifie son id, ou mets ton script tout en bas de la page.
+Toi : Que veut dire SyntaxError ?
+IA : C'est une faute de grammaire dans le code : une parenthèse, une accolade ou un guillemet qui manque.
+Toi : Comment trouver un bug ?
+IA : Ajoute des console.log pour voir les valeurs à chaque étape, et cherche le moment où ça ne fait plus ce que tu veux.
+Toi : C'est quoi l'indentation ?
+IA : Ce sont les espaces au début des lignes. Elles montrent ce qui est à l'intérieur d'une boucle ou d'une fonction. En Python, elles sont obligatoires.
+Toi : Comment faire une boucle en Python ?
+IA : for i in range(10): puis les instructions décalées en dessous.
+Toi : Comment faire une condition en Python ?
+IA : if score > 10: puis elif pour un autre cas, et else pour tout le reste.
+Toi : Comment faire une fonction en Python ?
+IA : def saluer(nom): puis, en dessous et décalé, return "Bonjour " + nom.
+Toi : Comment demander quelque chose à l'utilisateur en Python ?
+IA : nom = input("Comment tu t'appelles ? ")
+Toi : C'est quoi Git ?
+IA : C'est un outil qui garde l'historique de ton code, pour revenir en arrière et travailler à plusieurs.
+Toi : C'est quoi GitHub ?
+IA : C'est un site où l'on range et partage son code. Mon site à moi est publié avec GitHub Pages !
+Toi : Comment bien nommer ses variables ?
+IA : Choisis des noms clairs qui disent ce qu'elles contiennent, comme score ou vitesseBalle, plutôt que x ou truc.
+Toi : C'est quoi un algorithme de tri ?
+IA : C'est une méthode pour ranger une liste dans l'ordre, du plus petit au plus grand par exemple.
+Toi : C'est quoi un jeu vidéo pour un ordinateur ?
+IA : Une boucle qui lit les touches, déplace les personnages, vérifie les collisions et redessine l'écran des dizaines de fois par seconde.
+Toi : Tu peux m'apprendre à coder ?
+IA : Moi, je suis le petit cerveau, je peux t'expliquer les bases. Pour écrire un vrai programme, demande à mon grand cerveau dans l'Atelier !
+Toi : Code-moi un jeu
+IA : Mon petit cerveau ne sait pas coder, mais mon grand cerveau, si ! Va dans l'Atelier et décris le jeu que tu veux.
+`;
+
 // Tous les textes à la fois : le plus de données possible pour le petit cerveau.
-TEXTES.tout = [TEXTES.discussions, TEXTES.festival, TEXTES.histoires].join('\n');
+TEXTES.tout = [TEXTES.discussions, TEXTES.connaissances, TEXTES.code, TEXTES.festival, TEXTES.histoires].join('\n');

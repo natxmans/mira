@@ -18,8 +18,8 @@ Tu lui demandes un jeu, un site ou un outil ; elle écrit le code et tu vois le 
 
 - Son « grand cerveau » est un vrai modèle de langage open source spécialisé en programmation, **Qwen2.5-Coder** (équipe Qwen d'Alibaba). Il tourne sur ta carte graphique grâce à **WebGPU** et à la bibliothèque **[WebLLM](https://github.com/mlc-ai/web-llm)**.
 - Il se télécharge une seule fois (0,9 Go, 1,7 Go ou 4,3 Go selon la taille choisie), puis il reste dans le cache du navigateur.
-- **Sa bibliothèque** (`savoirs.js`) : 27 exemples de code testés (serpent, morpion, quiz, calculatrice, casse-briques, Flappy, Pong, plateforme, pendu, memory, roue de tirage au sort, tableau de tournoi, formulaire, page du festival…) et 15 fiches (boucle de jeu, manipuler la page, tableaux, fetch, erreurs fréquentes, mise en page, canvas, dates, sons, Python…). À chaque demande, elle cherche ce qui ressemble et le relit avant d'écrire : un petit modèle fait beaucoup moins d'erreurs quand il s'inspire d'un code qui marche. Elle te dit de quoi elle s'est aidée.
-- **La recherche sur des sites fiables** (`recherche.js`) : quand tu poses une question ou que son code plante, elle cherche sur Vikidia, Wikipédia, le Wiktionnaire, MDN Web Docs ou Stack Overflow, lit ce qu'elle trouve et te donne ses sources. Aucun autre site n'est consulté, et seuls les mots de ta question sont envoyés. La case « Elle cherche sur des sites fiables » permet de l'arrêter.
+- **Sa bibliothèque** (`savoirs.js`) : 42 exemples de code testés (serpent, morpion, quiz, calculatrice, casse-briques, Flappy, Pong, plateforme, pendu, memory, roue de tirage au sort, tableau de tournoi, formulaire, page du festival, Tetris, 2048, Puissance 4, démineur, Simon, labyrinthe, défense spatiale, course de voitures, pixel art, feu d'artifice, générateur d'équipes, sondage, programme d'un événement, tables de multiplication, météo…) et 30 fiches (boucle de jeu, collisions, écran titre et niveaux, manette, images et sprites, canvas adapté à tous les écrans, grilles, adversaire contrôlé par l'ordinateur, particules, fichiers JSON, formulaires, accessibilité, classes, thème sombre, code sûr, même vitesse partout, manipuler la page, fetch, erreurs fréquentes, mise en page, sons, Python…). À chaque demande, elle cherche ce qui ressemble et le relit avant d'écrire : un petit modèle fait beaucoup moins d'erreurs quand il s'inspire d'un code qui marche. Elle te dit de quoi elle s'est aidée.
+- **La recherche sur des sites fiables** (`recherche.js`) : quand tu poses une question ou que son code plante, elle cherche sur Vikidia, Wikipédia, le Wiktionnaire, MDN Web Docs (177 pages repérées et vérifiées, presque toutes en français) ou Stack Overflow, lit ce qu'elle trouve et te donne ses sources. Aucun autre site n'est consulté, et seuls les mots de ta question sont envoyés. La case « Elle cherche sur des sites fiables » permet de l'arrêter.
 - Le code s'exécute dans un cadre isolé (`iframe` sandbox) : il ne peut pas lire les données de la page. S'il plante dès le lancement, elle essaie une fois de le corriger toute seule ; sinon, un bouton propose de lui demander de corriger l'erreur.
 - **L'aperçu** a trois vues : le résultat, le code (que tu peux modifier toi-même avant de cliquer sur « Relancer ») et la console (les `console.log` et les erreurs du programme).
 - **Mes créations** : tout ce qu'elle crée est gardé sur l'ordinateur. Tu peux rouvrir, renommer, télécharger ou supprimer chaque création, et « Garder comme exemple » lui apprend à s'inspirer de tes réussites.
@@ -33,7 +33,9 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 
 - Tu l'entraînes toi-même dans la page et tu le vois passer du charabia à de vraies phrases en quelques minutes.
 - Courbe d'erreur, journal de ce qu'elle écrit au fil de l'entraînement, probabilités de la lettre suivante en direct, leçons pour corriger ses réponses.
-- Pour lui donner plus à lire : « Tout lire » rassemble tous ses textes, et tu peux ajouter des livres libres de droits de Wikisource (fables, contes…) ou des articles de Vikidia et Wikipédia.
+- **Ses textes** (`textes.js`) : discussions, connaissances (animaux, corps humain, espace, Terre, sciences, géographie, histoire, arts, français, anglais, maths, informatique, sécurité sur internet), apprendre à coder, festival 2K27 et histoires, soit 772 questions-réponses. « Tout lire » les rassemble.
+- **Sa bibliothèque** (`bibliotheque/`) : 14 vrais livres du domaine public, près de 5 millions de caractères (fables de La Fontaine, contes de Perrault, d'Andersen et de Grimm, Alice au pays des merveilles, le Roman de Renart, les Malheurs de Sophie, Poil de Carotte, Lettres de mon moulin, Contes du lundi, et quatre romans de Jules Verne). On coche ceux qu'elle lit en plus de ses textes, et un réglage de mélange garde une bonne place à ses discussions.
+- Tu peux aussi ajouter des livres de Wikisource ou des articles de Vikidia et Wikipédia en les cherchant.
 - Il est bien trop petit pour coder : c'est un cerveau pour apprendre comment marche une IA.
 
 ## Les fichiers
@@ -51,7 +53,8 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 | `sw.js`, `manifest.webmanifest`, `icone-*.png` | L'application installable qui marche sans internet |
 | `cerveau.js` | Le petit cerveau : Transformer, rétropropagation et optimiseur Adam écrits à la main |
 | `app.js` | Le Laboratoire : entraînement, courbe, journal, sauvegardes |
-| `textes.js` | Ce que lit le petit cerveau (discussions, festival 2K27, histoires) |
+| `textes.js` | Ce que lit le petit cerveau (discussions, connaissances, apprendre à coder, festival 2K27, histoires) |
+| `bibliotheque/` | Les 14 livres du domaine public du petit cerveau (`index.json` + un fichier texte par livre) |
 | `festival-resume.js` | Ce que le grand cerveau sait du festival 2K27, par sujet |
 
 ## Crédits
@@ -60,4 +63,6 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 - Moteur dans le navigateur : WebLLM (MLC AI, licence Apache 2.0).
 - Coloration du code : highlight.js (licence BSD).
 - Recherche : API de Vikidia, Wikipédia, Wiktionnaire et Wikisource (MediaWiki), documentation MDN Web Docs (dépôts GitHub de Mozilla, CC-BY-SA), API Stack Exchange.
+- Livres de la bibliothèque : œuvres du domaine public, transcrites par les bénévoles de [Wikisource](https://fr.wikisource.org/) (le lien de chaque livre est dans `bibliotheque/index.json`).
+- Météo de l'exemple : [Open-Meteo](https://open-meteo.com/) (gratuit, sans clé).
 - Petit cerveau, interface et textes : écrits pour ce projet.

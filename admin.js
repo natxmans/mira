@@ -147,6 +147,7 @@
 
   function ouvrir() {
     viderChamps();
+    $('#verrou-erreur').textContent = '';
     document.body.classList.remove('verrouille');
     $('.page').inert = false;
     $('#verrou').hidden = true;

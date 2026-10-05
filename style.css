@@ -444,7 +444,9 @@ textarea.texte.court { min-height: 90px; font-family: var(--police); font-size: 
 .etat-publication { padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; margin: 0 0 8px; }
 .pub-liste li label { display: flex; gap: 10px; align-items: center; flex: 1; cursor: pointer; }
 .pub-liste li input { accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
-.lecons.pub-liste:empty::before { content: "Pas encore de création : fais coder Mira dans l'Atelier, ses créations apparaîtront ici."; }
+.pub-liste li label > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pub-liste li small { color: var(--doux); font-size: 12.5px; }
+#pub-vitrine:empty::before { content: "Pas encore de création : fais coder Mira dans l'Atelier, ses créations apparaîtront ici."; }
 .case-pub { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0; font-size: 15px; cursor: pointer; }
 .case-pub input { accent-color: var(--accent); width: 18px; height: 18px; margin-top: 2px; flex: none; }
 .avertissement { margin-top: 18px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--orange) 14%, transparent); font-size: 14px; }
