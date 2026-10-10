@@ -498,15 +498,76 @@ function installerCerveau() {
       return this.avant(idx, 1, T, null, true);
     }
 
+    // Un « lecteur » pour écrire vite. Il lit les lettres une par une et garde en mémoire
+    // les étiquettes (k) et les valeurs (v) que chaque couche a déjà calculées : une nouvelle
+    // lettre ne coûte alors qu'un petit calcul, au lieu de tout relire depuis le début.
+    // Il peut lire au plus T lettres ; après, il faut en prendre un neuf.
+    lecteur() {
+      const { d, H, T } = this.cfg;
+      const hs = d / H, echelle = 1 / Math.sqrt(hs);
+      const memK = this.couches.map(() => new Tableau(T * d));
+      const memV = this.couches.map(() => new Tableau(T * d));
+      const poids = new Float64Array(T);
+      const cerveau = this;
+      let n = 0;
+      return {
+        get longueur() { return n; },
+        // Lit la lettre `id` à la position n et renvoie les scores de la lettre suivante.
+        lire(id) {
+          if (n >= T) throw new Error('Le lecteur est plein.');
+          let x = new Tableau(d);
+          const lo = id * d, po = n * d;
+          for (let i = 0; i < d; i++) x[i] = cerveau.wte.w[lo + i] + cerveau.wpe.w[po + i];
+          cerveau.couches.forEach((c, l) => {
+            const qkv = lineaire(normaliser(x, 1, d, c.n1g.w, c.n1b.w).y, 1, d, 3 * d, c.wqkv.w, c.bqkv.w);
+            memK[l].set(qkv.subarray(d, 2 * d), n * d);
+            memV[l].set(qkv.subarray(2 * d, 3 * d), n * d);
+            const att = new Tableau(d);
+            for (let h = 0; h < H; h++) {
+              const o = h * hs;
+              let max = -Infinity;
+              for (let t = 0; t <= n; t++) {
+                let s = 0;
+                for (let k = 0; k < hs; k++) s += qkv[o + k] * memK[l][t * d + o + k];
+                poids[t] = s * echelle;
+                if (poids[t] > max) max = poids[t];
+              }
+              let somme = 0;
+              for (let t = 0; t <= n; t++) { poids[t] = Math.exp(poids[t] - max); somme += poids[t]; }
+              for (let t = 0; t <= n; t++) {
+                const a = poids[t] / somme;
+                for (let k = 0; k < hs; k++) att[o + k] += a * memV[l][t * d + o + k];
+              }
+            }
+            const a = lineaire(att, 1, d, d, c.wo.w, c.bo.w);
+            const milieu = new Tableau(d);
+            for (let i = 0; i < d; i++) milieu[i] = x[i] + a[i];
+            const h1 = lineaire(normaliser(milieu, 1, d, c.n2g.w, c.n2b.w).y, 1, d, 4 * d, c.w1.w, c.b1.w);
+            for (let i = 0; i < h1.length; i++) if (h1[i] < 0) h1[i] = 0;
+            const m = lineaire(h1, 1, 4 * d, d, c.w2.w, c.b2.w);
+            x = new Tableau(d);
+            for (let i = 0; i < d; i++) x[i] = milieu[i] + m[i];
+          });
+          n++;
+          return lineaire(normaliser(x, 1, d, cerveau.nfg.w, cerveau.nfb.w).y, 1, d, cerveau.cfg.V, cerveau.wout.w, cerveau.bout.w);
+        },
+      };
+    }
+
+    // Un gros cerveau est rangé en « demi-précision » (16 bits par nombre au lieu de 32) :
+    // deux fois moins de place dans le navigateur, et presque aucune différence dans ses réponses.
     sauvegarder() {
       const tout = new Float32Array(this.nbParametres);
       let o = 0;
       for (const p of this.params) { tout.set(p.w, o); o += p.w.length; }
-      return {
+      const demi = this.nbParametres > 250000;
+      const s = {
         format: 'mon-ia/1', alphabet: ALPHABET, cfg: this.cfg,
         etape: this.etape, lettresLues: this.lettresLues,
-        poids: versBase64(new Uint8Array(tout.buffer)),
+        poids: versBase64(demi ? new Uint8Array(versDemi(tout).buffer) : new Uint8Array(tout.buffer)),
       };
+      if (demi) s.precision = 16;
+      return s;
     }
 
     static charger(s) {
@@ -514,7 +575,7 @@ function installerCerveau() {
       if (s.alphabet !== ALPHABET) throw new Error("Ce cerveau utilise un autre alphabet.");
       const c = new Cerveau(s.cfg, 1);
       const octets = depuisBase64(s.poids);
-      const tout = new Float32Array(octets.buffer, 0, octets.byteLength / 4);
+      const tout = s.precision === 16 ? depuisDemi(octets) : new Float32Array(octets.buffer, 0, octets.byteLength / 4);
       if (tout.length !== c.nbParametres) throw new Error('Le cerveau sauvegardé est abîmé.');
       let o = 0;
       for (const p of c.params) { p.w.set(tout.subarray(o, o + p.w.length)); o += p.w.length; }
@@ -535,6 +596,34 @@ function installerCerveau() {
     const o = new Uint8Array(s.length);
     for (let i = 0; i < s.length; i++) o[i] = s.charCodeAt(i);
     return o;
+  }
+
+  // Nombres 32 bits -> 16 bits (1 bit de signe, 5 d'exposant, 10 de mantisse), arrondis au plus près.
+  function versDemi(f) {
+    const h = new Uint16Array(f.length);
+    const un = new Float32Array(1), bits = new Uint32Array(un.buffer);
+    for (let i = 0; i < f.length; i++) {
+      un[0] = f[i];
+      const x = bits[0];
+      const signe = (x >>> 16) & 0x8000, e = ((x >>> 23) & 255) - 112, m = x & 0x7fffff;
+      if (e >= 31) h[i] = signe | 0x7c00;
+      else if (e <= 0) h[i] = e < -10 ? signe : signe | (((m | 0x800000) + (1 << (13 - e))) >> (14 - e));
+      else h[i] = signe | ((((e << 10) | (m >> 13)) + ((m >> 12) & 1)));
+    }
+    return h;
+  }
+
+  // Et l'inverse : 16 bits -> 32 bits.
+  function depuisDemi(octets) {
+    const h = new Uint16Array(octets.buffer, octets.byteOffset, octets.byteLength / 2);
+    const f = new Float32Array(h.length);
+    for (let i = 0; i < h.length; i++) {
+      const x = h[i], signe = x & 0x8000 ? -1 : 1, e = (x >> 10) & 31, m = x & 1023;
+      f[i] = e === 0 ? signe * m * Math.pow(2, -24)
+        : e === 31 ? (m ? NaN : signe * Infinity)
+        : signe * (1 + m / 1024) * Math.pow(2, e - 15);
+    }
+    return f;
   }
 
   // Scores -> probabilités (elles sont toutes positives et leur somme fait 1).
@@ -600,17 +689,28 @@ function ouvrier(port, IA) {
     return r;
   }
 
+  // Elle lit le début une seule fois, puis chaque nouvelle lettre ne coûte qu'un petit calcul.
+  // Quand sa mémoire de T lettres est pleine, elle relit les 3/4 les plus récents et continue.
   function ecrire(texteAmorce, max, temperature, arret, surLettre) {
     const ids = Array.from(IA.encoder(texteAmorce));
     if (!ids.length) ids.push(0);
+    const T = cerveau.cfg.T;
+    let lecteur = null, scores = null;
+    const relire = (combien) => {
+      lecteur = cerveau.lecteur();
+      for (const id of ids.slice(-combien)) scores = lecteur.lire(id);
+    };
+    relire(T);
     let sortie = '';
     for (let i = 0; i < max; i++) {
-      const c = IA.choisir(cerveau.scoresSuivants(ids), temperature, hasard);
+      const c = IA.choisir(scores, temperature, hasard);
       const lettre = IA.ALPHABET[c];
       if (arret && lettre === arret) break;
       ids.push(c);
       sortie += lettre;
       if (surLettre) surLettre(lettre);
+      if (lecteur.longueur >= T) relire(Math.floor(T * 3 / 4));
+      else scores = lecteur.lire(c);
     }
     return sortie;
   }

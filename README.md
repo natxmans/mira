@@ -38,6 +38,19 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 - Tu peux aussi ajouter des livres de Wikisource ou des articles de Vikidia et Wikipédia en les cherchant.
 - Il est bien trop petit pour coder : c'est un cerveau pour apprendre comment marche une IA.
 
+### Le cerveau entraîné par Claude
+
+Pour qu'elle ressemble à Claude (l'IA d'Anthropic), Claude a écrit **825 discussions** dans sa façon de parler (`textes-claude.js`) : honnête, claire, gentille, qui explique étape par étape, qui reconnaît ses erreurs, qui dit quand elle ne sait pas, et qui refuse poliment ce qui est dangereux en proposant autre chose. Il a ensuite entraîné un cerveau de taille **Grande** (496 000 paramètres, 4 couches, 256 lettres de mémoire) **pendant des heures sur un ordinateur**, avec la même architecture que `cerveau.js`. Il a lu ces discussions (tapées de plusieurs façons, comme au clavier), les autres textes de Mira et les 14 livres.
+
+- Le résultat est dans `cerveau-claude.json` (1,3 Mo, nombres rangés sur 16 bits).
+- Dans le Laboratoire, onglet Sauvegarde : « Charger le cerveau de Claude ». Son cerveau actuel est d'abord téléchargé, pour qu'on puisse le reprendre.
+- Sur la page des visiteurs, c'est lui qui répond tant que tu n'as pas publié ton propre petit cerveau.
+- Le bouton « Comme Claude » de « Ce qu'elle lit » donne ces discussions (plus tous les autres textes) à n'importe quelle taille de cerveau.
+- Pour écrire vite, le petit cerveau garde en mémoire ce qu'il a déjà calculé pour les lettres précédentes : une nouvelle lettre coûte environ 2 millisecondes au lieu de 35.
+- Le grand cerveau de l'Atelier (Qwen) reçoit aussi « sa façon d'être » dans ses consignes : direct, honnête, pédagogue, une seule question quand c'est flou, refus gentil de ce qui est dangereux, et les bons numéros (119, 3018, 112) quand quelqu'un va mal.
+
+C'est une imitation de son style, pas une copie de Claude : Claude a des milliards de paramètres, ce petit cerveau quelques centaines de milliers. Il répond bien aux questions proches de ce qu'il a lu, et il mélange encore pour les autres.
+
 ## Les fichiers
 
 | Fichier | Rôle |
@@ -54,6 +67,8 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 | `cerveau.js` | Le petit cerveau : Transformer, rétropropagation et optimiseur Adam écrits à la main |
 | `app.js` | Le Laboratoire : entraînement, courbe, journal, sauvegardes |
 | `textes.js` | Ce que lit le petit cerveau (discussions, connaissances, apprendre à coder, festival 2K27, histoires) |
+| `textes-claude.js` | Les 825 discussions écrites par Claude dans sa façon de parler |
+| `cerveau-claude.json` | Le petit cerveau entraîné par Claude (taille Grande) |
 | `bibliotheque/` | Les 14 livres du domaine public du petit cerveau (`index.json` + un fichier texte par livre) |
 | `festival-resume.js` | Ce que le grand cerveau sait du festival 2K27, par sujet |
 
@@ -65,4 +80,4 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 - Recherche : API de Vikidia, Wikipédia, Wiktionnaire et Wikisource (MediaWiki), documentation MDN Web Docs (dépôts GitHub de Mozilla, CC-BY-SA), API Stack Exchange.
 - Livres de la bibliothèque : œuvres du domaine public, transcrites par les bénévoles de [Wikisource](https://fr.wikisource.org/) (le lien de chaque livre est dans `bibliotheque/index.json`).
 - Météo de l'exemple : [Open-Meteo](https://open-meteo.com/) (gratuit, sans clé).
-- Petit cerveau, interface et textes : écrits pour ce projet.
+- Petit cerveau, interface et textes : écrits pour ce projet. Les discussions « comme Claude » et le cerveau entraîné ont été écrits et entraînés par Claude (Anthropic), avec PyTorch.

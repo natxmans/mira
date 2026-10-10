@@ -125,6 +125,7 @@
           <label class="reglage-admin" title="Vikidia, Wikipédia, Wiktionnaire, MDN Web Docs et Stack Overflow. Seuls les mots de ta question leur sont envoyés."><input type="checkbox" id="avec-recherche"> Elle cherche sur des sites fiables quand c'est utile</label>
           <label class="reglage-admin" title="Si son code plante dès le lancement, elle essaie une fois de le corriger toute seule"><input type="checkbox" id="auto-correction"> Elle corrige toute seule ses erreurs (1 essai)</label>
           <label class="reglage-admin" title="Elle lit ses réponses à voix haute (voix de ton ordinateur)"><input type="checkbox" id="lecture-auto"> Elle lit ses réponses à voix haute</label>
+          <label class="reglage-admin" title="Si tu es sur un autre onglet quand elle a fini, le titre de l'onglet change et un petit son te prévient"><input type="checkbox" id="son-fin"> Un petit son quand elle a fini (si tu es ailleurs)</label>
           <button class="lien" type="button" id="changer-cerveau" hidden>Changer de taille</button>
         </div>
         <details class="savoirs" id="espace">
@@ -150,6 +151,8 @@
           </div>
           <span class="espace"></span>
           <div class="actions-apercu">
+            <button class="bouton petit" type="button" id="annuler-version" disabled title="Revenir à la version d'avant" aria-label="Revenir à la version d'avant">↶</button>
+            <button class="bouton petit" type="button" id="retablir-version" disabled title="Rétablir la version suivante" aria-label="Rétablir la version suivante">↷</button>
             <button class="bouton petit" type="button" id="recharger" disabled title="Relancer" aria-label="Relancer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span class="etiquette-bouton">Relancer</span></button>
             <button class="bouton petit" type="button" id="copier" disabled title="Copier le code" aria-label="Copier le code"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span class="etiquette-bouton">Copier</span></button>
             <button class="bouton petit" type="button" id="telecharger-code" disabled title="Télécharger" aria-label="Télécharger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span class="etiquette-bouton">Télécharger</span></button>
@@ -242,6 +245,8 @@
     <div role="tabpanel" id="p-lit" aria-labelledby="t-lit">
       <p class="sous">Tout ce qu'elle saura dire vient de ces textes. Change-les, ajoute tes propres phrases, puis clique sur « Utiliser ce texte ». Pour qu'elle sache discuter, garde le format <code>Toi : …</code> / <code>IA : …</code>. <code>{nom}</code> sera remplacé par son nom.</p>
       <div class="boutons" style="margin-bottom:10px">
+        <button class="bouton petit" type="button" data-modele="commeClaude">Comme Claude (le plus ressemblant)</button>
+        <button class="bouton petit" type="button" data-modele="claude">Modèle : discussions de Claude</button>
         <button class="bouton petit" type="button" data-modele="tout">Tout lire (le plus de données)</button>
         <button class="bouton petit" type="button" data-modele="discussions">Modèle : discussions</button>
         <button class="bouton petit" type="button" data-modele="connaissances">Modèle : connaissances</button>
@@ -314,16 +319,16 @@
           <div><b>Lettre choisie</b><code>l</code></div>
         </div>
         <ol>
-          <li><strong>Elle lit lettre par lettre.</strong>Ton IA connaît 125 caractères : les lettres, les accents, les chiffres et la ponctuation. Chaque caractère a un numéro, et elle ne voit que ces numéros.</li>
+          <li><strong>Elle lit lettre par lettre.</strong>Ton IA connaît 124 caractères : les lettres, les accents, les chiffres et la ponctuation. Chaque caractère a un numéro, et elle ne voit que ces numéros.</li>
           <li><strong>Chaque lettre devient une liste de nombres.</strong>C'est son « plongement ». Au début, ces nombres sont tirés au hasard. Avec l'entraînement, les lettres qui jouent le même rôle (comme les voyelles) finissent avec des listes qui se ressemblent.</li>
           <li><strong>L'attention : regarder en arrière.</strong>Pour deviner la suite, chaque lettre regarde les lettres d'avant et choisit celles qui comptent. Après « Enchantée, », par exemple, elle doit retrouver le prénom écrit plus haut pour le recopier.</li>
-          <li><strong>Une probabilité pour chaque lettre possible.</strong>À la fin, elle donne une chance à chacun des 125 caractères. Tu peux le voir en direct dans l'onglet « Dans sa tête ».</li>
+          <li><strong>Une probabilité pour chaque lettre possible.</strong>À la fin, elle donne une chance à chacun des 124 caractères. Tu peux le voir en direct dans l'onglet « Dans sa tête ».</li>
           <li><strong>Elle se corrige : c'est l'entraînement.</strong>On compare sa prédiction avec la vraie lettre du texte. L'erreur (la « perte ») mesure à quel point elle s'est trompée. Ensuite, la <em>rétropropagation</em> calcule, pour chacun de ses paramètres, dans quel sens le tourner pour se tromper un peu moins, et l'optimiseur <em>Adam</em> fait ce petit réglage. Une étape = 8 morceaux de texte lus, corrigés et réglés.</li>
           <li><strong>Pour parler, elle continue le texte.</strong>Quand tu lui écris, elle lit « Toi : ton message / IA : » et tire une lettre au hasard selon ses probabilités, puis une autre, jusqu'au retour à la ligne. Le curseur « Imagination » (la <em>température</em>) la rend plus sage ou plus farfelue.</li>
         </ol>
         <div class="encadre">
           <strong>Et les grandes IA comme Claude ?</strong>
-          <p>Elles sont construites sur le même principe : ce sont aussi des Transformers qui devinent la suite d'un texte, morceau par morceau. La différence, c'est l'échelle. Elles ont des milliards de paramètres au lieu de quelques dizaines de milliers, elles ont lu une immense quantité de textes, et elles ont reçu un entraînement supplémentaire pour apprendre à être utiles et honnêtes.</p>
+          <p>Elles sont construites sur le même principe : ce sont aussi des Transformers qui devinent la suite d'un texte, morceau par morceau. La différence, c'est l'échelle. Elles ont des milliards de paramètres au lieu de quelques dizaines ou centaines de milliers, elles ont lu une immense quantité de textes, et elles ont reçu un entraînement supplémentaire pour apprendre à être utiles et honnêtes.</p>
           <p>Ton IA, elle, n'a lu que ses quelques pages. Elle apprend surtout par cœur : si tu lui poses une question qu'elle n'a jamais lue, elle mélange des morceaux de réponses qu'elle connaît. Elle ne calcule pas vraiment non plus. Elle se souvient de « 7 x 8 = 56 » parce qu'elle l'a lu.</p>
         </div>
         <p class="sous" style="margin-top:16px">Le code de son cerveau est dans le fichier <code>cerveau.js</code>, entièrement commenté en français, sans aucune bibliothèque.</p>
@@ -338,6 +343,10 @@
         <button class="bouton" type="button" id="charger">Charger un cerveau</button>
         <input type="file" id="fichier" accept=".json,application/json" hidden>
       </div>
+      <h3>Le cerveau entraîné par Claude</h3>
+      <p class="sous" style="margin-bottom:10px">Claude, l'IA d'Anthropic, a écrit plus de 800 discussions dans sa façon de parler : honnête, claire, gentille, qui explique et qui dit quand elle ne sait pas. Il a ensuite entraîné pendant des heures un cerveau de taille « Grande » (environ 500 000 paramètres) sur ces discussions, ses autres textes et les 14 livres. Charge-le pour qu'elle lui ressemble. Son cerveau actuel est d'abord téléchargé dans un fichier, pour que tu puisses le reprendre quand tu veux.</p>
+      <button class="bouton principal" type="button" id="cerveau-claude">Charger le cerveau de Claude</button>
+      <p class="compteur" id="etat-cerveau-claude"></p>
       <h3>Tout effacer</h3>
       <p class="sous" style="margin-bottom:10px">Efface son cerveau, ses textes, ses leçons et son nom sur ce navigateur, et remet tout comme au premier jour.</p>
       <button class="bouton danger" type="button" id="tout-effacer">Tout effacer</button>
@@ -363,7 +372,7 @@
       <label class="case-pub"><input type="checkbox" id="pub-exemples" checked> <span>Partager mes réussites « ⭐ exemple » : la Mira des visiteurs s'en inspirera aussi (<b id="pub-nb-exemples">0</b>).</span></label>
 
       <h3>Son petit cerveau</h3>
-      <label class="case-pub"><input type="checkbox" id="pub-cerveau" checked> <span>Publier mon petit cerveau entraîné, pour que les visiteurs puissent lui parler. <span id="pub-cerveau-infos"></span></span></label>
+      <label class="case-pub"><input type="checkbox" id="pub-cerveau" checked> <span>Publier mon petit cerveau entraîné, pour que les visiteurs puissent lui parler (sinon, ils parlent au cerveau entraîné par Claude). <span id="pub-cerveau-infos"></span></span></label>
 
       <h3>Pour les visiteurs, {nom}…</h3>
       <label class="case-pub"><input type="checkbox" id="pub-festival" checked> <span>connaît le festival 2K27 quand on lui en parle</span></label>
@@ -395,6 +404,7 @@
 
 <script src="cerveau.js"></script>
 <script src="textes.js"></script>
+<script src="textes-claude.js"></script>
 <script src="festival-resume.js"></script>
 <script src="savoirs.js"></script>
 <script src="recherche.js"></script>

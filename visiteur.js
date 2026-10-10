@@ -132,6 +132,7 @@
   // Son petit cerveau entraîné (le même moteur que le Laboratoire, sans l'entraînement)
   // ---------------------------------------------------------------------------
   let moteur = null;
+  let cerveauPret = false;
   let enCours = false;
   const attentes = new Map();
   let prochainId = 1;
@@ -168,6 +169,7 @@
   function recevoir(m) {
     const r = attentes.get(m.id);
     if (m.type === 'infos') {
+      cerveauPret = true;
       $('#cerveau-etape').textContent = Number(m.etape || 0).toLocaleString('fr-FR');
       $('#cerveau-lettres').textContent = Number(m.lettresLues || 0).toLocaleString('fr-FR');
       $('#cerveau-params').textContent = Number(m.nbParametres || 0).toLocaleString('fr-FR');
@@ -202,7 +204,7 @@
 
   function parler(brut) {
     const texte = String(brut).replace(/\s+/g, ' ').trim();
-    if (!texte || enCours || !moteur) return;
+    if (!texte || enCours || !moteur || !cerveauPret) return;
     enCours = true;
     $('#message-cerveau').value = '';
     bulle('toi', texte);
@@ -222,9 +224,10 @@
     moteur.envoyer({ type: 'generer', id, amorce: `\n${contexte}Toi : ${texte}\nIA : `, max: 200, temperature: parseFloat($('#imagination-cerveau').value), arret: '\n' });
   }
 
+  // Le petit cerveau publié dans mira-public.json ; sinon, celui que Claude a entraîné.
   function preparerPetitCerveau(config) {
-    const pc = config.petitCerveau;
-    if (!pc || !pc.sauvegarde || typeof ouvrier !== 'function') {
+    const publie = config.petitCerveau && config.petitCerveau.sauvegarde;
+    if (typeof ouvrier !== 'function') {
       $('#cerveau-absent').hidden = false;
       $('#cerveau-present').hidden = true;
       return;
@@ -232,7 +235,18 @@
     const reveiller = () => {
       if (moteur) return;
       moteur = creerMoteur(recevoir);
-      moteur.envoyer({ type: 'charger', sauvegarde: pc.sauvegarde, paquet: 8 });
+      if (publie) {
+        moteur.envoyer({ type: 'charger', sauvegarde: publie, paquet: 8 });
+        return;
+      }
+      $('#cerveau-etat').textContent = 'Il se réveille…';
+      fetch('cerveau-claude.json')
+        .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then((f) => {
+          moteur.envoyer({ type: 'charger', sauvegarde: f.cerveau, paquet: 8 });
+          $('#cerveau-etat').textContent = 'Cerveau entraîné par Claude';
+        })
+        .catch(() => { $('#cerveau-etat').textContent = 'Impossible de le réveiller : vérifie ta connexion internet.'; });
     };
     window.addEventListener('mira-vue', (e) => { if (e.detail === 'cerveau') reveiller(); });
     if (!$('#vue-cerveau').hidden) reveiller();

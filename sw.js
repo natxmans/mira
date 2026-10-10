@@ -9,9 +9,10 @@
  *   - Le grand cerveau n'est pas géré ici : WebLLM le range lui-même dans IndexedDB.
  *   - La recherche sur les sites fiables n'est jamais gardée en copie.
  */
-const VERSION = 'mira-v6';
+const VERSION = 'mira-v7';
+// cerveau-claude.json (1,3 Mo) n'est pas dans la liste : il est gardé en copie la première fois qu'on le lit.
 const FICHIERS = [
-  './', 'index.html', 'admin.html', 'style.css', 'cerveau.js', 'textes.js', 'festival-resume.js', 'savoirs.js',
+  './', 'index.html', 'admin.html', 'style.css', 'cerveau.js', 'textes.js', 'textes-claude.js', 'festival-resume.js', 'savoirs.js',
   'recherche.js', 'app.js', 'atelier.js', 'outils.js', 'admin.js', 'visiteur.js', 'manifest.webmanifest',
   'icone-192.png', 'icone-512.png',
 ];

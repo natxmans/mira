@@ -14,6 +14,7 @@
     mini:    { nom: 'Mini',    detail: 'la plus rapide',        cfg: { d: 32, L: 2, H: 4, T: 64 } },
     petite:  { nom: 'Petite',  detail: 'conseillée',            cfg: { d: 48, L: 2, H: 4, T: 64 } },
     moyenne: { nom: 'Moyenne', detail: 'plus lente, plus douée', cfg: { d: 64, L: 3, H: 4, T: 96 } },
+    grande:  { nom: 'Grande',  detail: 'celle du cerveau de Claude, très lente à entraîner ici', cfg: { d: 96, L: 4, H: 4, T: 256 } },
   };
   const PAQUET = 8; // nombre de morceaux de texte lus à chaque étape
   const PAGE = 1500; // lettres dans une page de livre, environ
@@ -749,7 +750,7 @@
   // ---------------------------------------------------------------------------
   // Sauvegarde par fichier
   // ---------------------------------------------------------------------------
-  function telecharger() {
+  function telecharger(apres) {
     sauvegarder((cerveau) => {
       const fichier = {
         app: 'mon-ia', version: 1, nom: etat.nom, taille: etat.taille,
@@ -764,6 +765,7 @@
       lien.click();
       lien.remove();
       setTimeout(() => URL.revokeObjectURL(lien.href), 5000);
+      if (apres) apres();
     });
   }
 
@@ -773,41 +775,75 @@
       let f;
       try { f = JSON.parse(lecteur.result); } catch (e) { afficherToast('Ce fichier n\'est pas un cerveau de Mira.'); return; }
       if (!f || f.app !== 'mon-ia' || !f.cerveau) { afficherToast('Ce fichier n\'est pas un cerveau de Mira.'); return; }
-      basculerEntrainement(false);
-      demander({ type: 'charger', sauvegarde: f.cerveau, paquet: PAQUET }, {
-        erreur(msg) { afficherToast('Impossible de le charger : ' + msg); },
-      });
-      etat.nom = f.nom || etat.nom;
-      etat.taille = TAILLES[f.taille] ? f.taille : trouverTaille(f.cerveau.cfg);
-      if (typeof f.textes === 'string') etat.textes = f.textes;
-      if (Array.isArray(f.lecons)) etat.lecons = f.lecons;
-      if (Array.isArray(f.livres)) {
-        livres.choisis = new Set(f.livres.filter((id) => !livres.index.length || livres.index.some((l) => l.id === id)));
-        if ([0.25, 0.5, 0.75].includes(f.partLivres)) livres.part = f.partLivres;
-        stock.ecrire('part-livres', livres.part);
-        if (livres.index.length) { $('#part-livres').value = String(livres.part); afficherBibliotheque(); }
-        majLivres();
-      }
-      etat.historique = Array.isArray(f.historique) ? f.historique : [];
-      etat.journal = Array.isArray(f.journal) ? f.journal : [];
-      etat.perte = etat.historique.length ? etat.historique[etat.historique.length - 1][1] : null;
-      etat.reussite = null;
-      stock.ecrire('nom', etat.nom);
-      stock.ecrire('taille', etat.taille);
-      stock.ecrire('textes', etat.textes);
-      stock.ecrire('lecons', etat.lecons);
-      $('#nom').value = etat.nom;
-      $('#taille').value = etat.taille;
-      $('#textes').value = etat.textes;
-      compter();
-      afficherLecons();
-      afficherJournal();
-      envoyerTextes();
-      dessinerCourbe();
-      setTimeout(() => sauvegarder(), 300);
-      afficherToast(`${etat.nom} est de retour !`);
+      appliquerFichier(f);
     };
     lecteur.readAsText(fichier);
+  }
+
+  // Le cerveau que Claude a entraîné (cerveau-claude.json), avec ses textes à lui pour la suite.
+  // Son cerveau actuel est d'abord téléchargé : rien n'est perdu.
+  async function chargerCerveauClaude() {
+    const bouton = $('#cerveau-claude'), ligne = $('#etat-cerveau-claude');
+    const question = etat.etape > 0
+      ? `Son cerveau actuel (étape ${nombre.format(etat.etape)}) et ses textes vont être remplacés par ceux de Claude. On les télécharge d'abord dans un fichier, pour que tu puisses les recharger quand tu veux. Continuer ?`
+      : 'Charger le cerveau entraîné par Claude ?';
+    if (!confirm(question)) return;
+    bouton.disabled = true;
+    ligne.textContent = 'Chargement du cerveau de Claude (environ 1,3 Mo)…';
+    let f;
+    try {
+      const r = await fetch('cerveau-claude.json');
+      if (!r.ok) throw new Error(String(r.status));
+      f = await r.json();
+      if (!f || f.app !== 'mon-ia' || !f.cerveau) throw new Error('format');
+    } catch (e) {
+      ligne.textContent = 'Impossible de le charger. Vérifie ta connexion internet et réessaie.';
+      bouton.disabled = false;
+      return;
+    }
+    const appliquer = () => {
+      appliquerFichier(Object.assign({}, f, { nom: etat.nom, textes: TEXTES.commeClaude || f.textes, lecons: etat.lecons }),
+        'Voilà : elle a le cerveau que Claude a entraîné. Pose-lui une question !');
+      ligne.textContent = `Cerveau de Claude chargé : ${nombre.format(f.cerveau.etape)} étapes d'entraînement, ${court(f.cerveau.lettresLues)} lettres lues. Va lui parler !`;
+      bouton.disabled = false;
+    };
+    if (etat.etape > 0) telecharger(appliquer); else appliquer();
+  }
+
+  function appliquerFichier(f, message) {
+    basculerEntrainement(false);
+    demander({ type: 'charger', sauvegarde: f.cerveau, paquet: PAQUET }, {
+      erreur(msg) { afficherToast('Impossible de le charger : ' + msg); },
+    });
+    etat.nom = f.nom || etat.nom;
+    etat.taille = TAILLES[f.taille] ? f.taille : trouverTaille(f.cerveau.cfg);
+    if (typeof f.textes === 'string') etat.textes = f.textes;
+    if (Array.isArray(f.lecons)) etat.lecons = f.lecons;
+    if (Array.isArray(f.livres)) {
+      livres.choisis = new Set(f.livres.filter((id) => !livres.index.length || livres.index.some((l) => l.id === id)));
+      if ([0.25, 0.5, 0.75].includes(f.partLivres)) livres.part = f.partLivres;
+      stock.ecrire('part-livres', livres.part);
+      if (livres.index.length) { $('#part-livres').value = String(livres.part); afficherBibliotheque(); }
+      majLivres();
+    }
+    etat.historique = Array.isArray(f.historique) ? f.historique : [];
+    etat.journal = Array.isArray(f.journal) ? f.journal : [];
+    etat.perte = etat.historique.length ? etat.historique[etat.historique.length - 1][1] : null;
+    etat.reussite = null;
+    stock.ecrire('nom', etat.nom);
+    stock.ecrire('taille', etat.taille);
+    stock.ecrire('textes', etat.textes);
+    stock.ecrire('lecons', etat.lecons);
+    $('#nom').value = etat.nom;
+    $('#taille').value = etat.taille;
+    $('#textes').value = etat.textes;
+    compter();
+    afficherLecons();
+    afficherJournal();
+    envoyerTextes();
+    dessinerCourbe();
+    setTimeout(() => sauvegarder(), 300);
+    afficherToast(message || `${etat.nom} est de retour !`);
   }
 
   function trouverTaille(cfg) {
@@ -963,7 +999,8 @@
     setInterval(() => { if (etat.enCours) afficherTete(); }, 1500);
 
     // sauvegarde
-    $('#telecharger').addEventListener('click', telecharger);
+    $('#telecharger').addEventListener('click', () => telecharger());
+    $('#cerveau-claude').addEventListener('click', chargerCerveauClaude);
     $('#charger').addEventListener('click', () => $('#fichier').click());
     $('#fichier').addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];

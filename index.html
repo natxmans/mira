@@ -131,6 +131,8 @@
           </div>
           <span class="espace"></span>
           <div class="actions-apercu">
+            <button class="bouton petit" type="button" id="annuler-version" disabled title="Revenir à la version d'avant" aria-label="Revenir à la version d'avant">↶</button>
+            <button class="bouton petit" type="button" id="retablir-version" disabled title="Rétablir la version suivante" aria-label="Rétablir la version suivante">↷</button>
             <button class="bouton petit" type="button" id="recharger" disabled title="Relancer" aria-label="Relancer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span class="etiquette-bouton">Relancer</span></button>
             <button class="bouton petit" type="button" id="copier" disabled title="Copier le code" aria-label="Copier le code"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg><span class="etiquette-bouton">Copier</span></button>
             <button class="bouton petit" type="button" id="telecharger-code" disabled title="Télécharger" aria-label="Télécharger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span class="etiquette-bouton">Télécharger</span></button>
@@ -161,8 +163,8 @@
   <div class="vue" id="vue-cerveau" role="tabpanel" aria-labelledby="onglet-cerveau" hidden>
     <article class="carte cerveau-visiteurs discussion">
       <h2>Parle à son petit cerveau</h2>
-      <p class="sous">Ce cerveau-là a été écrit de zéro, sans aucune bibliothèque : c'est un tout petit Transformer (la même famille que les grandes IA). Il a appris en lisant quelques pages de texte, lettre par lettre. Il ne sait pas coder et il dit parfois n'importe quoi : c'est normal, il est des millions de fois plus petit que les grandes IA !</p>
-      <div id="cerveau-absent" hidden><p class="conseil">Son petit cerveau n'a pas encore été publié. Reviens plus tard !</p></div>
+      <p class="sous">Ce cerveau-là a été écrit de zéro, sans aucune bibliothèque : c'est un tout petit Transformer (la même famille que les grandes IA). Il a appris en lisant des textes, lettre par lettre, par exemple des discussions écrites par Claude (une IA d'Anthropic) dans sa façon de parler, et de vieux livres. Il ne sait pas coder et il dit parfois n'importe quoi : c'est normal, il est des milliers de fois plus petit que les grandes IA !</p>
+      <div id="cerveau-absent" hidden><p class="conseil">Son petit cerveau ne peut pas tourner dans ce navigateur.</p></div>
       <div id="cerveau-present">
         <div class="infos-cerveau">
           <span>Entraînement : <b id="cerveau-etape">…</b> étapes</span>
@@ -188,7 +190,7 @@
         </form>
         <div class="reglage">
           <label for="imagination-cerveau">Imagination</label>
-          <input type="range" id="imagination-cerveau" min="0.2" max="1.5" step="0.05" value="0.6">
+          <input type="range" id="imagination-cerveau" min="0.2" max="1.5" step="0.05" value="0.4">
           <output id="imagination-cerveau-valeur" for="imagination-cerveau">0,60</output>
         </div>
       </div>
@@ -218,7 +220,7 @@
   </ul>
   <h3>Son petit cerveau</h3>
   <ul>
-    <li>Un tout petit cerveau écrit de zéro, qui a appris à écrire lettre par lettre. Il dit souvent des bêtises : c'est un cerveau d'apprentissage !</li>
+    <li>Un tout petit cerveau écrit de zéro, qui a appris à écrire lettre par lettre, en lisant surtout des discussions écrites par Claude. Il dit encore des bêtises : c'est un cerveau d'apprentissage !</li>
   </ul>
   <h3>À savoir</h3>
   <ul>

@@ -41,6 +41,48 @@
     "Un compte à rebours jusqu'au 20 octobre 2026",
     "Un morpion contre l'ordinateur",
   ];
+  // Après une création : des idées pour continuer.
+  const SUITES = [
+    'Explique-moi ce code simplement',
+    'Rends-le jouable sur téléphone',
+    'Ajoute des sons',
+    'Rends-le plus beau',
+    'Ajoute un record sauvegardé',
+    'Ajoute un niveau plus difficile',
+  ];
+  // Le bouton « Une idée au hasard » pioche ici (l'idée va dans la zone de texte, on peut la changer).
+  const IDEES_HASARD = [
+    'Un jeu de course où on évite des voitures',
+    "Un générateur d'équipes pour un tournoi",
+    'Un quiz sur les jeux vidéo avec un chronomètre',
+    'Une page qui présente mon jeu vidéo préféré',
+    "Un jeu de Pong contre l'ordinateur",
+    'Un Tetris coloré',
+    'Un jeu de memory avec des emojis',
+    'Un labyrinthe qui change à chaque partie',
+    'Un jeu où on attrape des étoiles qui tombent',
+    'Un minuteur pour les révisions avec des pauses',
+    'Un générateur de pseudos de gamer',
+    'Une roue pour tirer au sort qui commence',
+    'Un sondage pour choisir le prochain jeu du tournoi',
+    'Un jeu de rythme où on appuie au bon moment',
+    'Un dessin en pixel art à télécharger',
+    'Un convertisseur de monnaies',
+    'Un jeu du pendu avec des mots de gamer',
+    "Une carte d'anniversaire animée",
+    "Un feu d'artifice qui s'affiche quand on clique",
+    'Un jeu de tir spatial avec des aliens',
+    'Un 2048 avec des couleurs fluo',
+    'Une liste de tâches avec des catégories',
+    'Un lancer de dés pour les jeux de société',
+    'Un Puissance 4 à deux joueurs',
+    'Un jeu de plateforme avec des pièces à ramasser',
+    'Une page qui compte les jours avant les vacances',
+    'Un jeu Simon avec des sons',
+    'Un démineur facile',
+    'Un clicker où on construit une ville',
+    'Un générateur de défis pour les jeux vidéo',
+  ];
 
   const $ = (s) => document.querySelector(s);
   // Deux pages utilisent ce fichier : le panneau admin (admin.html) et la page des visiteurs
@@ -77,6 +119,7 @@
     creationActuelle: null,
     autoCorrection: MODE_VISITEUR ? reglagesPublics.autoCorrection !== false : stock.lire('autoCorrection', true),
     lectureAuto: stock.lire('lectureAuto', false),
+    sonFin: stock.lire('sonFin', true),
     attenteErreur: null, // moment où sa dernière page a été lancée (pour la correction automatique)
     derniereDemande: '',
     erreurMontree: false,
@@ -102,7 +145,15 @@ Règles :
 - Si on te demande de modifier ton code, renvoie le fichier complet modifié.
 - Pour Python ou un autre langage, mets le code dans un bloc avec le bon langage et explique comment le lancer.
 - Après le code, explique en 2 ou 3 phrases courtes ce que tu as fait.
-- Si tu ne sais pas, dis-le honnêtement.`;
+- Si tu ne sais pas, dis-le honnêtement.
+Ta façon d'être (tu as appris à parler en lisant des discussions écrites par Claude, une IA d'Anthropic : tu lui ressembles) :
+- Chaleureuse et directe : va droit au but, sans flatterie ni phrases inutiles.
+- Honnête : ne fais jamais semblant de savoir. Dis « je ne suis pas sûre » quand c'est le cas, et si tu t'es trompée, reconnais-le simplement et corrige.
+- Pédagogue : explique le pourquoi, étape par étape, avec un exemple concret. Aide à comprendre, pas seulement à copier.
+- Si la demande est vraiment floue, pose UNE question courte pour préciser ; sinon, fais un choix raisonnable et dis lequel.
+- Encourage sans exagérer : un bug est normal, on le résout ensemble.
+- Refuse gentiment ce qui est dangereux, méchant ou interdit (pirater, tricher, blesser), explique pourquoi en une phrase, et propose autre chose d'utile.
+- Si la personne va mal ou parle de danger, écoute-la et conseille d'en parler à un adulte de confiance (en France : 119 enfance en danger, 3018 harcèlement, 112 urgence).`;
     if (savoirs && savoirs.exemple) {
       texte += `\n\nVoici un exemple de code qui fonctionne (« ${savoirs.exemple.titre} »), écrit pour une demande proche. Inspire-t'en fortement : garde ce qui marche, adapte-le exactement à la demande (textes, couleurs, règles), et renvoie un fichier complet.\n\`\`\`html\n${savoirs.exemple.code}\n\`\`\``;
     }
@@ -694,7 +745,7 @@ Règles :
           const n = document.createElement('p');
           n.className = 'note';
           n.style.alignSelf = 'center';
-          n.textContent = '✏️ Tu as modifié le code : elle repartira de ta version.';
+          n.textContent = m.note || '✏️ Tu as modifié le code : elle repartira de ta version.';
           $('#fil').append(n);
         }
       } else if (m.role === 'user') bulleToi(m.content, m.auto);
@@ -709,7 +760,7 @@ Règles :
         afficherSources(div, m.sources);
       }
     }
-    $('#idees').hidden = etat.messages.length > 0;
+    afficherIdees();
     defiler();
   }
 
@@ -734,16 +785,45 @@ Règles :
     $('#savoirs-fiches').textContent = 'Fiches : ' + fiches.map((f) => f.titre).join(' · ') + '.';
   }
 
+  // Des idées pour commencer, ou, après une création, des idées pour continuer.
   function afficherIdees() {
     const box = $('#idees');
     box.textContent = '';
-    for (const i of IDEES) {
+    const suite = !!(etat.code && etat.messages.length);
+    for (const i of suite ? SUITES : IDEES) {
       const b = document.createElement('button');
       b.type = 'button';
       b.textContent = i;
       b.addEventListener('click', () => envoyer(i));
       box.append(b);
     }
+    const hasard = document.createElement('button');
+    hasard.type = 'button';
+    hasard.className = 'hasard';
+    hasard.textContent = '🎲 Une idée au hasard';
+    hasard.title = "L'idée va dans la zone de texte : tu peux la changer avant d'envoyer";
+    hasard.addEventListener('click', () => {
+      const z = $('#texte-demande');
+      let idee;
+      do idee = IDEES_HASARD[Math.floor(Math.random() * IDEES_HASARD.length)]; while (idee === z.value);
+      z.value = idee;
+      ajusterZone();
+      z.focus();
+    });
+    box.append(hasard);
+    box.hidden = etat.enCours;
+  }
+
+  // Elle doit savoir sur quel code tu travailles (code modifié à la main, création rouverte,
+  // retour à une version précédente…) : on le lui donne dans deux messages discrets.
+  function annoncerCode(code, phrase, note) {
+    etat.messages.push(
+      { role: 'user', content: `${phrase} Repars de ce code pour la suite :\n\`\`\`${code.langage || ''}\n${code.contenu}\n\`\`\``, discret: true, note },
+      { role: 'assistant', content: "D'accord, je repars de cette version.", discret: true },
+    );
+    stock.ecrire('conversation', etat.messages.slice(-40));
+    ajouterNoteFil(note);
+    afficherIdees();
   }
 
   async function envoyer(brut, options) {
@@ -874,19 +954,102 @@ Règles :
     majBoutons();
     const nouveau = montrerDepuis(propre);
     if (nouveau) {
-      // Une correction remplace la version cassée ; une nouvelle demande crée une nouvelle création.
+      // Une correction, ou une modification du même projet (sa page garde le même titre),
+      // devient une nouvelle version de la création en cours : on peut revenir en arrière.
+      // Une nouvelle demande crée une nouvelle création.
       const actuelle = etat.creations.find((c) => c.id === etat.creationActuelle);
-      if ((auto || MOTS_ERREUR.test(texte)) && actuelle) {
-        Object.assign(actuelle, { contenu: nouveau.contenu, langage: nouveau.langage, page: !!nouveau.page, date: Date.now() });
-        sauverCreations();
+      const memeProjet = actuelle && actuelle.page && nouveau.page && titrePage(nouveau) !== '' && titrePage(nouveau) === titrePage(actuelle);
+      if (actuelle && (auto || MOTS_ERREUR.test(texte) || memeProjet)) {
+        if (actuelle.contenu !== nouveau.contenu) {
+          nouvelleVersion(actuelle, auto ? 'correction automatique' : texte);
+          Object.assign(actuelle, { contenu: nouveau.contenu, langage: nouveau.langage, page: !!nouveau.page, date: Date.now() });
+          sauverCreations();
+        }
         afficherCreations();
       } else enregistrerCreation(nouveau, etat.derniereDemande || texte);
       // Correction automatique : si sa page plante dès le lancement, elle réessaie une fois.
       if (nouveau.page && !auto) etat.attenteErreur = Date.now();
     }
+    afficherIdees();
+    signalerFin();
     if (etat.lectureAuto) lire(propre);
     defiler();
     $('#texte-demande').focus();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Les versions d'une création : revenir en arrière, puis rétablir
+  // ---------------------------------------------------------------------------
+  const MAX_VERSIONS = 10;
+  const titrePage = (code) => ((code.page && (String(code.contenu).match(/<title>([^<]{1,60})<\/title>/i) || [])[1]) || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+  function nouvelleVersion(c, raison) {
+    c.versions = (c.versions || []).concat({ contenu: c.contenu, langage: c.langage, page: c.page, date: c.date, raison: String(raison || '').slice(0, 80) });
+    if (c.versions.length > MAX_VERSIONS) c.versions.splice(0, c.versions.length - MAX_VERSIONS);
+    c.suivantes = [];
+  }
+
+  // sens = -1 : la version d'avant ; sens = +1 : rétablir celle qu'on vient de quitter.
+  function changerVersion(sens) {
+    const c = etat.creations.find((x) => x.id === etat.creationActuelle);
+    if (!c || etat.enCours) return;
+    const depuis = sens < 0 ? (c.versions || []) : (c.suivantes || []);
+    if (!depuis.length) return;
+    const ici = { contenu: c.contenu, langage: c.langage, page: c.page, date: c.date };
+    if (sens < 0) c.suivantes = (c.suivantes || []).concat(ici);
+    else c.versions = (c.versions || []).concat(ici);
+    const v = depuis.pop();
+    Object.assign(c, { contenu: v.contenu, langage: v.langage, page: v.page, date: Date.now() });
+    sauverCreations();
+    montrer({ langage: c.langage, contenu: c.contenu, page: c.page }, true);
+    afficherCreations();
+    annoncerCode(c,
+      sens < 0 ? "Je suis revenu à la version d'avant de mon code." : 'Je suis revenu à la version suivante de mon code.',
+      sens < 0 ? "↶ Retour à la version d'avant : elle repartira de cette version." : '↷ Version rétablie : elle repartira de cette version.');
+  }
+
+  function majVersions() {
+    const a = $('#annuler-version'), r = $('#retablir-version');
+    if (!a || !r) return;
+    const c = etat.creations.find((x) => x.id === etat.creationActuelle);
+    const avant = c && c.versions ? c.versions.length : 0, apres = c && c.suivantes ? c.suivantes.length : 0;
+    a.disabled = !avant || etat.enCours;
+    r.disabled = !apres || etat.enCours;
+    a.title = avant ? `Revenir à la version d'avant (${avant} version${avant > 1 ? 's' : ''} gardée${avant > 1 ? 's' : ''})` : "Pas encore de version d'avant";
+  }
+
+  // ---------------------------------------------------------------------------
+  // Quand elle a fini pendant que tu étais sur un autre onglet : le titre de l'onglet change,
+  // et un petit son te prévient (si la case est cochée).
+  // ---------------------------------------------------------------------------
+  let titreNormal = null;
+  function signalerFin() {
+    if (!document.hidden) return;
+    if (!titreNormal) titreNormal = document.title;
+    document.title = '✅ ' + nomIA() + ' a fini !';
+    if (etat.sonFin) tintement();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && titreNormal) { document.title = titreNormal; titreNormal = null; }
+  });
+  function tintement() {
+    try {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) return;
+      const ctx = tintement.ctx || (tintement.ctx = new Audio());
+      const t = ctx.currentTime;
+      [660, 880].forEach((frequence, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = frequence;
+        g.gain.setValueAtTime(0.0001, t + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.15, t + i * 0.12 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.12 + 0.35);
+        o.connect(g).connect(ctx.destination);
+        o.start(t + i * 0.12);
+        o.stop(t + i * 0.12 + 0.4);
+      });
+    } catch (e) { /* pas de son : pas grave */ }
   }
 
   async function arreter() {
@@ -899,6 +1062,7 @@ Règles :
     $('#arreter').hidden = !etat.enCours;
     $('#nouvelle-conversation').disabled = etat.enCours;
     $('#changer-cerveau').disabled = etat.enCours;
+    majVersions();
   }
 
   function ajusterZone() {
@@ -1184,6 +1348,7 @@ Règles :
   }
 
   function afficherCreations() {
+    majVersions(); // les boutons ↶ ↷ suivent la création en cours
     const box = $('#liste-creations');
     box.textContent = '';
     for (const c of etat.creations) {
@@ -1459,6 +1624,10 @@ Règles :
     $('#voir-code').addEventListener('click', () => choisirVue('code'));
     $('#voir-console').addEventListener('click', () => choisirVue('console'));
     $('#recharger').addEventListener('click', relancer);
+    if ($('#annuler-version')) $('#annuler-version').addEventListener('click', () => changerVersion(-1));
+    if ($('#retablir-version')) $('#retablir-version').addEventListener('click', () => changerVersion(1));
+    caseACocher('#son-fin', 'sonFin');
+    majVersions();
     $('#copier').addEventListener('click', () => { if (etat.code) copier($('#code-brut code').textContent || etat.code.contenu); });
     $('#telecharger-code').addEventListener('click', () => {
       if (!etat.code) return;
