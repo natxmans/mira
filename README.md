@@ -42,6 +42,10 @@ Un **Transformer** (la même famille que les grandes IA) écrit **de zéro**, sa
 
 Pour qu'elle ressemble à Claude (l'IA d'Anthropic), Claude a écrit **825 discussions** dans sa façon de parler (`textes-claude.js`) : honnête, claire, gentille, qui explique étape par étape, qui reconnaît ses erreurs, qui dit quand elle ne sait pas, et qui refuse poliment ce qui est dangereux en proposant autre chose. Il a ensuite entraîné un cerveau de taille **Grande** (496 000 paramètres, 4 couches, 256 lettres de mémoire) **pendant des heures sur un ordinateur**, avec la même architecture que `cerveau.js`. Il a lu ces discussions (tapées de plusieurs façons, comme au clavier), les autres textes de Mira et les 14 livres.
 
+- Ensuite, comme pour les grandes IA, il y a eu deux étapes de plus :
+  - **un affinage supervisé** : chaque exemple est une vraie conversation (0 à 2 échanges d'avant, la question, la réponse), et il n'apprend que la réponse, à partir de la question entière ;
+  - **des retours sur ses erreurs** : toutes les 250 étapes, on vérifie chacune des 1 328 questions (celles de Claude et les autres textes de Mira, festival compris), et il revoit 5 fois plus souvent celles qu'il rate.
+- Il a fallu 20 000 étapes en tout. Il réécrit exactement **99,8 %** des réponses apprises (99,3 % quand la question est tapée en minuscules sans ponctuation), contre 4,6 % avant l'affinage.
 - Le résultat est dans `cerveau-claude.json` (1,3 Mo, nombres rangés sur 16 bits).
 - Dans le Laboratoire, onglet Sauvegarde : « Charger le cerveau de Claude ». Son cerveau actuel est d'abord téléchargé, pour qu'on puisse le reprendre.
 - Sur la page des visiteurs, c'est lui qui répond tant que tu n'as pas publié ton propre petit cerveau.
@@ -49,7 +53,7 @@ Pour qu'elle ressemble à Claude (l'IA d'Anthropic), Claude a écrit **825 discu
 - Pour écrire vite, le petit cerveau garde en mémoire ce qu'il a déjà calculé pour les lettres précédentes : une nouvelle lettre coûte environ 2 millisecondes au lieu de 35.
 - Le grand cerveau de l'Atelier (Qwen) reçoit aussi « sa façon d'être » dans ses consignes : direct, honnête, pédagogue, une seule question quand c'est flou, refus gentil de ce qui est dangereux, et les bons numéros (119, 3018, 112) quand quelqu'un va mal.
 
-C'est une imitation de son style, pas une copie de Claude : Claude a des milliards de paramètres, ce petit cerveau quelques centaines de milliers. Il répond bien aux questions proches de ce qu'il a lu, et il mélange encore pour les autres.
+C'est une imitation de son style, pas une copie de Claude : Claude a des milliards de paramètres, ce petit cerveau quelques centaines de milliers. Il répond juste aux questions qu'il a apprises, même tapées un peu autrement. Pour une question vraiment nouvelle, il peut encore donner une réponse qui ne va pas.
 
 ## Les fichiers
 
