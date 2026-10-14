@@ -136,7 +136,6 @@
   let enCours = false;
   const attentes = new Map();
   let prochainId = 1;
-  const conversation = [];
 
   function creerMoteur(surMessage) {
     let port = null, pret = false;
@@ -226,7 +225,6 @@
     $('#message-cerveau').value = '';
     bulle('toi', texte);
     const ecrit = bulle('ia', '…');
-    const contexte = conversation.slice(-2).map((e) => `Toi : ${e.q}\nIA : ${e.r}\n`).join('');
     let reponse = '';
     const id = prochainId++;
     attentes.set(id, {
@@ -235,7 +233,6 @@
         const r = reponse.trim();
         if (!r) { ecrit.textContent = '(il n\'a rien trouvé à dire)'; enCours = false; return; }
         const sure = estSure(bilan, r);
-        conversation.push({ q: texte, r: sure ? r : PAS_SURE });
         afficherPeuAPeu(ecrit, sure ? r : PAS_SURE, () => {
           enCours = false;
           const note = document.createElement('small');
@@ -258,7 +255,9 @@
         });
       },
     });
-    moteur.envoyer({ type: 'generer', id, amorce: `\n${contexte}Toi : ${texte}\nIA : `, max: 200, temperature: parseFloat($('#imagination-cerveau').value), arret: '\n' });
+    // Chaque question est posée seule : un petit cerveau répond mieux ainsi, et les échanges d'avant
+    // (surtout ses « je ne suis pas sûre ») le perturbent plus qu'ils ne l'aident.
+    moteur.envoyer({ type: 'generer', id, amorce: `\nToi : ${texte}\nIA : `, max: 200, temperature: parseFloat($('#imagination-cerveau').value), arret: '\n' });
   }
 
   // Le petit cerveau publié dans mira-public.json ; sinon, celui que Claude a entraîné.
