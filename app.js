@@ -139,7 +139,7 @@
         break;
       case 'fini':
         attentes.delete(m.id);
-        if (r && r.fini) r.fini();
+        if (r && r.fini) r.fini(m);
         break;
       case 'probas':
       case 'sauvegarde':
@@ -462,11 +462,21 @@
     let reponse = '';
     demander({ type: 'generer', amorce: `\n${contexte}Toi : ${texte}\nIA : `, max: 200, temperature: etat.temperature, arret: '\n' }, {
       lettre(l) { reponse += l; ecrit.textContent = reponse; box.scrollTop = box.scrollHeight; },
-      fini() {
+      fini(bilan) {
         occupee = false;
         const r = reponse.trim();
         if (!r) ecrit.textContent = '(elle n\'a rien trouvé à dire)';
         conversation.push({ q: texte, r });
+        // Sa certitude : haute quand elle récite ce qu'elle a appris, basse quand elle invente.
+        if (r && bilan && bilan.certitude !== undefined) {
+          const note = document.createElement('small');
+          const sure = IA.estSure(bilan, r);
+          note.className = 'certitude' + (sure ? '' : ' inventee');
+          note.textContent = sure
+            ? `sûre à ${Math.floor(bilan.certitude * 100)} %`
+            : `⚠ Pas sûre d'elle (${IA.doute(bilan)}) : cette réponse est sans doute inventée.`;
+          bulle.append(note);
+        }
         proposerLecon(bulle, texte);
         box.scrollTop = box.scrollHeight;
       },

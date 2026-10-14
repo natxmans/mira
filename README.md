@@ -46,6 +46,14 @@ Pour qu'elle ressemble à Claude (l'IA d'Anthropic), Claude a écrit **825 discu
   - **un affinage supervisé** : chaque exemple est une vraie conversation (0 à 2 échanges d'avant, la question, la réponse), et il n'apprend que la réponse, à partir de la question entière ;
   - **des retours sur ses erreurs** : toutes les 250 étapes, on vérifie chacune des 1 328 questions (celles de Claude et les autres textes de Mira, festival compris), et il revoit 5 fois plus souvent celles qu'il rate.
 - Il a fallu 20 000 étapes en tout. Il réécrit exactement **99,8 %** des réponses apprises (99,3 % quand la question est tapée en minuscules sans ponctuation), contre 4,6 % avant l'affinage.
+- Un deuxième affinage (3 000 étapes de plus) l'a rendu plus solide et plus honnête :
+  - il a appris sur des questions déformées (mots en plus ou en moins, fautes de frappe) ;
+  - il a vu 317 exemples de ce qu'il ne sait pas (questions, phrases, demandes, charabia), avec une réponse honnête au lieu d'une invention ;
+  - il a vu parfois la même question deux fois de suite.
+- **Sa certitude** : pendant qu'il écrit, `cerveau.js` note la probabilité de chaque lettre choisie. Quand il récite ce qu'il a appris, chaque lettre est presque sûre. Quand il invente, il hésite. Si sa certitude moyenne est sous 98 %, ou qu'une lettre est sous 50 %, la page des visiteurs affiche « Je ne suis pas sûre de bien comprendre ta question » au lieu d'inventer, avec un bouton pour voir ce qu'il allait dire. Le Laboratoire affiche « sûre à X % » ou « Pas sûre d'elle » sous chaque réponse.
+- Résultat chez les visiteurs (imagination 0,2), mesuré sur 3 tirages :
+  - questions apprises : 100 justes sur 100 ;
+  - 72 questions de test qu'il n'a jamais vues, exprès difficiles : environ 18 justes, 45 « pas sûre » ou « je ne sais pas » honnêtes, et 7 à 10 erreurs, contre 59 erreurs avant.
 - Le résultat est dans `cerveau-claude.json` (1,3 Mo, nombres rangés sur 16 bits).
 - Dans le Laboratoire, onglet Sauvegarde : « Charger le cerveau de Claude ». Son cerveau actuel est d'abord téléchargé, pour qu'on puisse le reprendre.
 - Sur la page des visiteurs, c'est lui qui répond tant que tu n'as pas publié ton propre petit cerveau.
@@ -53,7 +61,7 @@ Pour qu'elle ressemble à Claude (l'IA d'Anthropic), Claude a écrit **825 discu
 - Pour écrire vite, le petit cerveau garde en mémoire ce qu'il a déjà calculé pour les lettres précédentes : une nouvelle lettre coûte environ 2 millisecondes au lieu de 35.
 - Le grand cerveau de l'Atelier (Qwen) reçoit aussi « sa façon d'être » dans ses consignes : direct, honnête, pédagogue, une seule question quand c'est flou, refus gentil de ce qui est dangereux, et les bons numéros (119, 3018, 112) quand quelqu'un va mal.
 
-C'est une imitation de son style, pas une copie de Claude : Claude a des milliards de paramètres, ce petit cerveau quelques centaines de milliers. Il répond juste aux questions qu'il a apprises, même tapées un peu autrement. Pour une question vraiment nouvelle, il peut encore donner une réponse qui ne va pas.
+C'est une imitation de son style, pas une copie de Claude : Claude a des milliards de paramètres, ce petit cerveau quelques centaines de milliers. Il répond juste aux questions qu'il a apprises, même tapées un peu autrement. Pour une question vraiment nouvelle, il dit le plus souvent qu'il n'est pas sûr. Mais il lui arrive encore de réciter avec assurance une réponse apprise à la mauvaise question. Zéro erreur n'existe pas, même pour les grandes IA.
 
 ## Les fichiers
 

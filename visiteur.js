@@ -174,9 +174,9 @@
       $('#cerveau-lettres').textContent = Number(m.lettresLues || 0).toLocaleString('fr-FR');
       $('#cerveau-params').textContent = Number(m.nbParametres || 0).toLocaleString('fr-FR');
     } else if (m.type === 'lettre' && r) r.lettre(m.lettre);
-    else if (m.type === 'fini' && r) { attentes.delete(m.id); r.fini(); }
+    else if (m.type === 'fini' && r) { attentes.delete(m.id); r.fini(m); }
     else if (m.type === 'erreur') {
-      if (r) { attentes.delete(m.id); r.fini(); }
+      if (r) { attentes.delete(m.id); r.fini(null); }
       $('#cerveau-etat').textContent = 'Oups : ' + m.message;
     }
   }
@@ -202,23 +202,60 @@
     return e;
   }
 
+  // Comme une grande IA honnête : si elle n'est pas assez sûre de sa réponse, elle le dit au lieu
+  // d'inventer. On attend donc la fin de sa réponse (moins d'une seconde) avant de l'afficher.
+  const PAS_SURE = 'Je ne suis pas sûre de bien comprendre ta question. Tu peux la poser autrement, avec des mots simples ?';
+  const { estSure, doute } = installerCerveau();
+  const pourcent = (x) => Math.floor((x || 0) * 100) + ' %';
+
+  function afficherPeuAPeu(ecrit, texte, fin) {
+    let i = 0;
+    const pas = () => {
+      i = Math.min(texte.length, i + 3);
+      ecrit.textContent = texte.slice(0, i);
+      $('#messages-cerveau').scrollTop = 1e9;
+      if (i < texte.length) setTimeout(pas, 12); else if (fin) fin();
+    };
+    pas();
+  }
+
   function parler(brut) {
     const texte = String(brut).replace(/\s+/g, ' ').trim();
     if (!texte || enCours || !moteur || !cerveauPret) return;
     enCours = true;
     $('#message-cerveau').value = '';
     bulle('toi', texte);
-    const ecrit = bulle('ia', '');
+    const ecrit = bulle('ia', '…');
     const contexte = conversation.slice(-2).map((e) => `Toi : ${e.q}\nIA : ${e.r}\n`).join('');
     let reponse = '';
     const id = prochainId++;
     attentes.set(id, {
-      lettre(l) { reponse += l; ecrit.textContent = reponse; $('#messages-cerveau').scrollTop = 1e9; },
-      fini() {
-        enCours = false;
+      lettre(l) { reponse += l; },
+      fini(bilan) {
         const r = reponse.trim();
-        if (!r) ecrit.textContent = '(il n\'a rien trouvé à dire)';
-        conversation.push({ q: texte, r });
+        if (!r) { ecrit.textContent = '(il n\'a rien trouvé à dire)'; enCours = false; return; }
+        const sure = estSure(bilan, r);
+        conversation.push({ q: texte, r: sure ? r : PAS_SURE });
+        afficherPeuAPeu(ecrit, sure ? r : PAS_SURE, () => {
+          enCours = false;
+          const note = document.createElement('small');
+          note.className = 'certitude';
+          if (sure) {
+            note.textContent = `sûre à ${pourcent(bilan && bilan.certitude)}`;
+          } else {
+            const voir = document.createElement('button');
+            voir.type = 'button';
+            voir.textContent = `Voir ce qu'elle allait dire (${doute(bilan)})`;
+            voir.addEventListener('click', () => {
+              const brouillon = document.createElement('em');
+              brouillon.textContent = '« ' + r + ' »';
+              voir.replaceWith(brouillon);
+            });
+            note.append(voir);
+          }
+          ecrit.parentElement.append(note);
+          $('#messages-cerveau').scrollTop = 1e9;
+        });
       },
     });
     moteur.envoyer({ type: 'generer', id, amorce: `\n${contexte}Toi : ${texte}\nIA : `, max: 200, temperature: parseFloat($('#imagination-cerveau').value), arret: '\n' });

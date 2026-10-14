@@ -650,7 +650,26 @@ function installerCerveau() {
   // Pour les tests : passer tous les calculs en haute précision.
   function precision(haute) { Tableau = haute ? Float64Array : Float32Array; }
 
-  return { ALPHABET, nettoyer, encoder, decoder, creerHasard, Cerveau, probabilites, choisir, precision };
+  // Est-elle assez sûre d'elle pour qu'on croie sa réponse ? Seuils mesurés sur le cerveau entraîné
+  // par Claude : ses bonnes réponses sont presque toutes au-dessus, la plupart de ses inventions en dessous.
+  // Ses réponses honnêtes apprises (« je ne sais pas »…) ne sont jamais des inventions, même si elle a
+  // hésité avant de les choisir.
+  const SEUILS = { certitude: 0.98, minimum: 0.5 };
+  const HONNETES = [/^Je ne sais pas répondre à ça/, /^Je t'écoute !/, /^Ça, je ne sais pas le faire/, /^Je n'ai pas compris\./];
+  function estSure(bilan, texte) {
+    if (texte && HONNETES.some((r) => r.test(texte))) return true;
+    return !!bilan && bilan.certitude >= SEUILS.certitude && bilan.minimum >= SEUILS.minimum;
+  }
+  // Pourquoi elle n'est pas sûre, en une phrase courte.
+  function doute(bilan) {
+    const pc = (x) => Math.floor((x || 0) * 100) + ' %';
+    if (!bilan) return "pas sûre d'elle";
+    return bilan.certitude < SEUILS.certitude
+      ? `sûre à ${pc(bilan.certitude)} seulement`
+      : `elle a hésité sur une lettre, sûre à ${pc(bilan.minimum)} seulement`;
+  }
+
+  return { ALPHABET, nettoyer, encoder, decoder, creerHasard, Cerveau, probabilites, choisir, precision, SEUILS, estSure, doute };
 }
 
 /*
@@ -691,7 +710,10 @@ function ouvrier(port, IA) {
 
   // Elle lit le début une seule fois, puis chaque nouvelle lettre ne coûte qu'un petit calcul.
   // Quand sa mémoire de T lettres est pleine, elle relit les 3/4 les plus récents et continue.
-  function ecrire(texteAmorce, max, temperature, arret, surLettre) {
+  // `bilan.certitude` : la probabilité moyenne (géométrique) des lettres qu'elle a choisies.
+  // Proche de 1 quand elle « récite » ce qu'elle a appris, basse quand elle invente.
+  // `bilan.minimum` : la probabilité de la lettre dont elle était le moins sûre.
+  function ecrire(texteAmorce, max, temperature, arret, surLettre, bilan) {
     const ids = Array.from(IA.encoder(texteAmorce));
     if (!ids.length) ids.push(0);
     const T = cerveau.cfg.T;
@@ -701,9 +723,13 @@ function ouvrier(port, IA) {
       for (const id of ids.slice(-combien)) scores = lecteur.lire(id);
     };
     relire(T);
-    let sortie = '';
+    let sortie = '', sommeLog = 0, nb = 0, minimum = 1;
     for (let i = 0; i < max; i++) {
       const c = IA.choisir(scores, temperature, hasard);
+      const p = IA.probabilites(scores, 1)[c];
+      sommeLog += Math.log(Math.max(p, 1e-12));
+      minimum = Math.min(minimum, p);
+      nb++;
       const lettre = IA.ALPHABET[c];
       if (arret && lettre === arret) break;
       ids.push(c);
@@ -712,6 +738,7 @@ function ouvrier(port, IA) {
       if (lecteur.longueur >= T) relire(Math.floor(T * 3 / 4));
       else scores = lecteur.lire(c);
     }
+    if (bilan) { bilan.certitude = nb ? Math.exp(sommeLog / nb) : 0; bilan.minimum = minimum; }
     return sortie;
   }
 
@@ -780,10 +807,12 @@ function ouvrier(port, IA) {
           enCours = false;
           envoyer({ type: 'etat', enCours });
           break;
-        case 'generer':
-          ecrire(m.amorce, m.max || 200, m.temperature, m.arret, (lettre) => envoyer({ type: 'lettre', id: m.id, lettre }));
-          envoyer({ type: 'fini', id: m.id });
+        case 'generer': {
+          const bilan = {};
+          ecrire(m.amorce, m.max || 200, m.temperature, m.arret, (lettre) => envoyer({ type: 'lettre', id: m.id, lettre }), bilan);
+          envoyer({ type: 'fini', id: m.id, certitude: bilan.certitude, minimum: bilan.minimum });
           break;
+        }
         case 'probas': {
           const ids = Array.from(IA.encoder(m.texte));
           if (!ids.length) ids.push(0);
